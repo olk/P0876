@@ -1,0 +1,81 @@
+%//////////////////////////////////////////////////////////////////////////////
+
+\documentclass[fontsize=10pt,paper=A4,pagesize,DIV=15]{scrartcl}
+
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage[british]{babel}
+
+\usepackage{amsmath}
+\usepackage{ellipsis}
+\usepackage{ragged2e}
+\usepackage[final]{microtype}
+
+\usepackage{palatino}
+
+\usepackage{overcite}
+\usepackage{booktabs}
+\usepackage{boxedminipage}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{perpage}
+\usepackage{rotating}
+\usepackage{soul}
+\usepackage{svg}
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata}
+\usepackage{xcolor}
+\usepackage{xspace}
+\usepackage[colorlinks=true,
+            urlcolor=blue,
+            pdftex,
+            pdfsubject  = {},
+            pdfauthor   = {Oliver Kowalke},
+            pdfkeywords = {C++,callcc,call/cc,context,continuation,coroutine,execution,fiber,switch,P0099,P0534,P0876},
+            pdftitle    = {fibers without scheduler}]{hyperref}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\input{commands}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\begin{document}
+\small
+\begin{tabbing}
+    Document number: \= P0876R0\\
+    Date:            \> 2017-12-01\\
+    Author:          \> Oliver Kowalke (oliver.kowalke@gmail.com)\\
+    Audience:        \> SG1\\
+\end{tabbing}
+
+\section*{fibers without scheduler}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\tableofcontents
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\input{abstract}
+\input{control_transfer}
+\input{first_class}
+\input{stack_management}
+\input{invalidation}
+\input{problem_gp_ub}
+\input{solution_gp_ub}
+\input{passing_data}
+\input{low_level}
+\input{stl}
+\input{implementation}
+\input{register_window}
+\input{performance}
+\input{accelerators}
+\input{tls}
+\input{acknowledgment}
+\input{api}
+\input{references}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\end{document}
