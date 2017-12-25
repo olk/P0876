@@ -1,0 +1,102 @@
+\setlength{\parindent}{0pt} 
+\renewcommand\sfdefault{phv}
+
+\makeatletter
+    \renewcommand*\l@subsection{\@dottedtocline{2}{0em}{2.3em}}
+    \renewcommand*\l@subsection{\@dottedtocline{3}{0em}{3.2em}}
+    \renewcommand{\tableofcontents}{\@starttoc{toc}}
+\makeatother
+
+\MakePerPage{footnote}
+\renewcommand*{\thefootnote}{\fnsymbol{footnote}}
+
+\newcommand{\pdfimg}[1]{\pdfximage{pics/#1}\pdfrefximage\pdflastximage}
+\newcommand{\img}[1]{\mbox{\pdfimg{#1}}}
+\newcommand{\imgc}[1]{\begin{center}\img{#1}\end{center}}
+\newcommand{\graph}[1]{\input{graphs/#1}}
+\newcommand{\graphc}[1]{\begin{center}\graph{#1}\end{center}}
+\newcommand{\bfs}[1]{{\bfseries #1}}
+\newcommand{\zs}[1]{\begin{boxedminipage}[t]{16.8cm}\bfs{#1}\end{boxedminipage}}
+
+\newcommand{\cpp}[1]{{\lstinline[
+		basicstyle=\ttfamily\small\color{black},
+        breakatwhitespace=true,
+        breaklines=true,
+        captionpos=b,
+        commentstyle=\ttfamily\color{red},
+        keywordstyle=\ttfamily\color{blue},
+        language={C++},
+        morekeywords={},
+        showspaces=false,
+        showstringspaces=false,
+        showtabs=false,
+        stringstyle=\ttfamily\color{magenta}
+] !#1!}\xspace}
+\newcommand{\cppf}[1]{\lstinputlisting[
+		basicstyle=\ttfamily\small\color{black},
+        breakatwhitespace=true,
+        breaklines=true,
+        captionpos=b,
+        commentstyle=\ttfamily\color{red},
+        keywordstyle=\ttfamily\color{blue},
+        language={C++},
+        morekeywords={},
+        showspaces=false,
+        showstringspaces=false,
+        showtabs=false,
+        stringstyle=\ttfamily\color{magenta}
+] {code/#1.cpp}}
+\newcommand{\cppfl}[1]{\lstinputlisting[
+		basicstyle=\ttfamily\small\color{black},
+        breakatwhitespace=true,
+        breaklines=true,
+        captionpos=b,
+        commentstyle=\ttfamily\color{red},
+        keywordstyle=\ttfamily\color{blue},
+        language={C++},
+        morekeywords={},
+        numbers=left,
+        showspaces=false,
+        showstringspaces=false,
+        showtabs=false,
+        stringstyle=\ttfamily\color{magenta}
+] {code/#1.cpp}}
+
+\newcommand{\dtor}{\cpp{\~fiber()}}
+\newcommand{\main}{\cpp{main()}}
+\newcommand{\fiber}{\cpp{std::fiber}}
+\newcommand{\op}{\cpp{operator()()}}
+\newcommand{\opbool}{\cpp{operator bool()}}
+\newcommand{\resume}{\cpp{resume()}}
+\newcommand{\resumewith}{\cpp{resume\_with()}}
+\newcommand{\unwindex}{\cpp{std::unwind\_exception}}
+\newcommand{\unwindcont}{\cpp{std::unwind\_context()}}
+
+\newcommand{\sym}{\emph{symmetric}\xspace}
+\newcommand{\asym}{\emph{asymmetric}\xspace}
+\newcommand{\entryfn}{\emph{entry-function}}
+
+\newcommand{\abschnitt}[1]{\addcontentsline{toc}{subsection}{#1}\subsection*{#1}}
+\newcommand{\uabschnitt}[1]{\paragraph*{#1}}
+
+\newcommand{\bcontext}{
+        \href{http://www.boost.org/doc/libs/release/libs/context/doc/html/index.html}
+        {\emph{Boost.Context}}}
+\newcommand{\bcoroutine}{
+        \href{http://www.boost.org/doc/libs/release/libs/coroutine2/doc/html/index.html}
+        {\emph{Boost.Coroutine2}}}
+\newcommand{\bfiber}{
+        \href{http://www.boost.org/doc/libs/release/libs/fiber/doc/html/index.html}
+        {\emph{Boost.Fiber}}}
+\newcommand{\fbmcrouter}{
+        \href{https://code.facebook.com/posts/296442737213493/introducing-mcrouter-a-memcached-protocol-router-for-scaling-memcached-deployments}
+        {\emph{mcrouter}}}
+\newcommand{\fbfibers}{
+        \href{https://github.com/facebook/folly/tree/master/folly/fibers}
+        {\emph{folly::fibers}}}
+\newcommand{\fbthrift}{
+        \href{https://github.com/facebook/fbthrift}
+        {\emph{Thrift}}}
+\newcommand{\synca}{
+        \href{https://github.com/gridem/Synca}
+        {\emph{Synca}}}
