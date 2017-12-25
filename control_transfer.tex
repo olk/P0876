@@ -1,0 +1,55 @@
+\abschnitt{control transfer mechanism}
+
+According to literature\cite{Moura2009} the control-transfer operations can be
+distinguished into the concepts of \sym and \asym operations.
+
+\uabschnitt{symmetric fiber} A symmetric fiber provides a single
+control-transfer operation. This single operation requires that the control is
+passed explicitly between the fibers.\\
+\graphc{symm}
+
+\cppfl{symmetric_op}
+
+In the pseudo-code example above, a chain of fibers is created.\\
+The execution control is transferred to fiber \cpp{f1} at line 15 and the lambda
+passed to constructor of \cpp{f1} is entered. The control is transferred from
+fiber \cpp{f1} to \cpp{f2} at line 12 and from \cpp{f2} to \cpp{f3} (line 9) and
+so on. Fiber \cpp{f4} itself transfers the execution control directly back to
+fiber \cpp{f1} at line 3.
+
+\uabschnitt{asymmetric fiber} Two control-transfer operations are part of
+asymmetric fiber's interface. One operation for resuming (\resume) and one for
+suspending (\cpp{suspend()}) the fiber. The suspending operation returns the
+control back to the fiber caller.\\
+\graphc{asymm}
+
+\cppfl{asymmetric_op}
+In the pseudo code above execution control is transferred to fiber \cpp{f1} at
+line 16. Fiber \cpp{f1} resumes fiber \cpp{f2} at line 13 and so on. At line 2
+fiber \cpp{f4} calls its suspend operation \cpp{self::suspend()}. Fiber \cpp{f4}
+is suspended and \cpp{f3} resumed. Inside the lambda, \cpp{f3} returns from
+\cpp{f4.resume()} and calls \cpp{self::suspend()} (line 6). Fiber \cpp{f3} gets
+suspended while \cpp{f2} will be resumed and so on ...\\
+The asymmetric version needs \bfs{N-1 more} fiber switches than the variant
+using symmetric fibers.\\
+
+\zs{While asymmetric fibers establish a caller-callee relationship (strong
+coupled), symmetric fibers operate at the same level (loose coupled).}\\
+\newline
+
+Symmetric fibers represent independent units of execution, making symmetric
+fibers a suitable for mechanism for concurrent programming. Additionally,
+constructs that produce sequences of values (\emph{generators}) are easily
+constructed out of two symmetric fibers (one represents the caller, the other
+the callee).\\
+
+Asymmetric fibers incorporate additional fiber switches as shown in the pseudo
+code above. It is obvious that asymmetric fibers are less efficient than their
+symmetric counterparts in order to achieve the same functionality.\\
+Additionally, the calling fiber must be kept alive until the called fiber
+terminates. Otherwise the call of \cpp{suspend()} will be undefined behaviour
+(where to transfer execution control to?).\\
+
+\zs{A symmetric fibers are more efficient, have less restrictions (no
+caller-callee relationship) and can be used to create a wider set of
+applications (generators, cooperative multitasking, backtracking ...).}

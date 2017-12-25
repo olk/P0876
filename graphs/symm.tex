@@ -1,0 +1,16 @@
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2.8cm,
+                    semithick,initial text=f1.resume()]
+
+  \tikzstyle{every state}=[draw=blue!50,very thick,fill=blue!20, font=\bfseries\large]
+  \tikzstyle{every edge}=[draw,font={\tiny}]
+
+  \node[state,initial] (A)              {$f_1$};
+  \node[state]         (B) [right of=A] {$f_2$};
+  \node[state]         (C) [right of=B] {$f_3$};
+  \node[state]         (D) [right of=C] {$f_4$};
+
+  \path (A)             edge node {f2.resume()}     (B)
+        (B)             edge node {f3.resume()}     (C)
+        (C)             edge node {f4.resume()}     (D)
+        (D) [bend left] edge node {pf1->resume()}   (A);
+\end{tikzpicture}
