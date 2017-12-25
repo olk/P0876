@@ -1,0 +1,399 @@
+\abschnitt{appendix: API}\label{api}
+
+\uabschnitt{class fiber}
+
+\cppf{fiber}
+
+\newpage
+\paragraph*{member functions}
+
+\subparagraph*{(constructor)}
+constructs new fiber\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{fiber() noexcept} & (1)\\
+
+    \midrule
+
+    \cpp{template<typename Fn>}\\
+    \cpp{fiber(Fn&& fn)} & (2)\\
+
+    \midrule
+
+    \cpp{template<typename StackAlloc, typename Fn>}\\
+    \cpp{fiber(std::allocator\_arg\_t, StackAlloc&& salloc, Fn&& fn)} & (3)\\
+
+    \midrule
+
+    \cpp{fiber(fiber&& other) noexcept} & (4)\\
+
+    \midrule
+
+    \cpp{fiber(const fiber& other)=delete} & (5)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] this constructor instantiates an invalid \fiber. Its \opbool
+              returns \cpp{false}; its \cpp{operator\!()} returns \cpp{true}.
+    \item[2)] takes a callable (function, lambda, object with \op) as
+              argument. The callable must have signature as described
+              in \nameref{subsec:callsemantics}. The stack is constructed using
+              either \cpp{fixedsize} or \cpp{segmented} (see \nameref{subsec:stackalloc}).
+              An implementation may infer which of these best suits the code
+              in \cpp{fn}. If it cannot infer, \cpp{fixedsize} will be used.
+    \item[3)] takes a callable as argument, requirements as for (2). The stack
+              is constructed using \emph{salloc}
+              (see \nameref{subsec:stackalloc}).\footnote{This constructor,
+              along with the \nameref{subsec:stackalloc} section, is an
+              optional part of the proposal. It might be that implementations
+              can reliably infer the optimal stack representation.}
+    \item[4)] moves underlying state to new \fiber
+    \item[5)] copy constructor deleted
+\end{description}
+
+{\bfseries Notes}
+\begin{description}
+    \item Every valid \fiber instance is synthesized by the underlying facility -- or
+          move-constructed, or move-assigned, from another valid instance.
+    \item The entry-function \cpp{fn} passed to \fiber is passed a synthesized \fiber
+          instance representing the suspended caller of \resume.
+    \item The function \cpp{fn} passed to \resumewith is passed a
+          synthesized \fiber instance representing the suspended caller of \resumewith.
+\end{description}
+
+\subparagraph*{(destructor)}\label{subpara:destructor}
+destroys a fiber\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \dtor & (1)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] destroys a \fiber instance. If this instance represents a fiber
+              of execution (\opbool returns \cpp{true}), then the fiber of
+              execution is destroyed too. Specifically, the stack is unwound
+              by throwing \unwindex.\footnote{ In a program in which exceptions
+              are thrown, it is prudent to code a fiber's \entryfn with a
+              last-ditch \cpp{catch (...)} clause: in general, exceptions must
+              \emph{not} leak out of the \entryfn. However, since stack
+              unwinding is implemented by throwing an exception, a correct
+              \entryfn\ \cpp{try} statement must also
+              \cpp{catch (std::unwind\_exception const&)} and rethrow it.}
+\end{description}
+
+
+\subparagraph*{operator=}
+moves the fiber object\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{fiber& operator=(fiber&& other) noexcept} & (1)\\
+
+    \midrule
+
+    \cpp{fiber& operator=(const fiber& other)=delete} & (2)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] assigns the state of \cpp{other} to \cpp{*this} using move semantics
+    \item[2)] copy assignment operator deleted
+\end{description}
+
+{\bfseries Parameters}
+\begin{description}
+    \item[other]   another fiber to assign to this object\\
+\end{description}
+
+{\bfseries Return value}
+\begin{description}
+    \item[*this]
+\end{description}
+
+
+\subparagraph*{resume()}
+resumes a fiber\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{fiber resume()} & (1)\\
+
+    \midrule
+
+    \cpp{template<typename Fn>}\\
+    \cpp{fiber resume\_with(Fn&& fn)} & (2)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] suspends the active fiber, resumes fiber \cpp{*this}
+    \item[2)] suspends the active fiber, resumes fiber \cpp{*this}
+              but calls \cpp{fn()} in the resumed fiber (as if called by the
+              suspended function)
+\end{description}
+
+{\bfseries Parameters}
+\begin{description}
+    \item[fn] function injected into resumed fiber\\
+\end{description}
+
+{\bfseries Return value}
+\begin{description}
+    \item[fiber] the returned instance represents the fiber that has been
+                 suspended in order to resume the current one
+\end{description}
+
+{\bfseries Exceptions}
+\begin{description}
+    \item[1)] \resume or \resumewith might throw \unwindex if, while suspended,
+              the calling fiber is destroyed
+    \item[2)] \resume or \resumewith might throw \emph{any} exception if,
+              while suspended:
+              \begin{itemize}
+                  \item some other fiber calls \resumewith to resume this
+                        suspended fiber
+                  \item the function \cpp{fn} passed to \resumewith -- or some
+                        function called by \cpp{fn} -- throws an exception
+              \end{itemize}
+    \item[3)] Any exception thrown by the function \cpp{fn} passed to
+              \resumewith, or any function called by \cpp{fn}, is thrown in the
+              fiber referenced by \cpp{*this} rather than in the fiber of
+              the caller of \resumewith.
+\end{description}
+
+{\bfseries Preconditions}
+\begin{description}
+    \item[1)] \cpp{*this} represents a valid fiber (\opbool returns \cpp{true})
+    \item[2)] the current \cpp{std::thread} is the same as the thread on which
+              \cpp{*this} was originally launched
+\end{description}
+
+{\bfseries Postcondition}
+\begin{description}
+    \item[1)] \cpp{*this} is in-place assigned by the fiber that has resumed
+            the current fiber
+\end{description}
+
+{\bfseries Notes}
+\newline
+\resume preserves the execution context of the calling fiber. Those data are
+restored if the calling fiber is resumed.\\
+A suspended \cpp{fiber} can be destroyed. Its resources will be cleaned
+up at that time.\\
+The returned \cpp{fiber} indicates whether the suspended fiber has
+terminated (returned from \entryfn) via \opbool.\\
+Because \resume invalidates the instance on which it is called, \emph{no valid
+\fiber instance ever represents the currently-running fiber.}\\
+When calling \resume, it is conventional to replace the newly-invalidated
+instance -- the instance on which \resume was called -- with the new instance
+returned by that \resume call. This helps to avoid inadvertent calls to \resume
+on the old, invalidated instance.\\
+An injected function \cpp{fn()} must accept \cpp{std::fiber&&} and
+return \fiber. The returned \fiber instance is, in turn, used to in-place
+assignment for the suspended function: \resume or \resumewith.
+
+
+\subparagraph*{operator bool}
+test whether fiber is valid\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{explicit operator bool() const noexcept} & (1)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] returns \cpp{true} if \cpp{*this} represents a fiber of
+              execution, \cpp{false} otherwise.
+\end{description}
+
+{\bfseries Notes}
+\newline
+A \fiber instance might not represent a valid fiber for any of a number of reasons.
+\begin{itemize}
+    \item It might have been default-constructed.
+    \item It might have been assigned to another instance, or passed into a
+          function.\\
+          \fiber instances are move-only.
+    \item It might already have been resumed -- calling \resume invalidates the
+          instance.
+    \item The \entryfn might have voluntarily terminated the fiber by
+          returning.
+\end{itemize}
+The essential points:
+\begin{itemize}
+    \item Regardless of the number of \fiber declarations, exactly one\\
+          \fiber instance represents each suspended fiber.
+    \item No \fiber instance represents the currently-running fiber.
+\end{itemize}
+
+
+\subparagraph*{operator!}
+test whether fiber is invalid\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{bool operator\!() const noexcept} & (1)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] returns \cpp{false} if \cpp{*this} represents a valid fiber,
+              \cpp{true} otherwise.
+\end{description}
+
+{\bfseries Notes}
+\newline
+See {\bfseries Notes} for \opbool.
+
+\subparagraph*{(comparisons)}
+establish an arbitrary total ordering for \fiber instances\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{bool operator==(const fiber& other) const noexcept} & (1)\\
+
+    \midrule
+
+    \cpp{bool operator\!=(const fiber& other) const noexcept} & (1)\\
+
+    \midrule
+
+    \cpp{bool operator<(const fiber& other) const noexcept} & (2)\\
+
+    \midrule
+
+    \cpp{bool operator>(const fiber& other) const noexcept} & (2)\\
+
+    \midrule
+
+    \cpp{bool operator<=(const fiber& other) const noexcept} & (2)\\
+
+    \midrule
+
+    \cpp{bool operator>=(const fiber& other) const noexcept} & (2)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] Every invalid \fiber instance compares equal to every other invalid
+              instance. But because the running fiber is never represented by
+              a valid \fiber instance, and because every suspended fiber is
+              represented by exactly one valid instance, \emph{no valid instance
+              can ever compare equal to any other valid instance.}
+    \item[2)] These comparisons establish an arbitrary total ordering of \fiber
+              instances, for example to store in ordered containers. (However,
+              key lookup is meaningless, since you cannot construct a search key
+              that would compare equal to any entry.) There is no significance
+              to the relative order of two instances.
+\end{description}
+
+
+\subparagraph*{swap}
+swaps two \fiber instances\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{void swap(fiber& other) noexcept} & (1)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] Exchanges the state of \cpp{*this} with \cpp{other}.\\
+\end{description}
+
+
+\uabschnitt{std::unwind\_fiber()}
+
+terminate the current running fiber, switching to the fiber represented by
+the passed \fiber. This is like returning that \fiber from the \entryfn, but may
+be called from any function on that fiber.
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{void unwind\_fiber(fiber&& other)} & (1)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] throws \unwindex, binding the passed \fiber. The running fiber's
+              first stack entry catches \unwindex, extracts the bound \fiber
+              and terminates the current fiber by returning that \fiber.
+\end{description}
+
+\bfs{Parameters}
+\begin{description}
+    \item[other] the \fiber to which to switch once the current fiber has terminated
+\end{description}
+
+\bfs{Preconditions}
+\begin{description}
+    \item[1)] \cpp{cont} must be valid (\cpp{operator bool()} returns \cpp{true})
+\end{description}
+
+\bfs{Return value}
+\begin{description}
+    \item[1)] None: \unwindcont does not return
+\end{description}
+
+\bfs{Exceptions}
+\begin{description}
+    \item[1)] throws \unwindex
+\end{description}
+
+
+\uabschnitt{std::unwind\_exception}
+
+is the exception used to unwind the stack referenced by a \fiber being destroyed.
+t is thrown by \unwindcont. \unwindex binds a \fiber referencing the fiber to
+which control should be passed once the current fiber is unwound and destroyed.
+
+
+\uabschnitt{Stack allocators}
+\label{subsec:stackalloc}
+
+are the means by which stacks with non-default properties may be requested by
+the caller of \fiber constructor. The stack allocator concept is
+implementation-dependent; the means by which an implementation's
+stack allocators communicate with \fiber constructor is unspecified.\\
+
+An implementation may provide zero or more stack allocators. However, a stack
+allocator with semantics matching any of the following must use the
+corresponding name.
+\begin{description}
+  \item[protected\_fixedsize] The constructor accepts a \cpp{size\_t} parameter.
+        This stack allocator constructs a contiguous stack of specified size,
+        appending a guard page at the end to protect against overflow. If the
+        guard page is accessed (read or write operation), a segmentation
+        fault/access violation is generated by the operating system.
+  \item[fixedsize] The constructor accepts a \cpp{size\_t} parameter.
+        This stack allocator constructs a contiguous stack of specified size.
+        In contrast to \cpp{protected\_fixedsize}, it does not append a guard
+        page. The memory is simply managed by \cpp{std::malloc()}
+        and \cpp{std::free()}, avoiding kernel involvement.
+  \item[segmented] The constructor accepts a \cpp{size\_t} parameter.
+        This stack allocator creates a segmented stack\cite{gccsplit} with the
+        specified initial size, which grows on demand.
+\end{description}
