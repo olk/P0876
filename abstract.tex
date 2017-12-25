@@ -1,0 +1,21 @@
+\abschnitt{abstract}
+
+At the November 2017 meeting in Albuquerque the members of the committee
+concluded that stackful context switching is important and decided to pursue the
+technology.\\
+
+This paper addresses concerns, questions and suggestions from the past meetings.
+The proposed API reflects the former proposals N3985\cite{N3985},
+P0099R1\cite{P0099R1} and P0534R3\cite{P0534R3}.\\
+Because of name clashes with \emph{coroutine} from coroutine TS,
+\emph{execution context} from executor proposals and \emph{continuation} used
+in the context of \cpp{future::then()}, \emph{fiber}, as suggested by some
+committee members, has been chosen - \emph{filament}, \emph{tasklet},
+\emph{lightfiber} or \emph{coop\_task} are alternative names.\\
+
+The minimal API enables stackful context switching \bfs{without} the need for a
+\bfs{scheduler}. The API is suitable to act as building-block for high-level
+constructs such as stackful coroutines as well as cooperative multitasking
+(aka user-land/green threads that incorporate a \bfs{scheduling facility}).\\
+
+A fiber is represented by the first-class object \fiber.
