@@ -1,0 +1,15 @@
+\abschnitt{fiber as a first-class object}
+
+Because the symmetric control-transfer operation requires to explicitly pass
+the control-transfer between fibers, fibers must be expressed as first class
+objects.\\
+
+Fibers exposed as \emph{first-class objects} can be passed to and returned from
+functions, assigned to variables or stored into containers. With fibers as
+first-class objects, a language can \bfs{explicitly control the flow of
+execution} by suspending and resuming fibers, enabling control to pass into a
+function at exactly the point where it previously suspended.\\
+
+\zs{Symmetric control-transfer operation requires fibers to be first-class
+object. First-class objects can be returned from functions, assigned to
+variables or stored into containers.}
