@@ -1,0 +1,54 @@
+\abschnitt{fiber as building block for higher-level frameworks}
+
+A low-level API enables a rich set of higher-level frameworks that provide
+specific syntaxes/semantics suitable for a specific domains. As an example, the
+following four frameworks are based on the low-level fiber switching API of
+\bcontext\cite{bcontext} (implements the API of this proposal).
+
+\uabschnitt{\bcoroutine}\cite{bcoroutine2} implements \bfs{asymmetric coroutines}
+\cpp{coroutine<>::push_type} and \cpp{coroutine<>::pull_type} providing a
+unidirectional transfer of data. Both stackful coroutines are always used as
+pair, that means that\\
+\cpp{coroutine<>::pull_type} is synthesized and passed as parameter into the
+coroutine if \cpp{coroutine<>::push_type} was explicitly instantiated. In the
+example below \cpp{coroutine<>::push_type} (variable \cpp{writer}) provides the
+resume operation, while \cpp{coroutine<>::pull_type} (variable \cpp{in})
+represents the suspend operation. Coroutine\\
+\cpp{coroutine<>::pull_type} pushes strings into the lambda (accessed via
+\cpp{in.get()}).
+\cppf{bcoroutine_ex}
+
+Note that the library operates seamlessly with STL-algorithms and makes no use
+of global pointers!
+
+\uabschnitt{\synca}\cite{synca} (by Grigory Demchenko) is a small but efficient
+library to perform asynchronous operations in synchronous manner. The main
+features are a \bfs{GO-like} syntax, possibility to transfer execution context
+explicitly between different thread pools or schedulers (portals/teleports) and
+asynchronous network support.
+\cppf{synca_ex}
+
+The code itself looks like synchronous invocations while internally it uses
+asynchronous scheduling.
+
+\uabschnitt{\bfiber}\cite{bfiber} implements \bfs{user-land threads} and combines
+fibers with schedulers (scheduler-algorithms are customization points). The API
+is modelled after the \cpp{std::thread}-API and contains objects like
+\cpp{future}, \cpp{mutex},\\
+\cpp{condition_variable} ...
+\cppf{bfiber_ex}
+
+\uabschnitt{Facebook's \fbfibers}\cite{fbfiber} is an asynchronous C++ framework
+using \bfs{user-land threads} for parallelism. In contrast to \bfiber,
+\fbfibers\xspace exposes the scheduler and permits integration of various
+event dispatching libraries.
+\cppf{fbfiber_ex}
+
+\fbfibers\xspace is used in many critical applications at Facebook for instance
+in \fbmcrouter\cite{fbmcrouter} and some other Facebook services/libraries like
+ServiceRouter (routing framework for \fbthrift\cite{fbthrift}), Node API (graph
+ORM API for graph databases) ...\\
+
+\zs{As shown in this section a low-level API can act as building block for a
+rich set of high-level frameworks designed for specific application domains
+that require different aspects of design, semantic and syntax.}
