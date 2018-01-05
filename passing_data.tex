@@ -1,0 +1,27 @@
+\abschnitt{passing data between fibers}
+
+Data can be transferred between two fibers via global pointer, calling
+wrappers (like \cpp{std::bind}) or lambda captures.
+\cppfl{passing_lambda}
+
+The \resume call at line 9 enters the lambda and passes 1 into the
+new fiber. The value is incremented by one, as shown at line 5. The expression
+\cpp{caller.resume()} at line 6 resumes the original context (represented
+within the lambda by \cpp{caller}).\\
+The call to \cpp{lambda.resume()} at line 11 resumes the lambda, returning from
+the \cpp{caller.resume()} call at line 6. The \fiber instance \cpp{caller}
+invalidated by the \resume call at line 6 is in-place assigned by the
+synthesized fiber.\\
+Finally the lambda returns (the updated) \cpp{caller} at line 7, terminating its
+context.\\
+
+Since the updated \cpp{caller} represents the fiber suspended by the call at
+line 11, control returns to \main.\\
+
+However, since context \cpp{lambda} has now terminated, the updated \cpp{lambda}
+is invalid. Its \opbool returns \cpp{false}; its \cpp{operator\!()} returns
+\cpp{true}.\\
+
+\zs{Using lambda capture is the preferred way to transfer data between two
+fibers; global pointer and calling wrappers (like \cpp{std::bind}) are
+alternatives.}
