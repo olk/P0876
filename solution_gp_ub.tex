@@ -1,0 +1,79 @@
+\abschnitt{solution: avoiding non-const global variables and
+undefined behaviour}\label{solution_gpub}
+
+\zs{The \emph{avoid con-const global variables} guideline has an important
+impact on the design of the fiber API!}
+
+\uabschnitt{synthesizing the suspended fiber}\label{synthesizing}
+The problem of global variables or the need for static member functions
+returning the active fiber can be avoided by \bfs{synthesizing} the
+\bfs{suspended fiber} and passing it into the resumed fiber (as parameter if the
+fiber is started the first time or via in-place assignment of the instance that
+has suspended the fiber previously by invoking \resume).
+\cppfl{synthesized_foo}
+
+In the pseudo-code above the fiber \cpp{f} is started by invoking its member
+function \resume at line 6. This operation suspends \cpp{foo}, invalidates
+instance \cpp{f} and synthesizes a new fiber \cpp{m} that is passed as parameter
+to the lambda of \cpp{f} (line 2).\\
+Line 3 calls \cpp{m.resume()} that suspends the lambda, invalidates \cpp{m} and
+synthesizes a fiber that get \bfs{in-place assigned} to \cpp{f}. The control
+flow is transferred from line 3 to line 6. After returning from \cpp{f.resume()}
+at line 6, instance \cpp{f} represents the suspended fiber executing the lambda
+(that is suspended at line 3).\\
+Call \cpp{f.resume()} at line 7 invalidates \cpp{f} and suspends \cpp{foo()}
+again. A fiber, representing the suspended \cpp{foo()} is synthesized and
+in-place assigned to \cpp{m} at line 3. The execution control is transferred to
+line 3 returning from \cpp{m.resume()}. Instance \cpp{m} represents the
+suspended \cpp{foo()}.\\
+Function \cpp{foo()} is resumed at line 4 by executing \cpp{m.resume()} so that
+execution control returns in line 6 and so on ...\\
+
+Class \cpp{symmetric_coroutine<>::yield_type} from  N3985\cite{N3985} is
+\bfs{not} equivalent to the synthesized fiber.\\
+\cpp{symmetric_coroutine<>::yield_type} does not represent the suspended context,
+instead it is a special representation of the same coroutine. Thus \main or
+thread's \entryfn\xspace can \bfs{not} be represented by \cpp{yield_type}
+(see next section \nameref{representation}).\\
+Because \cpp{symmetric_coroutine<>::yield_type()} yields back to the starting
+point, e.g. invocation of\\
+\cpp{symmetric_coroutine<>::call_type::operator()()},
+both instances (\cpp{call_type} as well ass \cpp{yield_type}) must be preserved
+(otherwise UB occurs at resumption).\\
+
+
+\zs{This API is specified in terms of passing the suspended fiber, a higher
+level layer can hide that by using global variables.}
+
+\uabschnitt{distributing \emph{main()} and thread's \entryfn\xspace as fiber}\label{representation}
+As shown in the previous section a synthesized fiber is created and passed as
+instance of \fiber into the resumed fiber.\\
+\cppfl{synthesized_main}
+
+This is a nice feature because it allows \main and thread's \entryfn\xspace to
+be represented as a fiber. A fiber representing \main or thread's
+\entryfn\xspace can be handled like explicitly created fibers, it passed to
+and returned from functions or stored in containers.\\
+In the code snippet above the suspended \main is represented by instance
+\cpp{m} and can be stored in containers, scheduled together with \cpp{f}
+according to a scheduling algorithm.
+
+\zs{The proposed fiber API allows to represent and handle \main and thread's
+\entryfn\xspace by a instance of \fiber in the same way as explicitly created fibers.}
+
+\uabschnitt{fiber returns (terminates)} When a fiber returns (terminates), what
+should happen next? Which fiber should resumed next? The only way to avoid
+internal global variables that point to \main is to explicitly return a fiber
+instance that will be resumed after the active fiber terminates.
+\cppfl{terminating_fiber}
+
+In line 5 the fiber is started by invoking \resume on instance \cpp{f}. \main
+is suspended and a instance of type \cpp{fiber} is synthesized and passed as
+parameter \cpp{m} to the lambda at line 2. The fiber terminates by returning
+\cpp{m}. The control is transferred to \main (return from \cpp{f.resume()} at
+line 5 while the fiber \cpp{f} is destructed.
+
+\zs{\fiber as return value from a function used to construct a fiber avoids
+global variables -- the function passed to fiber's constructor must be of
+signature `\cpp{fiber(fiber&&)}`.}
+
