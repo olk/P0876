@@ -1,0 +1,35 @@
+\abschnitt{invalidation at resumption}\label{invalidation}
+
+The framework must prevent the resumption of an already running or terminated
+(computation has finished) fiber.\\
+Resuming an already running fiber will cause overriding and corrupting the stack
+frames (note, the stack is not copyable).  Resuming an terminated fiber will
+cause undefined behaviour because the stack might already unwound (objects
+allocated on the stack are destructed or the memory used as stack was already
+deallocated).\\
+As a consequence each call of \resume will invalidate the \fiber instance, e.g.
+no valid instance of the fiber represents the currently-running fiber.\\
+Whether a fiber is valid or not can be tested with member function \opbool.\\
+%If a fiber calls \cpp{f.resume()} then the  fiber is suspended and \cpp{f} is
+%invalidated. When the fiber is resumed later, it returns from \cpp{f.resume()}
+%and instance \cpp{f} references the calling fiber (the fiber that has resumed
+%the current fiber).\\
+
+The essential points:
+\begin{itemize}
+    \item regardless of the number of \fiber declarations, exactly one \fiber
+          instance represents each suspended fiber
+    \item no \fiber instance represents the currently-running fiber
+\end{itemize}
+
+Section \nameref{solution_gpub} describes how a instance of \fiber is
+synthesized from the active fiber that suspends.\\
+
+\zs{
+A fiber API has to:
+\begin{itemize}
+    \item prevent accidentally resuming a running fiber
+    \item prevent accidentally resuming a terminated (computation has finished)
+          fiber
+\end{itemize}
+}
