@@ -10,22 +10,22 @@ public:
 
     ~fiber();
 
-    fiber( fiber&& other) noexcept;
-    fiber & operator=( fiber&& other) noexcept;
-    fiber( const fiber& other) noexcept = delete;
-    fiber & operator=( const fiber& other) noexcept = delete;
+    fiber(fiber&& other) noexcept;
+    fiber& operator=(fiber&& other) noexcept;
+    fiber(const fiber& other) noexcept = delete;
+    fiber& operator=(const fiber& other) noexcept = delete;
 
     fiber resume();
     template<typename Fn>
-    fiber resume_with( Fn&& fn);
+    fiber resume_with(Fn&& fn);
 
     explicit operator bool() const noexcept;
     bool operator!() const noexcept;
-    bool operator==( const fiber& other) const noexcept;
-    bool operator!=( const fibert& other) const noexcept;
-    bool operator<( const fiber& other) const noexcept;
-    bool operator>( const fiber& other) const noexcept;
-    bool operator<=( const fiber& other) const noexcept;
-    bool operator>=( const fiber& other) const noexcept;
-    void swap( fiber& other) noexcept;
+    bool operator==(const fiber& other) const noexcept;
+    bool operator!=(const fibert& other) const noexcept;
+    bool operator<(const fiber& other) const noexcept;
+    bool operator>(const fiber& other) const noexcept;
+    bool operator<=(const fiber& other) const noexcept;
+    bool operator>=(const fiber& other) const noexcept;
+    void swap(fiber& other) noexcept;
 };
