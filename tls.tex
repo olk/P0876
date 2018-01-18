@@ -1,0 +1,6 @@
+\abschnitt{multi-threading environment}
+
+\fiber is TLS-agnostic - best practice related to TLS applies to fibers too
+(see P0772R0.)\\
+Migration between threads is forbidden. A \fiber may only be resumed on the
+\cpp{std::thread} on which it was launched.
