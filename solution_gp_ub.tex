@@ -41,7 +41,6 @@ point, e.g. invocation of\\
 both instances (\cpp{call_type} as well ass \cpp{yield_type}) must be preserved
 (otherwise UB occurs at resumption).\\
 
-
 \zs{This API is specified in terms of passing the suspended fiber, a higher
 level layer can hide that by using global variables.}
 
@@ -56,7 +55,7 @@ be represented as a fiber. A fiber representing \main or thread's
 and returned from functions or stored in containers.\\
 In the code snippet above the suspended \main is represented by instance
 \cpp{m} and can be stored in containers, scheduled together with \cpp{f}
-according to a scheduling algorithm.
+according to a scheduling algorithm.\\
 
 \zs{The proposed fiber API allows to represent and handle \main and thread's
 \entryfn\xspace by a instance of \fiber in the same way as explicitly created fibers.}
@@ -71,9 +70,23 @@ In line 5 the fiber is started by invoking \resume on instance \cpp{f}. \main
 is suspended and a instance of type \cpp{fiber} is synthesized and passed as
 parameter \cpp{m} to the lambda at line 2. The fiber terminates by returning
 \cpp{m}. The control is transferred to \main (return from \cpp{f.resume()} at
-line 5 while the fiber \cpp{f} is destructed.
+line 5 while the fiber \cpp{f} is destructed.\\
+
+In a more complex example another fiber is used as return value instead of the
+synthesized fiber that is passed in.
+\cppfl{terminating_fiber_complex}
+At line 13 fiber \cpp{f2} is resumed and the lambda is entered at line 8. The
+synthesized fiber \cpp{f} (representing suspended \main) is passed as a
+parameter \cpp{f} and stored in \cpp{m} (captured by the lambda) at line 10.
+This is necessary in order to prevent destructing \cpp{f} when the lambda
+returns. Fiber \cpp{f2} uses \cpp{f1}, that was also captured by the lambda as
+retrun value. Fiber \cpp{f2} terminates while fiber \cpp{f1} is resumed (entered
+the first time). The synthesized fiber \cpp{f} passed into the lambda at line 3
+represents the terminated fiber \cpp{f2} (e.g. the calling fiber). Thus instance
+\cpp{f} is invalid as the assert statement checks at line 5. Fiber \cpp{f1} uses
+the captured fiber \cpp{m} as return value (line 6). The control is returned to
+\main returning from \cpp{f2.resume()} at line 13.\\
 
 \zs{\fiber as return value from a function used to construct a fiber avoids
 global variables -- the function passed to fiber's constructor must be of
 signature `\cpp{fiber(fiber&&)}`.}
-
