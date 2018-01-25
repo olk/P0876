@@ -3,7 +3,7 @@ ctx::fiber g{[&a](ctx::fiber&& m){
     a=0;
     int b=1;
     for(;;){
-        m.resume();
+        m=m.resume();
         int next=a+b;
         a=b;
         b=next;
@@ -12,7 +12,7 @@ ctx::fiber g{[&a](ctx::fiber&& m){
 }};
 std::vector<int> v(10);
 std::generate(v.begin(), v.end(), [&a,&g]() mutable {
-    g.resume();
+    g=g.resume();
     return a;
 });
 std::cout << "v: ";

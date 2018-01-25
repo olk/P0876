@@ -95,8 +95,8 @@ technique.}.
 Inside \resume the code pushes the relevant CPU registers onto the stack and
 creates from the resulting stack address a new \fiber. This instance is then
 passed into the resume fiber as parameter if the resumed fiber is started for the
-first time or in-place assigned to the \fiber instance  that has previously
-suspended the resumed fiber (see example in \nameref{synthesizing}).\\
+first time or returned by \resume/\resumewith otherwise (see example in
+\nameref{synthesizing}).\\
 
 \zs{Using fiber's stack as storage for the CPU state is efficient because no
 additional allocations and deallocations are required.}

@@ -4,7 +4,6 @@
 
 \cppf{fiber}
 
-\newpage
 \paragraph*{member functions}
 
 \subparagraph*{(constructor)}
@@ -125,12 +124,12 @@ resumes a fiber\\
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{fiber& resume()} & (1)\\
+    \cpp{fiber resume()} & (1)\\
 
     \midrule
 
     \cpp{template<typename Fn>}\\
-    \cpp{fiber& resume\_with(Fn&& fn)} & (2)\\
+    \cpp{fiber resume\_with(Fn&& fn)} & (2)\\
 
     \midrule
 \end{tabular}
@@ -149,8 +148,8 @@ resumes a fiber\\
 
 {\bfseries Return value}
 \begin{description}
-    \item[fiber\&] reference to \cpp{*this} representing the fiber that was
-                 suspended in order to resume the current one
+    \item[fiber] the returned instance represents the fiber that has been
+                 suspended in order to resume the current fiber
 \end{description}
 
 {\bfseries Exceptions}
@@ -180,8 +179,7 @@ resumes a fiber\\
 
 {\bfseries Postcondition}
 \begin{description}
-    \item[1)] \cpp{*this} is internally replaced by the fiber that has resumed
-            the current fiber
+    \item[1)] \cpp{*this} is invalidated (\opbool returns \cpp{false})
 \end{description}
 
 {\bfseries Notes}
@@ -190,15 +188,18 @@ resumes a fiber\\
 restored if the calling fiber is resumed.\\
 A suspended \cpp{fiber} can be destroyed. Its resources will be cleaned
 up at that time.\\
-The returned \cpp{fiber&} indicates whether the suspended fiber has
-terminated (returned from \entryfn) via \opbool.\\
+The returned \cpp{fiber} indicates whether the suspended fiber has terminated
+(returned from \entryfn) via \opbool.\\
 Because \resume invalidates the instance on which it is called, \emph{no valid
 \fiber instance ever represents the currently-running fiber.}\\
-When calling \resume, \cpp{*this} -- the instance on which \resume was called --
-is replaced internally by the fiber that was suspended by the \resume call.\\
-An injected function \cpp{fn()} must accept \cpp{std::fiber&&} and
-return \fiber. The returned \fiber instance is, in turn, used to inplace
-assignment for the suspended function: \resume or \resumewith.
+When calling \resume, it is conventional to replace the newly-invalidated
+instance -- the instance on which \resume was called -- with the new instance
+returned by that \resume call. This helps to avoid inadvertent calls to \resume
+on the old, invalidated instance.
+\newline
+An injected function \cpp{fn()} must accept \cpp{std::fiber&&} and return
+\fiber. The returned \fiber instance is, in turn, used as the return value for
+the suspended function: \resume or \resumewith.
 
 
 \subparagraph*{operator bool}

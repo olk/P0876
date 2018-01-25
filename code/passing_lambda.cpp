@@ -3,12 +3,12 @@ std::fiber lambda{
     [&i](fiber&& caller){
         std::cout << "inside lambda,i==" << i << std::endl;
         i+=1;
-        caller.resume();
+        caller=caller.resume();
         return std::move(caller);
 }};
-lambda.resume();
+lambda=lambda.resume();
 std::cout << "i==" << i << std::endl;
-lambda.resume();
+lambda=lambda.resume();
 
 output:
     inside lambda,i==1

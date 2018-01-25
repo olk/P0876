@@ -7,7 +7,7 @@ int main(){
     }};
     fiber f2{[&](fiber&& f){
         std::cout << "f2: entered first time" << std::endl;
-        m = std::move(f); // preserve `f` (== suspended main())
+        m=std::move(f); // preserve `f` (== suspended main())
         return std::move(f1);
     }};
     f2.resume();

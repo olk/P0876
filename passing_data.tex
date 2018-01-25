@@ -10,8 +10,8 @@ new fiber. The value is incremented by one, as shown at line 5. The expression
 within the lambda by \cpp{caller}).\\
 The call to \cpp{lambda.resume()} at line 11 resumes the lambda, returning from
 the \cpp{caller.resume()} call at line 6. The \fiber instance \cpp{caller}
-invalidated by the \resume call at line 6 is in-place assigned by the
-synthesized fiber.\\
+invalidated by the \resume call at (6) is replaced with the new instance
+returned by that same \resume call.\\
 Finally the lambda returns (the updated) \cpp{caller} at line 7, terminating its
 context.\\
 

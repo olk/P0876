@@ -8,26 +8,26 @@ impact on the design of the fiber API!}
 The problem of global variables or the need for static member functions
 returning the active fiber can be avoided by \bfs{synthesizing} the
 \bfs{suspended fiber} and passing it into the resumed fiber (as parameter if the
-fiber is started the first time or via in-place assignment of the instance that
-has suspended the fiber previously by invoking \resume).
+fiber is started the first time or returned from \resume by the instance that
+has suspended the fiber previously).
 \cppfl{synthesized_foo}
 
 In the pseudo-code above the fiber \cpp{f} is started by invoking its member
-function \resume at line 6. This operation suspends \cpp{foo}, invalidates
+function \resume at line 7. This operation suspends \cpp{foo}, invalidates
 instance \cpp{f} and synthesizes a new fiber \cpp{m} that is passed as parameter
 to the lambda of \cpp{f} (line 2).\\
-Line 3 calls \cpp{m.resume()} that suspends the lambda, invalidates \cpp{m} and
-synthesizes a fiber that get \bfs{in-place assigned} to \cpp{f}. The control
-flow is transferred from line 3 to line 6. After returning from \cpp{f.resume()}
-at line 6, instance \cpp{f} represents the suspended fiber executing the lambda
-(that is suspended at line 3).\\
-Call \cpp{f.resume()} at line 7 invalidates \cpp{f} and suspends \cpp{foo()}
-again. A fiber, representing the suspended \cpp{foo()} is synthesized and
-in-place assigned to \cpp{m} at line 3. The execution control is transferred to
-line 3 returning from \cpp{m.resume()}. Instance \cpp{m} represents the
-suspended \cpp{foo()}.\\
+Invoking \cpp{m.resume()} (line 3) suspends the lambda, invalidates \cpp{m} and
+synthesizes a fiber that is returned by \cpp{f.resume()} at line 7. The
+synthesized fiber is assigned to \cpp{f}. Instance \cpp{f} represents now the
+suspended fiber running the lambda (that is suspended at line 3). The control
+flow has been transferred from line 3 (lambda) to line 7 (\cpp{foo()}).\\
+Call \cpp{f.resume()} at line 8 invalidates \cpp{f} and suspends \cpp{foo()}
+again. A fiber, representing the suspended \cpp{foo()} is synthesized, returned
+from \cpp{m.resume()} and assigned to \cpp{m} at line 3. The execution control
+is transferred back to the lambda and instance \cpp{m} represents the suspended
+\cpp{foo()}.\\
 Function \cpp{foo()} is resumed at line 4 by executing \cpp{m.resume()} so that
-execution control returns in line 6 and so on ...\\
+execution control returns in line 8 and so on ...\\
 
 Class \cpp{symmetric_coroutine<>::yield_type} from  N3985\cite{N3985} is
 \bfs{not} equivalent to the synthesized fiber.\\
@@ -47,7 +47,7 @@ level layer can hide that by using global variables.}
 \uabschnitt{distributing \emph{main()} and thread's \entryfn\xspace as fiber}\label{representation}
 As shown in the previous section a synthesized fiber is created and passed as
 instance of \fiber into the resumed fiber.\\
-\cppfl{synthesized_main}
+\cppf{synthesized_main}
 
 This is a nice feature because it allows \main and thread's \entryfn\xspace to
 be represented as a fiber. A fiber representing \main or thread's
