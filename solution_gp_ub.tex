@@ -80,7 +80,7 @@ synthesized fiber \cpp{f} (representing suspended \main) is passed as a
 parameter \cpp{f} and stored in \cpp{m} (captured by the lambda) at line 10.
 This is necessary in order to prevent destructing \cpp{f} when the lambda
 returns. Fiber \cpp{f2} uses \cpp{f1}, that was also captured by the lambda as
-retrun value. Fiber \cpp{f2} terminates while fiber \cpp{f1} is resumed (entered
+return value. Fiber \cpp{f2} terminates while fiber \cpp{f1} is resumed (entered
 the first time). The synthesized fiber \cpp{f} passed into the lambda at line 3
 represents the terminated fiber \cpp{f2} (e.g. the calling fiber). Thus instance
 \cpp{f} is invalid as the assert statement checks at line 5. Fiber \cpp{f1} uses
@@ -90,3 +90,50 @@ the captured fiber \cpp{m} as return value (line 6). The control is returned to
 \zs{\fiber as return value from a function used to construct a fiber avoids
 global variables -- the function passed to fiber's constructor must be of
 signature `\cpp{fiber(fiber&&)}`.}
+
+\uabschnitt{returning synthesized fiber instance from \cpp{resume()}}\label{fiberreturn}
+A instance of \fiber remains invalid after returning of \resume or \resumewith -
+the synthesized fiber is returned instead of implicitly assigning it.\\
+If the underlying fiber object would be implicitly be replaced, the fiber would 
+change its identity because each fiber is associated with a stack. Each stack
+contains a chain of function calls (call stack). If this association would be
+implicitly modified, unexpected behaviour happens.\\
+The example below demonstrates the problem:
+\cppfl{return_from_resume_inplace}
+
+In the pseudo-code above the underlying fiber object is implicitly replaced.\\
+The example creates a circle of fibers: each fiber prints out its name and
+resumes the next fiber (f1 -> f2 -> f3 -> f1 -> ...).\\
+Fiber \cpp{f1} is started at line 26. The synthesized fiber \cpp{main} passed 
+to the resumed fiber is not used. In the for-loop the name \emph{f1} is printed
+out and fiber \cpp{f2} is resumed. Inside the for-loop \cpp{f2} prints its name
+and resumes \cpp{f3}. Fiber \cpp{f3} resumes fiber \cpp{f1} at line 7. Inside
+\cpp{f1} control returns from \cpp{f2.resume()} loops, prints out the name and
+invokes \cpp{f2.resume()}. But this time fiber \cpp{f3} instead of \cpp{f2} is
+resumed. This is caused by the fact the instance \cpp{f2} gets the synthesized
+fiber of \cpp{f3} implicitly assigned. Remember that at line 7 fiber \cpp{f3}
+gets suspended while \cpp{f1} is resumed through \cpp{f1.resume()}.
+\cppf{return_from_resume_invalid}
+
+This problem can be solved by returning the synthesized fiber from  \resume or
+\resumewith. In the example above the synthesized fiber returned by \resume is
+assigned to the correct fiber instance (that has resumed the current fiber).\\
+
+If the overall control flow isn't know, member function \resumewith (see section
+\nameref{resumewith}) can be used to assign the synthesized to the correct fiber
+instance.
+\cppf{assign_resumewith}
+
+Member function \cpp{resume_next()} resumes the next \cpp{filament} passed as
+parameter. The active fiber invokes \resumewith on the fiber aggregated by
+\cpp{fila}. The lambda captures \cpp{this}, the current fiber is suspended, a
+new \fiber is synthesized and passed as parameter \cpp{f} to the function
+injected to the resumed fiber of \cpp{fila}.\\
+Inside the lambda \cpp{f} is moved into the instance \cpp{f_} aggregated by the
+\cpp{filament} that was suspended.
+\footnote{\bfiber\cite{bfiber} uses this pattern for resuming user-land threads
+to assign the synthesized fiber and unlock a lock if one was provided or
+re-schedule the suspended user-land thread.}
+
+\zs{The synthesized fiber must be returned from \resume or \resumewith in order
+to prevent changing the identity of the fiber.}
