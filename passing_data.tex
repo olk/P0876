@@ -4,19 +4,19 @@ Data can be transferred between two fibers via global pointer, calling
 wrappers (like \cpp{std::bind}) or lambda captures.
 \cppfl{passing_lambda}
 
-The \resume call at line 9 enters the lambda and passes 1 into the
-new fiber. The value is incremented by one, as shown at line 5. The expression
-\cpp{caller.resume()} at line 6 resumes the original context (represented
+The \resume call at line 8 enters the lambda and passes 1 into the
+new fiber. The value is incremented by one, as shown at line 4. The expression
+\cpp{caller.resume()} at line 5 resumes the original context (represented
 within the lambda by \cpp{caller}).\\
-The call to \cpp{lambda.resume()} at line 11 resumes the lambda, returning from
-the \cpp{caller.resume()} call at line 6. The \fiber instance \cpp{caller}
-invalidated by the \resume call at (6) is replaced with the new instance
+The call to \cpp{lambda.resume()} at line 10 resumes the lambda, returning from
+the \cpp{caller.resume()} call at line 5. The \fiber instance \cpp{caller}
+invalidated by the \resume call at (5) is replaced with the new instance
 returned by that same \resume call.\\
-Finally the lambda returns (the updated) \cpp{caller} at line 7, terminating its
+Finally the lambda returns (the updated) \cpp{caller} at line 6, terminating its
 context.\\
 
 Since the updated \cpp{caller} represents the fiber suspended by the call at
-line 11, control returns to \main.\\
+line 10, control returns to \main.\\
 
 However, since context \cpp{lambda} has now terminated, the updated \cpp{lambda}
 is invalid. Its \opbool returns \cpp{false}; its \cpp{operator\!()} returns
