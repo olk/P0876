@@ -41,13 +41,13 @@ constructs new fiber\\
     \item[2)] takes a callable (function, lambda, object with \op) as
               argument. The callable must have signature as described
               in \nameref{solution_gpub}. The stack is constructed using
-              either \cpp{fixedsize} or \cpp{segmented} (see \nameref{subsec:stackalloc}).
+              either \cpp{fixedsize} or \cpp{segmented} (see \nameref{stackalloc}).
               An implementation may infer which of these best suits the code
               in \cpp{fn}. If it cannot infer, \cpp{fixedsize} will be used.
     \item[3)] takes a callable as argument, requirements as for (2). The stack
               is constructed using \emph{salloc}
-              (see \nameref{subsec:stackalloc}).\footnote{This constructor,
-              along with the \nameref{subsec:stackalloc} section, is an
+              (see \nameref{stackalloc}).\footnote{This constructor,
+              along with the \nameref{stackalloc} section, is an
               optional part of the proposal. It might be that implementations
               can reliably infer the optimal stack representation.}
     \item[4)] moves underlying state to new \fiber
@@ -62,7 +62,7 @@ constructs new fiber\\
           synthesized \fiber instance representing the suspended caller of \resumewith.
 \end{description}
 
-\subparagraph*{(destructor)}\label{subpara:destructor}
+\subparagraph*{(destructor)}\label{destructor}
 destroys a fiber\\
 
 \begin{tabular}{ l l }
@@ -352,7 +352,7 @@ be called from any function on that fiber.
 
 \bfs{Return value}
 \begin{description}
-    \item[1)] None: \unwindcont does not return
+    \item[1)] None: \unwindfib does not return
 \end{description}
 
 \bfs{Exceptions}
@@ -364,12 +364,11 @@ be called from any function on that fiber.
 \uabschnitt{std::unwind\_exception}
 
 is the exception used to unwind the stack referenced by a \fiber being destroyed.
-t is thrown by \unwindcont. \unwindex binds a \fiber referencing the fiber to
+t is thrown by \unwindfib. \unwindex binds a \fiber referencing the fiber to
 which control should be passed once the current fiber is unwound and destroyed.
 
 
-\uabschnitt{Stack allocators}
-\label{subsec:stackalloc}
+\uabschnitt{Stack allocators}\label{stackalloc}
 
 are the means by which stacks with non-default properties may be requested by
 the caller of \fiber constructor. The stack allocator concept is
