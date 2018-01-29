@@ -75,6 +75,7 @@ line 5 while the fiber \cpp{f} is destructed.\\
 In a more advanced example another fiber is used as return value instead of the
 synthesized fiber that is passed in.
 \cppfl{terminating_fiber_complex}
+
 At line 13 fiber \cpp{f2} is resumed and the lambda is entered at line 8. The
 synthesized fiber \cpp{f} (representing suspended \main) is passed as a
 parameter \cpp{f} and stored in \cpp{m} (captured by the lambda) at line 10.
