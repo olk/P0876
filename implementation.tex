@@ -8,13 +8,13 @@ Modern \bfs{micro-processors} are \bfs{register machines}; the content of
 processor registers represent the execution context of the program at a given
 point in time.\\
 \bfs{Operating systems} maintain for each process all relevant data (execution
-context, other hardware registers etc.) in the process table.\\
-Operating system's \bfs{CPU scheduler} periodically suspends and resumes
-processes in order to share CPU time between multiple processes. When a process
-is suspended, its execution context (processor registers, instruction pointer,
-stack pointer, ...) is stored in the associated process table entry. On
-resumption, the CPU scheduler loads the execution context into the CPU and the
-process continues to be executed.\\
+context, other hardware registers etc.) in the process table. Operating system's
+\bfs{CPU scheduler} periodically suspends and resumes processes in order to
+share CPU time between multiple processes. When a process is suspended, its
+execution context (processor registers, instruction pointer, stack pointer, ...)
+is stored in the associated process table entry. On resumption, the CPU
+scheduler loads the execution context into the CPU and the process continues to
+be executed.\\
 The CPU scheduler does a \bfs{full context switch}, beside of preserving
 the execution context (complete CPU state), the cache has to be invalidated and
 the memory map modified.\\
@@ -76,16 +76,16 @@ is required.\\
 Instead of allocating extra memory for each fiber, a implementation could use
 the stack by simply advancing the stack pointer at suspension and pushing the
 CPU registers (CPU state) onto the stack (owned by the suspending fiber). When
-the fiber is resumed, the fiber pops the values from its stack and loads them
-into the appropriate registers.\\
+the fiber is resumed, the values are poped from the stack and loaded into the
+appropriate registers.\\
 
 This strategy works because only a resumed fiber creates new stack frames
 (advancing the stack pointer). If a fiber is suspended it is save to keep the
 CPU state on its stack.\\
 
-Using the stack as storage for the CPU state has the advantage that \fiber needs
-only to aggregate a pointer to the stack location (memory footprint is equal to
-a pointer).\\
+Using the stack as storage for the CPU state has the additional advantage that
+\fiber needs only to aggregate a pointer to the stack location (memory footprint
+is equal to a pointer).\\
 Section \nameref{synthesizing} describes how global variables are prevented
 by synthesizing a fiber from the active fiber (execution context) and passing
 this synthesized fiber (representing the now suspended fiber) into the resumed
@@ -94,8 +94,7 @@ fiber. Using the stack as storage makes this mechanism very easy to implement
 technique.}.
 Inside \resume the code pushes the relevant CPU registers onto the stack and
 creates from the resulting stack address a new \fiber. This instance is then
-passed into the resume fiber as parameter if the resumed fiber is started for the
-first time or returned by \resume/\resumewith otherwise (see example in
+passed into the resume fiber as synthesized fiber (see
 \nameref{synthesizing}).\\
 
 \zs{Using fiber's stack as storage for the CPU state is efficient because no

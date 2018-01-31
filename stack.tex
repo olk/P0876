@@ -1,7 +1,7 @@
 \abschnitt{stack destruction}\label{destruction}
 
-On construction of a fiber a stack is allocated. If the \entryfn returns, the
-stack will be destroyed. If the function has not yet returned and the
+On construction of a fiber a stack is allocated. If the \entryfn\xspace returns,
+the stack will be destroyed. If the function has not yet returned and the
 \nameref{destructor} of the \fiber instance representing that context is called,
 the stack will be unwound and destroyed.\\
 

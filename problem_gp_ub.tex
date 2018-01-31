@@ -20,7 +20,7 @@ frameworks should prevent introducing global variables. If this API would be
 specified in terms of internal global variables, no higher level layer can undo
 that: it would be stuck with the global variables.}
 
-\uabschnitt{switch back to \emph{main()} by return}
+\uabschnitt{switch back to \emph{main()} by returning}
 Switching back to \main by returning from the fiber function has two drawbacks:
 it requires a internal global variable pointing to the suspended \main and
 restricts the set of usages.
@@ -31,23 +31,23 @@ this means that no way exists to transfer data (sequence of values) back and
 forth between a fiber an \main.\\
 
 \zs{Switching to \main only by returning is impractical because it limits the
-applicability of fibers and requires internal global variable pointing to
+applicability of fibers and requires a internal global variable pointing to
 \main.}
 
 \uabschnitt{static member function returns active fiber}
 P0099R0\cite{P0099R0} has introduced a static member function\\
 (\cpp{execution_context::current()}) that returned an instance of the active
-fiber. This allows to pass the fiber \cpp{m} (represents \main) into the fiber
-\cpp{l} via lambda capture. This mechanism enables to switch back and forth
-between fiber and \main enabling a rich set of applications (for instance
-generators).
+fiber. This allows to pass the active fiber \cpp{m} (for instance representing
+\main) into the fiber \cpp{l} via lambda capture. This mechanism enables to
+switch back and forth between the fiber and \main enabling a rich set of
+applications (for instance generators).
 \cppf{static_current}
 
 But this solution requires a internal global variable pointing to the active
 fiber and some kind of reference counting. Reference counting is needed because
-\cpp{fiber::current()} allows to construct multiple instance of the active
-fiber. If one instance goes out of scope the other instances must be still
-valid. But the last reference must destruct the fiber and deallocate the stack.
+\cpp{fiber::current()} allows to construct multiple instance of \fiber for the
+active fiber. Only if the last reference goes out of scope the fiber is
+destructed and the stack deallocated.
 \cppf{multi_current}
 
 Additionally a static member function returning a instance of the active fiber
@@ -57,5 +57,5 @@ resumed by invoking \resume.
 \cppf{resume_current}
 
 \zs{A static member function returning the active fiber requires a reference
-counted global variable and does not prevent for accidentally resuming the
-active fiber.}
+counted global variable and does not prevent accidentally resuming the active
+fiber.}

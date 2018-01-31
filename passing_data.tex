@@ -1,7 +1,7 @@
 \abschnitt{passing data between fibers}
 
 Data can be transferred between two fibers via global pointer, calling
-wrappers (like \cpp{std::bind}) or lambda captures.
+wrapper (like \cpp{std::bind}) or lambda capture.
 \cppfl{passing_lambda}
 
 The \resume call at line 8 enters the lambda and passes 1 into the
@@ -23,5 +23,5 @@ is invalid. Its \opbool returns \cpp{false}; its \cpp{operator\!()} returns
 \cpp{true}.\\
 
 \zs{Using lambda capture is the preferred way to transfer data between two
-fibers; global pointer and calling wrappers (like \cpp{std::bind}) are
+fibers; global pointer and calling wrapper (like \cpp{std::bind}) are
 alternatives.}

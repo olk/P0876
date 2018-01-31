@@ -7,19 +7,16 @@ following four frameworks are based on the low-level fiber switching API of
 
 \uabschnitt{\bcoroutine}\cite{bcoroutine2} implements \bfs{asymmetric coroutines}
 \cpp{coroutine<>::push_type} and \cpp{coroutine<>::pull_type} providing a
-unidirectional transfer of data. Both stackful coroutines are always used as
-pair, that means that\\
+unidirectional transfer of data. Both stackful coroutines are only used in
+pairs, that means that\\
 \cpp{coroutine<>::pull_type} is synthesized and passed as parameter into the
 coroutine if \cpp{coroutine<>::push_type} was explicitly instantiated. In the
 example below \cpp{coroutine<>::push_type} (variable \cpp{writer}) provides the
 resume operation, while \cpp{coroutine<>::pull_type} (variable \cpp{in})
 represents the suspend operation. Coroutine\\
-\cpp{coroutine<>::pull_type} pushes strings into the lambda (accessed via
+\cpp{coroutine<>::pull_type} pulls strings inside the lambda (accessed via
 \cpp{in.get()}).
 \cppf{bcoroutine_ex}
-
-Note that the library operates seamlessly with STL-algorithms and makes no use
-of global pointers!
 
 \uabschnitt{\synca}\cite{synca} (by Grigory Demchenko) is a small but efficient
 library to perform asynchronous operations in synchronous manner. The main

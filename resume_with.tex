@@ -1,16 +1,17 @@
 \abschnitt{inject function into suspended fiber}\label{resumewith}
 Sometimes it is useful to inject a new function (for instance, to throw an
-exception or assigning the synthesized fiber as in \nameref{fiberreturn}) into a
-suspended fiber. For this purpose \cpp{resume\_with(Fn && fn)} may be called,
-passing the function \cpp{fn()} to execute.\\
+exception or assigning the synthesized fiber to the caller as described in
+\nameref{fiberreturn}) into a suspended fiber. For this purpose
+\cpp{resume\_with(Fn&& fn)} may be called, passing the function \cpp{fn()} to
+execute.\\
 If the fiber represented by the \fiber instance \cpp{f} has called a function
 \cpp{suspender()}, which has called \resume and is now suspended, function
 \cpp{fn()} is injected into fiber \cpp{f} as if \cpp{suspender()}'s \resume call
 had directly called \cpp{fn()}.\\
 
-Like an \entryfn passed to \fiber, \cpp{fn()} must accept \cpp{std::fiber&&} and
-return \fiber. The \fiber instance returned by \cpp{fn()} will, in turn, be
-returned to \cpp{suspender()} by \resume.\\
+Like an \entryfn\xspace passed to \fiber, \cpp{fn()} must accept
+\cpp{std::fiber&&} and return \fiber. The \fiber instance returned by \cpp{fn()}
+will, in turn, be returned to \cpp{suspender()} by \resume.\\
 
 Suppose that code running on the program's main fiber calls \resume, thereby
 entering the first lambda shown below. This is the point at which \cpp{m} is
