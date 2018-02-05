@@ -1,5 +1,5 @@
 int a;
-ctx::fiber g{[&a](ctx::fiber&& m){
+std::fiber g{[&a](std::fiber&& m){
     a=0;
     int b=1;
     for(;;){

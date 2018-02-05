@@ -1,36 +1,51 @@
 \abschnitt{termination}
 
 There are a few different ways to terminate a given fiber without
-terminating the whole process, or engaging undefined behavior.
+terminating the whole process, or engaging undefined behavior.\\
+
+When a \fiber instance is constructed with an \entryfn, its new stack is
+initialized with the frame of an implicit top-level function that can
+catch \unwindex. \unwindex binds a \fiber instance; the implicit \cpp{catch}
+clause returns the bound \fiber from that top-level function.\\
+
+Therefore, any of the following will gracefully terminate a fiber:
 
 \begin{itemize}
-    \item Return a valid fiber from the \entryfn.
-    \item Call \unwindfib with a valid fiber. This throws a \unwindex
-          instance that binds that fiber.
-    \item Then another supported way would be to construct and throw \unwindex
-          ``by hand,'' which is what \unwindfib does internally.
-    \item Call \cpp{fiber::resume\_with(unwind\_fiber)}.
-          This is what \dtor does. Since \unwindfib accepts a \fiber, and
-          since \resumewith synthesizes a \fiber and passes it to the subject
-          function, this terminates the fiber referenced by the original
-          \fiber instance and switches back to the caller.
+    \item Cause its \entryfn to return a valid fiber.
+    \item From within the fiber you wish to terminate, call \unwindfib with a
+          valid fiber. This throws a \unwindex instance that binds the passed
+          fiber; that fiber will be resumed when the active fiber terminates.
+    \item From within the fiber you wish to terminate, construct and
+          throw \unwindex, binding the fiber you intend to resume next. This
+          is what \unwindfib does internally.
+    \item Call \cpp{fiber::resume\_with(unwind\_fiber)}. This is what \dtor
+          does. Since \unwindfib accepts a \fiber, and since \resumewith
+          synthesizes a \fiber representing its caller and passes it to the
+          subject function, this terminates the fiber referenced by the
+          original \fiber instance and switches back to the caller.
     \item Engage \dtor: switch to some other fiber, which will
           receive a \fiber instance representing the current fiber. Make that
           other fiber destroy the received \fiber instance.
 \end{itemize}
 
-When the \entryfn\xspace invoked by \resume returns a valid \fiber instance, the
-running fiber is terminated. Control switches to the fiber indicated by the
-returned \fiber instance.\\
+(However, since the operating system allocates the stack for \main and for a
+thread's \entryfn, of course there is no implicit top-level stack frame, no
+implicit \cpp{catch (std::unwind\_exception)}. In a conforming implementation,
+returning from a thread's \entryfn\xspace may terminate all fibers on that
+thread. Returning from \main may terminate the whole process.)
+
+When an explicitly-launched fiber's \entryfn\xspace returns a valid \fiber
+instance, that fiber is terminated. Control switches to the fiber indicated by
+the returned \fiber instance.\\
 
 Returning an invalid \fiber instance (\opbool returns \cpp{false}) invokes
 undefined behavior.\\
 
-If the \entryfn\xspace returns the same \fiber instance it was originally passed
-(or rather, the most recently updated \fiber returned from the previous
-instance's \resume), control returns to the fiber that most recently resumed the
-running fiber. However, the \entryfn\xspace may return (switch to) any reachable
-valid \fiber instance.\\
+If the \entryfn\xspace returns the same \fiber instance it was originally
+passed (or rather, the \fiber instance most recently returned by \resume
+or \resumewith), control returns to the fiber that most recently resumed the
+running fiber. However, the \entryfn\xspace may return (switch to) any
+reachable valid \fiber instance.\\
 
 \emph{Calling} \resume means: ``Please switch to the indicated fiber; I
 am suspending; please resume me later.''\\

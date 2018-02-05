@@ -1,7 +1,8 @@
 \abschnitt{control transfer mechanism}
 
-According to literature\cite{Moura2009} the control-transfer operations can be
-distinguished into the concepts of \sym and \asym operations.
+According to the literature\cite{Moura2009}, coroutine-like control-transfer
+operations can be distinguished into the concepts of \sym and \asym
+operations.
 
 \uabschnitt{symmetric fiber} A symmetric fiber provides a single
 control-transfer operation. This single operation requires that the control is
@@ -11,16 +12,16 @@ passed explicitly between the fibers.\\
 \cppfl{symmetric_op}
 
 In the pseudo-code example above, a chain of fibers is created.\\
-The execution control is transferred to fiber \cpp{f1} at line 15 and the lambda
-passed to constructor of \cpp{f1} is entered. The control is transferred from
+Control is transferred to fiber \cpp{f1} at line 15 and the lambda
+passed to constructor of \cpp{f1} is entered. Control is transferred from
 fiber \cpp{f1} to \cpp{f2} at line 12 and from \cpp{f2} to \cpp{f3} (line 9) and
-so on. Fiber \cpp{f4} itself transfers the execution control directly back to
+so on. Fiber \cpp{f4} itself transfers control directly back to
 fiber \cpp{f1} at line 3.
 
 \uabschnitt{asymmetric fiber} Two control-transfer operations are part of
-asymmetric fiber's interface. One operation for resuming (\resume) and one for
-suspending (\cpp{suspend()}) the fiber. The suspending operation returns the
-control back to the fiber caller.\\
+asymmetric fiber's interface: one operation for resuming (\resume) and one for
+suspending (\cpp{suspend()}) the fiber. The suspending operation returns
+control back to the calling fiber.\\
 \graphc{asymm}
 
 \cppfl{asymmetric_op}
@@ -33,8 +34,8 @@ suspended while \cpp{f2} will be resumed and so on ...\\
 The asymmetric version needs \bfs{N-1 more} fiber switches than the variant
 using symmetric fibers.\\
 
-\zs{While asymmetric fibers establish a caller-callee relationship (strong
-coupled), symmetric fibers operate at the same level (loose coupled).}\\
+\zs{While asymmetric fibers establish a caller-callee relationship (strongly
+coupled), symmetric fibers operate as siblings (loosely coupled).}\\
 \newline
 
 Symmetric fibers represent independent units of execution, making symmetric
@@ -44,12 +45,12 @@ constructed out of two symmetric fibers (one represents the caller, the other
 the callee).\\
 
 Asymmetric fibers incorporate additional fiber switches as shown in the pseudo
-code above. It is obvious that asymmetric fibers are less efficient than their
-symmetric counterparts in order to achieve the same functionality.\\
+code above. It is obvious that for a broad range of use cases, asymmetric
+fibers are less efficient than their symmetric counterparts.\\
 Additionally, the calling fiber must be kept alive until the called fiber
 terminates. Otherwise the call of \cpp{suspend()} will be undefined behaviour
 (where to transfer execution control to?).\\
 
-\zs{A symmetric fibers are more efficient, have less restrictions (no
+\zs{Symmetric fibers are more efficient, have fewer restrictions (no
 caller-callee relationship) and can be used to create a wider set of
 applications (generators, cooperative multitasking, backtracking ...).}

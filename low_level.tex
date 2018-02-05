@@ -1,26 +1,25 @@
 \abschnitt{fiber as building block for higher-level frameworks}
 
 A low-level API enables a rich set of higher-level frameworks that provide
-specific syntaxes/semantics suitable for a specific domains. As an example, the
+specific syntaxes/semantics suitable for specific domains. As an example, the
 following four frameworks are based on the low-level fiber switching API of
 \bcontext\cite{bcontext} (implements the API of this proposal).
 
 \uabschnitt{\bcoroutine}\cite{bcoroutine2} implements \bfs{asymmetric coroutines}
-\cpp{coroutine<>::push_type} and \cpp{coroutine<>::pull_type} providing a
-unidirectional transfer of data. Both stackful coroutines are only used in
-pairs, that means that\\
-\cpp{coroutine<>::pull_type} is synthesized and passed as parameter into the
-coroutine if \cpp{coroutine<>::push_type} was explicitly instantiated. In the
-example below \cpp{coroutine<>::push_type} (variable \cpp{writer}) provides the
+\cpp{coroutine<>::push_type} and \cpp{coroutine<>::pull_type}, providing a
+unidirectional transfer of data. These stackful coroutines are only used in
+pairs. When \cpp{coroutine<>::push_type} is explicitly
+instantiated, \cpp{coroutine<>::pull_type} is synthesized and passed as
+parameter into the coroutine function. In the
+example below, \cpp{coroutine<>::push_type} (variable \cpp{writer}) provides the
 resume operation, while \cpp{coroutine<>::pull_type} (variable \cpp{in})
-represents the suspend operation. Coroutine\\
-\cpp{coroutine<>::pull_type} pulls strings inside the lambda (accessed via
-\cpp{in.get()}).
+represents the suspend operation. Inside the lambda,\cpp{in.get()}
+pulls strings provided by \cpp{coroutine<>::push_type}'s output iterator support.
 \cppf{bcoroutine_ex}
 
-\uabschnitt{\synca}\cite{synca} (by Grigory Demchenko) is a small but efficient
+\uabschnitt{\synca}\cite{synca} (by Grigory Demchenko) is a small, efficient
 library to perform asynchronous operations in synchronous manner. The main
-features are a \bfs{GO-like} syntax, possibility to transfer execution context
+features are a \bfs{GO-like} syntax, support for transferring execution context
 explicitly between different thread pools or schedulers (portals/teleports) and
 asynchronous network support.
 \cppf{synca_ex}
@@ -37,7 +36,7 @@ is modelled after the \cpp{std::thread}-API and contains objects like
 
 \uabschnitt{Facebook's \fbfibers}\cite{fbfiber} is an asynchronous C++ framework
 using \bfs{user-land threads} for parallelism. In contrast to \bfiber,
-\fbfibers\xspace exposes the scheduler and permits integration of various
+\fbfibers\xspace exposes the scheduler and permits integration with various
 event dispatching libraries.
 \cppf{fbfiber_ex}
 
@@ -48,4 +47,4 @@ ORM API for graph databases) ...\\
 
 \zs{As shown in this section a low-level API can act as building block for a
 rich set of high-level frameworks designed for specific application domains
-that require different aspects of design, semantic and syntax.}
+that require different aspects of design, semantics and syntax.}

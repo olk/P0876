@@ -1,20 +1,30 @@
 \abschnitt{encapsulating the stack}\label{stackmgmt}
 
-Each fiber is associated with a stack and is responsible to manage the lifespan
-of its stack (allocation at construction, deallocated if fiber terminates). The
-RAII-pattern \footnote{resource acquisition is initialisation} should apply.\\
+Each fiber is associated with a stack and is responsible for managing the lifespan
+of its stack (allocation at construction, deallocation when fiber terminates). The
+RAII-pattern\footnote{resource acquisition is initialisation} should apply.\\
 
 Copying a fiber must not be permitted!\\
 If a fiber were copyable, then its stack with all the objects allocated on it
-would be copied too. That would force undefined behaviour if some of these
-objects were RAII-classes (manage a resource via RAII pattern). When the first
-of the fiber copies terminates (unwinds its stack), the RAII class destructors
-will release their managed resources. When the second copy terminates, the same
-destructors will try to doubly-release the same resources, leading to undefined
-behavior.\\
+must be copied too. That presents two implementation choices.
+\begin{itemize}
+    \item One approach would be to capture sufficient metadata to permit
+          object-by-object copying of stack contents. That would require
+          dramatically more runtime information than is presently available --
+          and would take considerably more overhead than a coder might expect.
+          Naturally, any one move-only object on the stack would prohibit
+          copying the entire stack.
+    \item The other approach would be a bytewise copy of the memory occupied
+          by the stack. That would force undefined behaviour if any stack
+          objects were RAII-classes (managing a resource via RAII pattern). When the first
+          of the fiber copies terminates (unwinds its stack), the RAII class destructors
+          will release their managed resources. When the second copy terminates, the same
+          destructors will try to doubly-release the same resources, leading to undefined
+          behavior.
+\end{itemize}
 
 \zs{
-A fiber API has to:
+A fiber API must:
 \begin{itemize}
     \item encapsulate the stack (hiding for user)
     \item manage lifespan of an explicitly-allocated stack: the stack gets
