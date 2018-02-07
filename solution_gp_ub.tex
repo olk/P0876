@@ -95,7 +95,7 @@ signature `\cpp{fiber(fiber&&)}`. Using \fiber as the return value from such a
 function avoids global variables.}
 
 \uabschnitt{returning synthesized fiber instance from \cpp{resume()}}\label{fiberreturn}
-A instance of \fiber remains invalid after return from \resume or \resumewith --
+An instance of \fiber remains invalid after return from \resume or \resumewith --
 the synthesized fiber is returned, instead of implicitly updating the \fiber
 instance on which \resume was called.\\
 If the \fiber object were implicitly udpated, the fiber would 
