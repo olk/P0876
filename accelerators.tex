@@ -6,8 +6,8 @@ attached or integrated accelerator. The CPU executes the main program while
 controlling the activity of the accelerator. Accelerator devices typically
 provide capabilities for efficient vector processing\footnote{warp on CUDA
 devices, wavefront on AMD GPUs, 512-bit SIMD on Intel Xeon Phi}. Usually the
-host-directed execution uses \bfs{computation offloading} that permits to
-execute computationally intensive work to an offloading device
+host-directed execution uses \bfs{computation offloading} that permits
+executing computationally intensive work on a separate device
 (accelerator)\cite{OpenAcc}.\\
 For instance CUDA devices use a \bfs{command buffer} to establish communication
 between host and device. The host puts commands (op-codes) into the command

@@ -6,15 +6,15 @@ the stack will be destroyed. If the function has not yet returned and the
 the stack will be unwound and destroyed.\\
 
 For this purpose member-function \resumewith is called with \unwindfib as
-argument. The execution context will be temporarily resumed and \unwindfib is
-invoked. Function \unwindfib throws exception \unwindex.
-\footnote{\unwindex binds an instance of \fiber that represents the fiber that
-called \resumewith.}
-The exception is caught by the first frame on the stack: the one created by
-constructor. Control is switched back to the fiber that called \dtor and the
-stack gets deallocated.\\
+argument. The fiber will be temporarily resumed and \unwindfib is
+invoked. Function \unwindfib throws exception \unwindex,
+binding an instance of \fiber that represents the fiber that
+called \resumewith.
+The exception is caught by the first frame on the stack: the one created
+by \fiber's constructor. Control switches back to the fiber that
+called \dtor and the stack gets deallocated.\\
 
-The StackAllocator's deallocate operation is called on the fiber that invoked
+The StackAllocator's deallocate operation runs on the fiber that invoked
 \dtor.\\
 
 The stack on which \cpp{main()} is executed, as well as the stack implicitly
@@ -63,7 +63,6 @@ Possible types of stack allocators:
 \end{itemize}
 
 It is expected that the StackAllocator's allocation operation will run in the
-context of the constructor (before control is passed to the new context), and
-that the StackAllocator's deallocation operation will run in the context of
-the \dtor call (after control returns from the destroyed
-context). No special constraints need apply to either operation.
+context of the \fiber constructor, and that the StackAllocator's deallocation
+operation will run on the fiber calling \dtor (after control returns from the
+destroyed fiber). No special constraints need apply to either operation.

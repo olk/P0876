@@ -1,7 +1,7 @@
-\abschnitt{fiber switch at architectures with register window}
+\abschnitt{fiber switch on architectures with register window}
 
 The implementation of fiber switch is possible -- many libc implementations
 still provide the ucontext-API (\cpp{swapcontext()} and related
 functions)\footnote{ucontext was removed from POSIX standard by POSIX.1-2008}
-for architectures using register window (like SPARC). The implementation of
-\cpp{swapcontext()} could be used as blue-print for the fiber-API.
+for architectures using a register window (such as SPARC). The implementation of
+\cpp{swapcontext()} could be used as blueprint for a fiber implementation.

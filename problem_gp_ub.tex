@@ -2,60 +2,60 @@
 undefined behaviour}\label{problem_gpub}
 
 According to \emph{C++ core guidelines}\cite{coreguidlines}, non-const global
-variables should be avoided because of hiding dependencies and making the
+variables should be avoided: they hide dependencies and make the
 dependencies subject to unpredictable changes.\\
 Global variables can be changed by assigning them indirectly using a pointer or
 by a function call. As a consequence, the compiler can't cache the value of a
 global variable in a register, degrading performance (unnecessary
 loads and stores to global memory especially in performance critical loops).\\
 Accessing a register is one to three orders of magnitude faster than accessing
-memory (dependence to whether the cache line is in cache and not invalidated by
+memory (depending on whether the cache line is in cache and not invalidated by
 another core; and depending on whether the page is in the TLB).\\
 The order of initialisation (and thus destruction) of static global
-variables is not defined introducing additional problems for depended static
+variables is not defined, introducing additional problems with static
 global variables.\\
 
 \zs{A library designed to be used as building block by other higher-level
-frameworks should prevent introducing global variables. If this API would be
-specified in terms of internal global variables, no higher level layer can undo
+frameworks should avoid introducing global variables. If this API were
+specified in terms of internal global variables, no higher level layer could undo
 that: it would be stuck with the global variables.}
 
 \uabschnitt{switch back to \emph{main()} by returning}
 Switching back to \main by returning from the fiber function has two drawbacks:
-it requires a internal global variable pointing to the suspended \main and
-restricts the set of usages.
+it requires an internal global variable pointing to the suspended \main and
+restricts the valid use cases.
 \cppf{return_to_main}
 For instance the generator pattern is impossible because the only way
 for a fiber to transfer execution control back to \main is to terminate. But
 this means that no way exists to transfer data (sequence of values) back and
-forth between a fiber an \main.\\
+forth between a fiber and \main.\\
 
 \zs{Switching to \main only by returning is impractical because it limits the
-applicability of fibers and requires a internal global variable pointing to
+applicability of fibers and requires an internal global variable pointing to
 \main.}
 
 \uabschnitt{static member function returns active fiber}
-P0099R0\cite{P0099R0} has introduced a static member function\\
+P0099R0\cite{P0099R0} introduced a static member function\\
 (\cpp{execution_context::current()}) that returned an instance of the active
-fiber. This allows to pass the active fiber \cpp{m} (for instance representing
-\main) into the fiber \cpp{l} via lambda capture. This mechanism enables to
-switch back and forth between the fiber and \main enabling a rich set of
+fiber. This allows passing the active fiber \cpp{m} (for instance representing
+\main) into the fiber \cpp{l} via lambda capture. This mechanism enables
+switching back and forth between the fiber and \main, enabling a rich set of
 applications (for instance generators).
 \cppf{static_current}
 
-But this solution requires a internal global variable pointing to the active
+But this solution requires an internal global variable pointing to the active
 fiber and some kind of reference counting. Reference counting is needed because
-\cpp{fiber::current()} allows to construct multiple instance of \fiber for the
-active fiber. Only if the last reference goes out of scope the fiber is
-destructed and the stack deallocated.
+\cpp{fiber::current()} necessarily requires multiple instances of \fiber for the
+active fiber. Only when the last reference goes out of scope can the fiber be
+destroyed and its stack deallocated.
 \cppf{multi_current}
 
-Additionally a static member function returning a instance of the active fiber
+Additionally a static member function returning an instance of the active fiber
 would violate the protection requirements of sections \nameref{stackmgmt} and
-\nameref{invalidation}. For instance the active fiber could accidentally be
-resumed by invoking \resume.
+\nameref{invalidation}. For instance you could accidentally attempt to resume
+the active fiber by invoking \resume.
 \cppf{resume_current}
 
 \zs{A static member function returning the active fiber requires a reference
-counted global variable and does not prevent accidentally resuming the active
-fiber.}
+counted global variable and does not prevent accidentally attempting to resume
+the active fiber.}

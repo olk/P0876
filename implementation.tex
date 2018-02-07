@@ -1,45 +1,45 @@
 \abschnitt{possible implementation strategies}\label{implementations}
 
-\zs{This proposal does \so{NOT} want to standardize a special implementation or
-calling convention!}
+\zs{This proposal does \so{NOT} seek to standardize any particular implementation or
+impose any specific calling convention!}
 \xspace\\
 
 Modern \bfs{micro-processors} are \bfs{register machines}; the content of
 processor registers represent the execution context of the program at a given
 point in time.\\
 \bfs{Operating systems} maintain for each process all relevant data (execution
-context, other hardware registers etc.) in the process table. Operating system's
+context, other hardware registers etc.) in the process table. The operating system's
 \bfs{CPU scheduler} periodically suspends and resumes processes in order to
 share CPU time between multiple processes. When a process is suspended, its
 execution context (processor registers, instruction pointer, stack pointer, ...)
 is stored in the associated process table entry. On resumption, the CPU
-scheduler loads the execution context into the CPU and the process continues to
-be executed.\\
-The CPU scheduler does a \bfs{full context switch}, beside of preserving
-the execution context (complete CPU state), the cache has to be invalidated and
+scheduler loads the execution context into the CPU and the process continues
+execution.\\
+The CPU scheduler does a \bfs{full context switch}. Besides preserving
+the execution context (complete CPU state), the cache must be invalidated and
 the memory map modified.\\
 A kernel-level context switch is several orders of magnitude slower than a
 context switch at user-level\cite{Tanenbaum2009}.
 
-\uabschnitt{fiber preserves the complete CPU state} This strategy tries to
-preserve the complete CPU state, e.g. all CPU registers. This requires, that the
-code identifies the concrete micro-processor type and supported processor
+\uabschnitt{hypothetical fiber preserving complete CPU state} This strategy tries to
+preserve the complete CPU state, e.g. all CPU registers. This requires that the
+implementation identifies the concrete micro-processor type and supported processor
 features. For instance the x86-architecture has several flavours of extensions
-like MMX, SSE1-4, AVX1-2, AVX-512.\\
+such as MMX, SSE1-4, AVX1-2, AVX-512.\\
 Depending on the detected processor features, implementations of certain
-functionality are switched on or off. The CPU scheduler in the operating system
-uses those informations for the context switch  between processes.\\
-A fiber implementation using this strategy needs such a detection mechanism
+functionality must be switched on or off. The CPU scheduler in the operating system
+uses such information for context switching between processes.\\
+A fiber implementation using this strategy requires such a detection mechanism
 too (equivalent to swapper/\cpp{system_32()} in the Linux kernel).\\
-Beside of the complexity of such detection mechanisms, preserving the complete
+Aside from the complexity of such detection mechanisms, preserving the complete
 CPU state for each fiber switch is expensive.
 
-\zs{A context switch facility that preserves the complete CPU state like a
-operating system is possible but impractical for the user-land.}
+\zs{A context switch facility that preserves the complete CPU state like an
+operating system is possible but impractical for user-land.}
 
 \uabschnitt{fiber switch using the calling convention}\label{callingconvention}
-For \fiber, not all registers are required to be preserved because the fiber
-switch is effected by a visible function call. It need not be undetectable like
+For \fiber, not all registers need be preserved because the context
+switch is effected by a visible function call. It need not be completely transparent like
 an operating-system context switch; it only needs to be as transparent as a call
 to any other function. The calling convention -- the part of the ABI that
 specifies how a function's arguments and return values are passed -- determines
@@ -51,51 +51,51 @@ architecture determines that general purpose registers R12, R13, R14, R15, RBX
 and RBP must be preserved by the sub-routine - the first arguments are passed
 to functions via RDI, RSI, RDX, RCX, R8 and R9 and return values are stored in
 RAX, RDX.\\
-In fact, for \resume the \bfs{general purpose registers} (R12-R15, RBX and RBP)
-specified by the calling convention are preserved. In addition, the \bfs{stack
-pointer} and \bfs{instruction pointer} are preserved and exchanged too -- thus,
-from the point of view of calling code, \resume behaves like an ordinary
-function call.\\
+So on that platform, the \resume implementation preserves the \bfs{general
+purpose registers} (R12-R15, RBX and RBP) specified by the calling convention.
+In addition, the \bfs{stack pointer} and \bfs{instruction pointer} are
+preserved and exchanged too -- thus, from the point of view of calling
+code, \resume behaves like an ordinary function call.\\
 In other words, \resume acts on the level of a simple function invocation --
 with the same performance characteristics (in terms of CPU cycles).\\
 
 This technique is used in \bcontext\cite{bcontext} which acts as building block
 for \fbfibers. The \fbfibers\xspace framework itself is the basis of many
-critical applications at Facebook. For instance in \fbmcrouter\cite{fbmcrouter}
+critical applications at Facebook, such as \fbmcrouter\cite{fbmcrouter}
 and some other Facebook services/libraries like ServiceRouter (routing framework
 for \fbthrift\cite{fbthrift}), Node API (graph ORM API for graph databases) ...
 
-\uabschnitt{in-place substitution at compile time} During the code generation
-the compiler could inject the assembler code responsible for the fiber switch
-directly in the function that calls \resume. This saves an extra indirection
-(JMP + PUSH/MOV of certain registers used to invoke \resume).
+\uabschnitt{in-place substitution at compile time} During code generation,
+a compiler-based implementation could inject the assembler code responsible
+for the fiber switch directly into each function that calls \resume. That would save
+an extra indirection (JMP + PUSH/MOV of certain registers used to
+invoke \resume).
 
-\uabschnitt{CPU state at the stack} Because each fiber has to preserve CPU
-registers at suspension and to load those registers at resumption, some storage
+\uabschnitt{CPU state at the stack} Because each fiber must preserve CPU
+registers at suspension and load those registers at resumption, some storage
 is required.\\
-Instead of allocating extra memory for each fiber, a implementation could use
+Instead of allocating extra memory for each fiber, an implementation can use
 the stack by simply advancing the stack pointer at suspension and pushing the
-CPU registers (CPU state) onto the stack (owned by the suspending fiber). When
-the fiber is resumed, the values are poped from the stack and loaded into the
+CPU registers (CPU state) onto the stack owned by the suspending fiber. When
+the fiber is resumed, the values are popped from the stack and loaded into the
 appropriate registers.\\
 
-This strategy works because only a resumed fiber creates new stack frames
-(advancing the stack pointer). If a fiber is suspended it is save to keep the
+This strategy works because only a running fiber creates new stack frames
+(moving the stack pointer). While a fiber is suspended, it is safe to keep the
 CPU state on its stack.\\
 
 Using the stack as storage for the CPU state has the additional advantage that
-\fiber needs only to aggregate a pointer to the stack location (memory footprint
-is equal to a pointer).\\
-Section \nameref{synthesizing} describes how global variables are prevented
-by synthesizing a fiber from the active fiber (execution context) and passing
-this synthesized fiber (representing the now suspended fiber) into the resumed
-fiber. Using the stack as storage makes this mechanism very easy to implement
-\footnote{The implementation of \bcontext\cite{bcontext} utilizes this
-technique.}.
-Inside \resume the code pushes the relevant CPU registers onto the stack and
-creates from the resulting stack address a new \fiber. This instance is then
-passed into the resume fiber as synthesized fiber (see
-\nameref{synthesizing}).\\
+\fiber must only contain a pointer to the stack location: its memory footprint
+can be that of a pointer.\\
+Section \nameref{synthesizing} describes how global variables are avoided
+by synthesizing a \fiber from the active fiber (execution context) and passing
+this synthesized fiber (representing the now-suspended fiber) into the resumed
+fiber. Using the stack as storage makes this mechanism very easy to
+implement.\footnote{The implementation of \bcontext\cite{bcontext} utilizes this
+technique.}
+Inside \resume the code pushes the relevant CPU registers onto the stack, and
+from the resulting stack address creates a new \fiber. This instance is then
+passed (or returned) into the resumed fiber (see \nameref{synthesizing}).\\
 
-\zs{Using fiber's stack as storage for the CPU state is efficient because no
-additional allocations and deallocations are required.}
+\zs{Using the active fiber's stack as storage for the CPU state is efficient because no
+additional allocations or deallocations are required.}
