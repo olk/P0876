@@ -128,21 +128,34 @@ resumes a fiber\\
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{fiber resume()} & (1)\\
+    \cpp{fiber resume() &} & (1)\\
+
+    \midrule
+
+    \cpp{fiber resume() &&} & (2)\\
 
     \midrule
 
     \cpp{template<typename Fn>}\\
-    \cpp{fiber resume\_with(Fn&& fn)} & (2)\\
+    \cpp{fiber resume\_with(Fn&& fn) &} & (3)\\
+
+    \midrule
+
+    \cpp{template<typename Fn>}\\
+    \cpp{fiber resume\_with(Fn&& fn) &&} & (4)\\
 
     \midrule
 \end{tabular}
 
 \begin{description}
-    \item[1)] suspends the active fiber, resumes fiber \cpp{*this}
-    \item[2)] suspends the active fiber, resumes fiber \cpp{*this}
+    \item[1)] suspends the active fiber, resumes fiber \cpp{*this}; lvalue-ref qualified
+    \item[2)] suspends the active fiber, resumes fiber \cpp{*this}; rvalue-ref qualified
+    \item[3)] suspends the active fiber, resumes fiber \cpp{*this}
               but calls \cpp{fn()} in the resumed fiber (as if called by the
-              suspended function)
+              suspended function); lvalue-ref qualified
+    \item[4)] suspends the active fiber, resumes fiber \cpp{*this}
+              but calls \cpp{fn()} in the resumed fiber (as if called by the
+              suspended function); rvalue-ref qualified
 \end{description}
 
 {\bfseries Parameters}
