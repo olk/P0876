@@ -1,8 +1,8 @@
 int main(){
     fiber f{[](fiber&& m){
-        m=m.resume(); // switch to `main()`
+        m=std::move(m).resume(); // switch to `main()`
         ...
     }};
-    f=f.resume(); // resume `f`
+    f=std::move(f).resume(); // resume `f`
     return 0;
 }

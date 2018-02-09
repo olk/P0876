@@ -4,7 +4,7 @@ int main(){
         f2=std::move(f);
         for(;;){
             std::cout << "f3 ";
-            f2=f1.resume();
+            f2=std::move(f1).resume();
         }
         return {};
     }};
@@ -12,18 +12,18 @@ int main(){
         f1=std::move(f);
         for(;;){
             std::cout << "f2 ";
-            f1=f3.resume();
+            f1=std::move(f3).resume();
         }
         return {};
     }};
     f1=fiber{[&](fiber&& /*main*/)->fiber{
         for(;;){
             std::cout << "f1 ";
-            f3=f2.resume();
+            f3=std::move(f2).resume();
         }
         return {};
     }};
-    f1.resume();
+    std::move(f1).resume();
     return 0;
 }
 

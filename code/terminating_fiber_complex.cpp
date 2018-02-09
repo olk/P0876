@@ -10,7 +10,7 @@ int main(){
         m=std::move(f); // preserve `f` (== suspended main())
         return std::move(f1);
     }};
-    f2.resume();
+    std::move(f2).resume();
     std::cout << "main: done" << std::endl;
     return 0;
 }

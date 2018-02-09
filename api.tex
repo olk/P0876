@@ -128,12 +128,12 @@ resumes a fiber\\
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{fiber resume()} & (1)\\
+    \cpp{fiber resume() &&} & (1)\\
 
     \midrule
 
     \cpp{template<typename Fn>}\\
-    \cpp{fiber resume\_with(Fn&& fn)} & (2)\\
+    \cpp{fiber resume\_with(Fn&& fn) &&} & (2)\\
 
     \midrule
 \end{tabular}
@@ -195,7 +195,10 @@ up at that time.\\
 The returned \cpp{fiber} indicates via \opbool whether the previous active
 fiber has terminated (returned from \entryfn).\\
 Because \resume invalidates the instance on which it is called, \emph{no valid
-\fiber instance ever represents the currently-running fiber.}\\
+\fiber instance ever represents the currently-running fiber.} In order to
+express the invalidation explicitly, \resume and \resumewith are
+rvalue-reference qualified. This means that both functions can only invoked on
+rvalues.\\
 When calling \resume, it is conventional to replace the newly-invalidated
 instance -- the instance on which \resume was called -- with the new instance
 returned by that \resume call. This helps to avoid inadvertent calls to \resume

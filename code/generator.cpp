@@ -3,7 +3,7 @@ std::fiber g{[&a](std::fiber&& m){
     a=0;
     int b=1;
     for(;;){
-        m=m.resume();
+        m=std::move(m).resume();
         int next=a+b;
         a=b;
         b=next;
@@ -12,7 +12,7 @@ std::fiber g{[&a](std::fiber&& m){
 }};
 std::vector<int> v(10);
 std::generate(v.begin(), v.end(), [&a,&g]() mutable {
-    g=g.resume();
+    g=std::move(g).resume();
     return a;
 });
 std::cout << "v: ";

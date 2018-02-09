@@ -2,20 +2,20 @@ int data = 0;
 fiber f{[&data](fiber&& m){
     std::cout << "f1: entered first time: " << data  << std::endl;
     data+=1;
-    m=m.resume();
+    m=std::move(m).resume();
     std::cout << "f1: entered second time: " << data  << std::endl;
     data+=1;
-    m=m.resume();
+    m=std::move(m).resume();
     std::cout << "f1: entered third time: " << data << std::endl;
     return std::move(m);
 }};
-f=f.resume();
+f=std::move(f).resume();
 std::cout << "f1: returned first time: " << data << std::endl;
 data+=1;
-f=f.resume();
+f=std::move(f).resume();
 std::cout << "f1: returned second time: " << data << std::endl;
 data+=1;
-f=f.resume_with([&data](fiber&& m){
+f=std::move(f).resume_with([&data](fiber&& m){
     std::cout << "f2: entered: " << data << std::endl;
     data=-1;
     return std::move(m);

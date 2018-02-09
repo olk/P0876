@@ -1,9 +1,9 @@
 void foo(){
     fiber f{[](fiber&& m){
-        m=m.resume(); // switch to `foo()`
-        m=m.resume(); // switch to `foo()`
+        m=std::move(m).resume(); // switch to `foo()`
+        m=std::move(m).resume(); // switch to `foo()`
         ...
     }};
-    f=f.resume(); // start `f`
-    f=f.resume(); // resume `f`
+    f=std::move(f).resume(); // start `f`
+    f=std::move(f).resume(); // resume `f`
 }
