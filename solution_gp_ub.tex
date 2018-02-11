@@ -52,6 +52,9 @@ into the resumed fiber as an instance of \fiber.\\
 The mechanism presented in this proposal describes jumping between stacks (each
 fiber has its own stack). The stacks of \main and the threads are not excluded
 and can be used as jump targets too.\\
+Thus a program can be considered to consist out of fibers - some fibers have
+been created by the OS (\main stack/thread's stack) and some are created
+explicitly in the code.\\
 This is a nice feature because it allows to represent (the stacks) of \main and
 the thread's as fibers. A fiber representing \main or thread's \entryfn\xspace
 can be handled like an explicitly created fiber: it can passed to and returned
