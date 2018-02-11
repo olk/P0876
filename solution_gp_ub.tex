@@ -49,14 +49,15 @@ As shown in the previous section a synthesized fiber is created and passed
 into the resumed fiber as an instance of \fiber.\\
 \cppf{synthesized_main}
 
-The mechanism presented in this proposal describes jumping between stacks (each
-fiber has its own stack). The stacks of \main and the threads are not excluded
-and can be used as jump targets too.\\
-Thus a program can be considered to consist out of fibers - some fibers have
-been created by the OS (\main stack/thread's stack) and some are created
-explicitly in the code.\\
-This is a nice feature because it allows to represent (the stacks) of \main and
-the thread's as fibers. A fiber representing \main or thread's \entryfn\xspace
+The mechanism presented in this proposal describes switching between stacks: each
+fiber has its own stack. The stacks of \main and explicitly-launched threads
+are not excluded; these can be used as targets too.\\
+Thus every program can be considered to consist of fibers -- some
+created by the OS (\main stack; each thread's initial stack) and some created
+explicitly by the code.\\
+This is a nice feature because it allows (the stacks of) \main and each
+thread's \entryfn\xspace to be represented as fibers.
+A fiber representing \main or a thread's \entryfn\xspace
 can be handled like an explicitly created fiber: it can passed to and returned
 from functions or stored in a container.\\
 

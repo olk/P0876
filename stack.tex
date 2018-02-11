@@ -5,21 +5,25 @@ the stack will be destroyed. If the function has not yet returned and the
 \nameref{destructor} of the \fiber instance representing that context is called,
 the stack will be unwound and destroyed.\\
 
-For this purpose member-function \resumewith is called with \unwindfib as
-argument. The fiber will be temporarily resumed and \unwindfib is
-invoked. Function \unwindfib triggers a specific actions that unwinds the stack
+Consider a running fiber \cpp{f2} that destroys the \fiber instance
+representing \cpp{f1}.\\
+
+\cpp{f1}'s destructor, running on \cpp{f2}, implicitly calls member-function
+\resumewith, passing \unwindfib as
+argument. Fiber \cpp{f1} will be temporarily resumed and \unwindfib is
+invoked. Function \unwindfib binds an instance of \fiber that
+represents \cpp{f2}, then triggers a specific action that
+unwinds \cpp{f1}'s stack
 (walking the stack and destroying automatic variables in reverse order of
-construction)
-\footnote{for instance the \emph{\_\_Unwind*-API} part of the
+construction)\footnote{for instance the \emph{\_\_Unwind*-API} part of the
 \emph{SYSV ABI} could be utilized}.
-An instance of \fiber that represents the fiber that called \resumewith is bound
-and the first frame on the stack, the one created by \fiber's constructor,
-extracts the bound \fiber and terminates the current fiber by returning that
-\fiber. The Control flow is returned to the fiber that called \dtor and the
+The first frame on \cpp{f1}'s stack, the one created by \fiber's constructor,
+extracts the bound \fiber representing \cpp{f2} and terminates \cpp{f1} by returning
+\cpp{f2}. Control is returned to \cpp{f2} and \cpp{f1}'s
 stack gets deallocated.\\
 
 The StackAllocator's deallocate operation runs on the fiber that invoked
-\dtor.\\
+\dtor, in this case \cpp{f2}.\\
 
 The stack on which \cpp{main()} is executed, as well as the stack implicitly
 created by \cpp{std::thread}'s constructor, is allocated by the operating
