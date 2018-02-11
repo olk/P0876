@@ -198,7 +198,7 @@ fiber has terminated (returned from \entryfn).\\
 Because \resume invalidates the instance on which it is called, \emph{no valid
 \fiber instance ever represents the currently-running fiber.} In order to
 express the invalidation explicitly, \resume and \resumewith are
-rvalue-reference qualified. This means that both functions can only invoked on
+rvalue-reference qualified. This means that both functions can only be invoked on
 rvalues.\\
 When calling \resume, it is conventional to replace the newly-invalidated
 instance -- the instance on which \resume was called -- with the new instance
@@ -343,7 +343,7 @@ be called from any function on that fiber.
 \end{tabular}
 
 \begin{description}
-    \item[1)] Binds the passed \fiber, triggers a specific action that unwinds
+    \item[1)] Binds the passed \fiber and triggers a specific action that unwinds
               the stack (walking the stack and destroying automatic variables in
               reverse order of construction)
               \footnote{for instance the \emph{\_\_Unwind*-API} part of the
