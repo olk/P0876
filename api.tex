@@ -80,14 +80,15 @@ destroys a fiber\\
 \begin{description}
     \item[1)] destroys a \fiber instance. If this instance represents a fiber
               of execution (\opbool returns \cpp{true}), then the fiber of
-              execution is destroyed too. Specifically, the stack is unwound
-              by throwing \unwindex.\footnote{ In a program in which exceptions
-              are thrown, it is prudent to code a fiber's \entryfn\xspace with a
-              last-ditch \cpp{catch (...)} clause: in general, exceptions must
-              \emph{not} leak out of the \entryfn. However, since stack
-              unwinding is implemented by throwing an exception, a correct
-              \entryfn\ \cpp{try} statement must also
-              \cpp{catch (std::unwind\_exception const&)} and rethrow it.}
+              execution is destroyed too.
+%             Specifically, the stack is unwound
+%             by throwing \unwindex.\footnote{ In a program in which exceptions
+%             are thrown, it is prudent to code a fiber's \entryfn\xspace with a
+%             last-ditch \cpp{catch (...)} clause: in general, exceptions must
+%             \emph{not} leak out of the \entryfn. However, since stack
+%             unwinding is implemented by throwing an exception, a correct
+%             \entryfn\ \cpp{try} statement must also
+%             \cpp{catch (std::unwind\_exception const&)} and rethrow it.}
 \end{description}
 
 
@@ -158,9 +159,9 @@ resumes a fiber\\
 
 {\bfseries Exceptions}
 \begin{description}
-    \item[1)] \resume or \resumewith might throw \unwindex if, while suspended,
-              the calling fiber is destroyed
-    \item[2)] \resume or \resumewith might throw \emph{any} exception if,
+%   \item[1)] \resume or \resumewith might throw \unwindex if, while suspended,
+%             the calling fiber is destroyed
+    \item[1)] \resume or \resumewith might throw \emph{any} exception if,
               while suspended:
               \begin{itemize}
                   \item some other fiber calls \resumewith to resume this
@@ -168,7 +169,7 @@ resumes a fiber\\
                   \item the function \cpp{fn} passed to \resumewith -- or some
                         function called by \cpp{fn} -- throws an exception
               \end{itemize}
-    \item[3)] Any exception thrown by the function \cpp{fn} passed to
+    \item[2)] Any exception thrown by the function \cpp{fn} passed to
               \resumewith, or any function called by \cpp{fn}, is thrown in the
               fiber referenced by \cpp{*this} rather than in the fiber of
               the caller of \resumewith.
@@ -342,8 +343,12 @@ be called from any function on that fiber.
 \end{tabular}
 
 \begin{description}
-    \item[1)] throws \unwindex, binding the passed \fiber. The running fiber's
-              first stack entry catches \unwindex, extracts the bound \fiber
+    \item[1)] Binds the passed \fiber, triggers a specific action that unwinds
+              the stack (walking the stack and destroying automatic variables in
+              reverse order of construction)
+              \footnote{for instance the \emph{\_\_Unwind*-API} part of the
+              \emph{SYSV ABI} could be utilized}.
+              The running fiber's first stack entry extracts the bound \fiber
               and terminates the current fiber by returning that \fiber.
 \end{description}
 
@@ -362,17 +367,17 @@ be called from any function on that fiber.
     \item[1)] None: \unwindfib does not return
 \end{description}
 
-\bfs{Exceptions}
-\begin{description}
-    \item[1)] throws \unwindex
-\end{description}
+%\bfs{Exceptions}
+%\begin{description}
+%    \item[1)] throws \unwindex
+%\end{description}
 
 
-\uabschnitt{std::unwind\_exception}
-
-is the exception used to unwind the stack referenced by a \fiber being destroyed.
-It is thrown by \unwindfib. \unwindex binds a \fiber referencing the fiber to
-which control should be passed once the current fiber is unwound and destroyed.
+%\uabschnitt{std::unwind\_exception}
+%
+%is the exception used to unwind the stack referenced by a \fiber being destroyed.
+%It is thrown by \unwindfib. \unwindex binds a \fiber referencing the fiber to
+%which control should be passed once the current fiber is unwound and destroyed.
 
 
 \uabschnitt{Stack allocators}\label{stackalloc}

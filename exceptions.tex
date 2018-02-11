@@ -1,12 +1,13 @@
 \abschnitt{exceptions}\label{exceptions}
 
 In general, if an uncaught exception escapes from the \entryfn,
-\cpp{std::terminate} is called. There is one exception: \unwindex. The fiber
-facility internally uses \unwindex to clean up the stack of a suspended context
-being destroyed. This exception must be allowed to propagate out of an \entryfn.\\
+\cpp{std::terminate} is called.
+%There is one exception: \unwindex. The fiber
+%facility internally uses \unwindex to clean up the stack of a suspended context
+%being destroyed. This exception must be allowed to propagate out of an \entryfn.\\
 
-A correct \entryfn\ \cpp{try/catch} block looks like this:
-\cppf{rethrow_unwind}
+%A correct \entryfn\ \cpp{try/catch} block looks like this:
+%\cppf{rethrow_unwind}
 
 Of course, no \cpp{try/catch} block is needed if neither \entryfn\xspace nor
 anything it calls throws exceptions.

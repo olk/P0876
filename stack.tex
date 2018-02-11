@@ -7,12 +7,16 @@ the stack will be unwound and destroyed.\\
 
 For this purpose member-function \resumewith is called with \unwindfib as
 argument. The fiber will be temporarily resumed and \unwindfib is
-invoked. Function \unwindfib throws exception \unwindex,
-binding an instance of \fiber that represents the fiber that
-called \resumewith.
-The exception is caught by the first frame on the stack: the one created
-by \fiber's constructor. Control switches back to the fiber that
-called \dtor and the stack gets deallocated.\\
+invoked. Function \unwindfib triggers a specific actions that unwinds the stack
+(walking the stack and destroying automatic variables in reverse order of
+construction)
+\footnote{for instance the \emph{\_\_Unwind*-API} part of the
+\emph{SYSV ABI} could be utilized}.
+An instance of \fiber that represents the fiber that called \resumewith is bound
+and the first frame on the stack, the one created by \fiber's constructor,
+extracts the bound \fiber and terminates the current fiber by returning that
+\fiber. The Control flow is returned to the fiber that called \dtor and the
+stack gets deallocated.\\
 
 The StackAllocator's deallocate operation runs on the fiber that invoked
 \dtor.\\
