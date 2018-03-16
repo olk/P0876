@@ -3,7 +3,7 @@
 
 \uabschnitt{class fiber\_context}
 
-\cppf{fiber\_context}
+\cppf{fiber}
 
 \paragraph*{member functions}
 
@@ -272,38 +272,13 @@ establish an arbitrary total ordering for \fiber instances\\
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{bool operator==(const fiber\_context& other) const noexcept} & (1)\\
-
-    \midrule
-
-    \cpp{bool operator\!=(const fiber\_context& other) const noexcept} & (1)\\
-
-    \midrule
-
-    \cpp{bool operator<(const fiber\_context& other) const noexcept} & (2)\\
-
-    \midrule
-
-    \cpp{bool operator>(const fiber\_context& other) const noexcept} & (2)\\
-
-    \midrule
-
-    \cpp{bool operator<=(const fiber\_context& other) const noexcept} & (2)\\
-
-    \midrule
-
-    \cpp{bool operator>=(const fiber\_context& other) const noexcept} & (2)\\
+    \cpp{bool operator<(const fiber\_context& other) const noexcept} & (1)\\
 
     \midrule
 \end{tabular}
 
 \begin{description}
-    \item[1)] Every invalid \fiber instance compares equal to every other invalid
-              instance. But because the running fiber is never represented by
-              a valid \fiber instance, and because every suspended fiber is
-              represented by exactly one valid instance, \emph{no valid instance
-              can ever compare equal to any other valid instance.}
-    \item[2)] These comparisons establish an arbitrary total ordering of \fiber
+    \item[1)] This comparison establishes an arbitrary total ordering of \fiber
               instances, for example to store in ordered containers. (However,
               key lookup is meaningless, since you cannot construct a search key
               that would compare equal to any entry.) There is no significance
