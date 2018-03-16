@@ -1,9 +1,9 @@
 \newpage
 \abschnitt{appendix: API}\label{api}
 
-\uabschnitt{class fiber}
+\uabschnitt{class fiber\_context}
 
-\cppf{fiber}
+\cppf{fiber\_context}
 
 \paragraph*{member functions}
 
@@ -13,25 +13,25 @@ constructs new fiber\\
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{fiber() noexcept} & (1)\\
+    \cpp{fiber\_context() noexcept} & (1)\\
 
     \midrule
 
     \cpp{template<typename Fn>}\\
-    \cpp{explicit fiber(Fn&& fn)} & (2)\\
+    \cpp{explicit fiber\_context(Fn&& fn)} & (2)\\
 
     \midrule
 
     \cpp{template<typename StackAlloc, typename Fn>}\\
-    \cpp{fiber(std::allocator\_arg\_t, StackAlloc&& salloc, Fn&& fn)} & (3)\\
+    \cpp{fiber\_context(std::allocator\_arg\_t, StackAlloc&& salloc, Fn&& fn)} & (3)\\
 
     \midrule
 
-    \cpp{fiber(fiber&& other) noexcept} & (4)\\
+    \cpp{fiber\_context(fiber\_context&& other) noexcept} & (4)\\
 
     \midrule
 
-    \cpp{fiber(const fiber& other)=delete} & (5)\\
+    \cpp{fiber\_context(const fiber\_context& other)=delete} & (5)\\
 
     \midrule
 \end{tabular}
@@ -92,16 +92,16 @@ destroys a fiber\\
 
 
 \subparagraph*{operator=}
-moves the fiber object\\
+moves the \fiber object\\
 
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{fiber& operator=(fiber&& other) noexcept} & (1)\\
+    \cpp{fiber\_context& operator=(fiber\_context&& other) noexcept} & (1)\\
 
     \midrule
 
-    \cpp{fiber& operator=(const fiber& other)=delete} & (2)\\
+    \cpp{fiber\_context& operator=(const fiber\_context& other)=delete} & (2)\\
 
     \midrule
 \end{tabular}
@@ -113,7 +113,7 @@ moves the fiber object\\
 
 {\bfseries Parameters}
 \begin{description}
-    \item[other]   another fiber to assign to this object\\
+    \item[other]   another \fiber to assign to this object\\
 \end{description}
 
 {\bfseries Return value}
@@ -128,12 +128,12 @@ resumes a fiber\\
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{fiber resume() &&} & (1)\\
+    \cpp{fiber\_context resume() &&} & (1)\\
 
     \midrule
 
     \cpp{template<typename Fn>}\\
-    \cpp{fiber resume\_with(Fn&& fn) &&} & (2)\\
+    \cpp{fiber\_context resume\_with(Fn&& fn) &&} & (2)\\
 
     \midrule
 \end{tabular}
@@ -152,14 +152,14 @@ resumes a fiber\\
 
 {\bfseries Return value}
 \begin{description}
-    \item[fiber] the returned instance represents the fiber that has been
+    \item[fiber\_context] the returned instance represents the fiber that has been
                  suspended in order to resume the current fiber
 \end{description}
 
 {\bfseries Exceptions}
 \begin{description}
     \item[1)] \resume or \resumewith might throw \unwindex if, while suspended,
-              the calling fiber is destroyed
+              the calling \fiber is destroyed
     \item[2)] \resume or \resumewith might throw \emph{any} exception if,
               while suspended:
               \begin{itemize}
@@ -190,9 +190,9 @@ resumes a fiber\\
 \newline
 \resume preserves the execution context of the calling fiber. Those data are
 restored if the calling fiber is resumed.\\
-A suspended \cpp{fiber} can be destroyed. Its resources will be cleaned
+A suspended \cpp{fiber\_context} can be destroyed. Its resources will be cleaned
 up at that time.\\
-The returned \cpp{fiber} indicates via \opbool whether the previous active
+The returned \cpp{fiber\_context} indicates via \opbool whether the previous active
 fiber has terminated (returned from \entryfn).\\
 Because \resume invalidates the instance on which it is called, \emph{no valid
 \fiber instance ever represents the currently-running fiber.} In order to
@@ -204,13 +204,13 @@ instance -- the instance on which \resume was called -- with the new instance
 returned by that \resume call. This helps to avoid inadvertent calls to \resume
 on the old, invalidated instance.
 \newline
-An injected function \cpp{fn()} must accept \cpp{std::fiber&&} and
-return \fiber. The fiber instance returned by \cpp{fn()} is, in turn, used as
+An injected function \cpp{fn()} must accept \cpp{std::fiber\_context&&} and
+return \fiber. The \fiber instance returned by \cpp{fn()} is, in turn, used as
 the return value for the suspended function: \resume or \resumewith.
 
 
 \subparagraph*{operator bool}
-test whether fiber is valid\\
+test whether \fiber is valid\\
 
 \begin{tabular}{ l l }
     \midrule
@@ -247,7 +247,7 @@ The essential points:
 
 
 \subparagraph*{operator!}
-test whether fiber is invalid\\
+test whether \fiber is invalid\\
 
 \begin{tabular}{ l l }
     \midrule
@@ -272,27 +272,27 @@ establish an arbitrary total ordering for \fiber instances\\
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{bool operator==(const fiber& other) const noexcept} & (1)\\
+    \cpp{bool operator==(const fiber\_context& other) const noexcept} & (1)\\
 
     \midrule
 
-    \cpp{bool operator\!=(const fiber& other) const noexcept} & (1)\\
+    \cpp{bool operator\!=(const fiber\_context& other) const noexcept} & (1)\\
 
     \midrule
 
-    \cpp{bool operator<(const fiber& other) const noexcept} & (2)\\
+    \cpp{bool operator<(const fiber\_context& other) const noexcept} & (2)\\
 
     \midrule
 
-    \cpp{bool operator>(const fiber& other) const noexcept} & (2)\\
+    \cpp{bool operator>(const fiber\_context& other) const noexcept} & (2)\\
 
     \midrule
 
-    \cpp{bool operator<=(const fiber& other) const noexcept} & (2)\\
+    \cpp{bool operator<=(const fiber\_context& other) const noexcept} & (2)\\
 
     \midrule
 
-    \cpp{bool operator>=(const fiber& other) const noexcept} & (2)\\
+    \cpp{bool operator>=(const fiber\_context& other) const noexcept} & (2)\\
 
     \midrule
 \end{tabular}
@@ -317,7 +317,7 @@ swaps two \fiber instances\\
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{void swap(fiber& other) noexcept} & (1)\\
+    \cpp{void swap(fiber\_context& other) noexcept} & (1)\\
 
     \midrule
 \end{tabular}
@@ -336,7 +336,7 @@ be called from any function on that fiber.
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{void unwind\_fiber(fiber&& other)} & (1)\\
+    \cpp{void unwind\_fiber(fiber\_context&& other)} & (1)\\
 
     \midrule
 \end{tabular}

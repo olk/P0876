@@ -34,7 +34,7 @@ forth between a fiber and \main.\\
 applicability of fibers and requires an internal global variable pointing to
 \main.}
 
-\uabschnitt{static member function returns active fiber}
+\uabschnitt{static member function returns active \fiber}
 P0099R0\cite{P0099R0} introduced a static member function\\
 (\cpp{execution_context::current()}) that returned an instance of the active
 fiber. This allows passing the active fiber \cpp{m} (for instance representing
@@ -45,7 +45,7 @@ applications (for instance generators).
 
 But this solution requires an internal global variable pointing to the active
 fiber and some kind of reference counting. Reference counting is needed because
-\cpp{fiber::current()} necessarily requires multiple instances of \fiber for the
+\cpp{fiber\_context::current()} necessarily requires multiple instances of \fiber for the
 active fiber. Only when the last reference goes out of scope can the fiber be
 destroyed and its stack deallocated.
 \cppf{multi_current}

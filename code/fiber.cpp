@@ -1,31 +1,31 @@
-class fiber {
+class fiber_context {
 public:
-    fiber() noexcept;
+    fiber_context() noexcept;
 
     template<typename Fn>
-    fiber(Fn&& fn);
+    fiber_context(Fn&& fn);
 
     template<typename StackAlloc, typename Fn>
-    fiber(std::allocator_arg_t, StackAlloc&& salloc, Fn&& fn);
+    fiber_context(std::allocator_arg_t, StackAlloc&& salloc, Fn&& fn);
 
-    ~fiber();
+    ~fiber_context();
 
-    fiber(fiber&& other) noexcept;
-    fiber& operator=(fiber&& other) noexcept;
-    fiber(const fiber& other) noexcept = delete;
-    fiber& operator=(const fiber& other) noexcept = delete;
+    fiber_context(fiber_context&& other) noexcept;
+    fiber_context& operator=(fiber_context&& other) noexcept;
+    fiber_context(const fiber_context& other) noexcept = delete;
+    fiber_context& operator=(const fiber_context& other) noexcept = delete;
 
-    fiber resume() &&;
+    fiber_context resume() &&;
     template<typename Fn>
-    fiber resume_with(Fn&& fn) &&;
+    fiber_context resume_with(Fn&& fn) &&;
 
     explicit operator bool() const noexcept;
     bool operator!() const noexcept;
-    bool operator==(const fiber& other) const noexcept;
+    bool operator==(const fiber_context& other) const noexcept;
     bool operator!=(const fibert& other) const noexcept;
-    bool operator<(const fiber& other) const noexcept;
-    bool operator>(const fiber& other) const noexcept;
-    bool operator<=(const fiber& other) const noexcept;
-    bool operator>=(const fiber& other) const noexcept;
-    void swap(fiber& other) noexcept;
+    bool operator<(const fiber_context& other) const noexcept;
+    bool operator>(const fiber_context& other) const noexcept;
+    bool operator<=(const fiber_context& other) const noexcept;
+    bool operator>=(const fiber_context& other) const noexcept;
+    void swap(fiber_context& other) noexcept;
 };

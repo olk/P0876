@@ -1,6 +1,6 @@
 int main(){
-    fiber f1,f2,f3;
-    f3=fiber{[&](fiber&& f)->fiber{
+    fiber_context f1,f2,f3;
+    f3=fiber_context{[&](fiber_context&& f)->fiber_context{
         f2=std::move(f);
         for(;;){
             std::cout << "f3 ";
@@ -8,7 +8,7 @@ int main(){
         }
         return {};
     }};
-    f2=fiber{[&](fiber&& f)->fiber{
+    f2=fiber_context{[&](fiber_context&& f)->fiber_context{
         f1=std::move(f);
         for(;;){
             std::cout << "f2 ";
@@ -16,7 +16,7 @@ int main(){
         }
         return {};
     }};
-    f1=fiber{[&](fiber&& /*main*/)->fiber{
+    f1=fiber_context{[&](fiber_context&& /*main*/)->fiber_context{
         for(;;){
             std::cout << "f1 ";
             std::move(f2).resume();

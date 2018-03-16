@@ -11,14 +11,14 @@ clause returns the bound \fiber from that top-level function.\\
 Therefore, any of the following will gracefully terminate a fiber:
 
 \begin{itemize}
-    \item Cause its \entryfn to return a valid fiber.
+    \item Cause its \entryfn to return a valid \fiber.
     \item From within the fiber you wish to terminate, call \unwindfib with a
-          valid fiber. This throws a \unwindex instance that binds the passed
-          fiber; that fiber will be resumed when the active fiber terminates.
+          valid \fiber. This throws a \unwindex instance that binds the passed
+          \fiber; that fiber will be resumed when the active fiber terminates.
     \item From within the fiber you wish to terminate, construct and
-          throw \unwindex, binding the fiber you intend to resume next. This
+          throw \unwindex, binding the \fiber you intend to resume next. This
           is what \unwindfib does internally.
-    \item Call \cpp{fiber::resume\_with(unwind\_fiber)}. This is what \dtor
+    \item Call \cpp{fiber\_context::resume\_with(unwind\_fiber)}. This is what \dtor
           does. Since \unwindfib accepts a \fiber, and since \resumewith
           synthesizes a \fiber representing its caller and passes it to the
           subject function, this terminates the fiber referenced by the

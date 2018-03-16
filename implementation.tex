@@ -89,7 +89,7 @@ Using the stack as storage for the CPU state has the additional advantage that
 can be that of a pointer.\\
 Section \nameref{synthesizing} describes how global variables are avoided
 by synthesizing a \fiber from the active fiber (execution context) and passing
-this synthesized fiber (representing the now-suspended fiber) into the resumed
+this synthesized \fiber (representing the now-suspended fiber) into the resumed
 fiber. Using the stack as storage makes this mechanism very easy to
 implement.\footnote{The implementation of \bcontext\cite{bcontext} utilizes this
 technique.}

@@ -1,11 +1,11 @@
 int main(){
-    fiber m;
-    fiber f1{[&](fiber&& f){
+    fiber_context m;
+    fiber_context f1{[&](fiber_context&& f){
         std::cout << "f1: entered first time" << std::endl;
         assert(!f);
         return std::move(m); // resume (main-)fiber that has started `f2`
     }};
-    fiber f2{[&](fiber&& f){
+    fiber_context f2{[&](fiber_context&& f){
         std::cout << "f2: entered first time" << std::endl;
         m=std::move(f); // preserve `f` (== suspended main())
         return std::move(f1);

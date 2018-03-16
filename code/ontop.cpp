@@ -1,5 +1,5 @@
 int data = 0;
-fiber f{[&data](fiber&& m){
+fiber_context f{[&data](fiber_context&& m){
     std::cout << "f1: entered first time: " << data  << std::endl;
     data+=1;
     m=std::move(m).resume();
@@ -15,7 +15,7 @@ data+=1;
 f=std::move(f).resume();
 std::cout << "f1: returned second time: " << data << std::endl;
 data+=1;
-f=std::move(f).resume_with([&data](fiber&& m){
+f=std::move(f).resume_with([&data](fiber_context&& m){
     std::cout << "f2: entered: " << data << std::endl;
     data=-1;
     return std::move(m);

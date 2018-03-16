@@ -1,7 +1,7 @@
 \abschnitt{exceptions}\label{exceptions}
 
 In general, if an uncaught exception escapes from the \entryfn,
-\cpp{std::terminate} is called. There is one exception: \unwindex. The fiber
+\cpp{std::terminate} is called. There is one exception: \unwindex. The \fiber
 facility internally uses \unwindex to clean up the stack of a suspended context
 being destroyed. This exception must be allowed to propagate out of an \entryfn.\\
 

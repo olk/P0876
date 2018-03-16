@@ -1,5 +1,5 @@
 int main() {
-    fiber f{[]{
+    fiber_context f{[]{
         ...
         // switch to `main()` only by returning
     }};

@@ -1,7 +1,7 @@
 int main(){
     int a;
-    fiber m=fiber::current(); // get active fiber
-    fiber f{[&]{
+    fiber_context m=fiber_context::current(); // get active fiber
+    fiber_context f{[&]{
         a=0;
         int b=1;
         for(;;){

@@ -1,5 +1,5 @@
 int i=1;
-std::fiber lambda{[&i](fiber&& caller){
+std::fiber_context lambda{[&i](fiber_context&& caller){
     std::cout << "inside lambda,i==" << i << std::endl;
     i+=1;
     caller=std::move(caller).resume();
