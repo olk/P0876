@@ -3,27 +3,21 @@
 There are a few different ways to terminate a given fiber without
 terminating the whole process, or engaging undefined behavior.\\
 
-%When a \fiber instance is constructed with an \entryfn, its new stack is
-%initialized with the frame of an implicit top-level function that can
-%catch \unwindex. \unwindex binds a \fiber instance; the implicit \cpp{catch}
-%clause returns the bound \fiber from that top-level function.\\
-%
-%Therefore, any of the following will gracefully terminate a fiber:
-Any of the following will gracefully terminate a fiber:
+When a \fiber instance is constructed with an \entryfn, its new stack is
+initialized with the frame of an implicit top-level function that can
+catch \unwindex. \unwindex binds a \fiber instance; the implicit \cpp{catch}
+clause returns the bound \fiber from that top-level function.\\
+
+Therefore, any of the following will gracefully terminate a fiber:
 
 \begin{itemize}
     \item Cause its \entryfn to return a valid fiber.
     \item From within the fiber you wish to terminate, call \unwindfib with a
-          valid fiber. \unwindfib will trigger a specific action that unwinds
-          the stack (walking the stack and destroying automatic variables in
-          reverse order of construction)
-          \footnote{for instance the \emph{\_\_Unwind*-API} part of the
-          \emph{SYSV ABI} could be utilized}.
-%         This throws a \unwindex instance that binds the passed
-%         fiber; that fiber will be resumed when the active fiber terminates.
-%\item From within the fiber you wish to terminate, construct and
-%      throw \unwindex, binding the fiber you intend to resume next. This
-%      is what \unwindfib does internally.
+          valid fiber. This throws a \unwindex instance that binds the passed
+          fiber; that fiber will be resumed when the active fiber terminates.
+    \item From within the fiber you wish to terminate, construct and
+          throw \unwindex, binding the fiber you intend to resume next. This
+          is what \unwindfib does internally.
     \item Call \cpp{fiber::resume\_with(unwind\_fiber)}. This is what \dtor
           does. Since \unwindfib accepts a \fiber, and since \resumewith
           synthesizes a \fiber representing its caller and passes it to the
