@@ -26,7 +26,7 @@ The StackAllocator's deallocate operation runs on the fiber that invoked
 \dtor, in this case \cpp{f2}.\\
 
 The stack on which \cpp{main()} is executed, as well as the stack implicitly
-created by \cpp{std::thread}'s constructor, is allocated by the operating
+created by \thread's constructor, is allocated by the operating
 system. Such stacks are recognized by \fiber, and are not deallocated by its
 destructor.
 

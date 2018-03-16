@@ -1,0 +1,338 @@
+\uabschnitt{class cross\_thread\_fiber\_context}
+
+\cppf{xtfiber}
+
+\paragraph*{member functions}
+
+\subparagraph*{(constructor)}
+constructs new fiber which might be resumed on a different \thread\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{cross\_thread\_fiber\_context() noexcept} & (1)\\
+
+    \midrule
+
+    \cpp{template<typename Fn>}\\
+    \cpp{explicit cross\_thread\_fiber\_context(Fn&& fn)} & (2)\\
+
+    \midrule
+
+    \cpp{template<typename StackAlloc, typename Fn>}\\
+    \cpp{cross\_thread\_fiber\_context(std::allocator\_arg\_t, StackAlloc&& salloc, Fn&& fn)} & (3)\\
+
+    \midrule
+
+    \cpp{cross\_thread\_fiber\_context(cross\_thread\_fiber\_context&& other) noexcept} & (4)\\
+
+    \midrule
+
+    \cpp{cross\_thread\_fiber\_context(const cross\_thread\_fiber\_context& other)=delete} & (5)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] this constructor instantiates an invalid \xtfiber. Its \opbool
+              returns \cpp{false}; its \cpp{operator\!()} returns \cpp{true}.
+    \item[2)] takes a callable (function, lambda, object with \op) as
+              argument. The callable must have signature as described
+              in \nameref{solution_gpub}. The stack is constructed using
+              either \cpp{fixedsize} or \cpp{segmented} (see \nameref{stackalloc}).
+              An implementation may infer which of these best suits the code
+              in \cpp{fn}. If it cannot infer, \cpp{fixedsize} will be used.
+    \item[3)] takes a callable as argument, requirements as for (2). The stack
+              is constructed using \emph{salloc}
+              (see \nameref{stackalloc}).\footnote{This constructor,
+              along with the \nameref{stackalloc} section, is an
+              optional part of the proposal. It might be that implementations
+              can reliably infer the optimal stack representation.}
+    \item[4)] moves underlying state to new \xtfiber
+    \item[5)] copy constructor deleted
+\end{description}
+
+{\bfseries Notes}
+\begin{description}
+    \item The entry-function \cpp{fn} is \emph{not} immediately entered. The
+          stack and any other necessary resources are created on construction,
+          but \cpp{fn} is not entered until \resume, \resumewith, \xtresume or
+          \xtresumewith is called.
+    \item The entry-function \cpp{fn} passed to \xtfiber will be passed a synthesized \xtfiber
+          instance representing the suspended caller of \resume.
+    \item The function \cpp{fn} passed to \resumewith or \xtresumewith will be passed a
+          synthesized \xtfiber instance representing the suspended caller of
+          \resumewith or \xtresumewith.
+\end{description}
+
+\subparagraph*{(destructor)}\label{destructor}
+destroys a fiber\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \xtdtor & (1)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] destroys a \xtfiber instance. If this instance represents a fiber
+              of execution (\opbool returns \cpp{true}), then the fiber of
+              execution is destroyed too. Specifically, the stack is unwound
+              by throwing \unwindex.\footnote{ In a program in which exceptions
+              are thrown, it is prudent to code a fiber's \entryfn\xspace with a
+              last-ditch \cpp{catch (...)} clause: in general, exceptions must
+              \emph{not} leak out of the \entryfn. However, since stack
+              unwinding is implemented by throwing an exception, a correct
+              \entryfn\ \cpp{try} statement must also
+              \cpp{catch (std::unwind\_exception const&)} and rethrow it.}
+\end{description}
+
+
+\subparagraph*{operator=}
+moves the \xtfiber object\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{cross\_thread\_fiber\_context& operator=(cross\_thread\_fiber\_context&& other) noexcept} & (1)\\
+
+    \midrule
+
+    \cpp{cross\_thread\_fiber\_context& operator=(const cross\_thread\_fiber\_context& other)=delete} & (2)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] assigns the state of \cpp{other} to \cpp{*this} using move semantics
+    \item[2)] copy assignment operator deleted
+\end{description}
+
+{\bfseries Parameters}
+\begin{description}
+    \item[other]   another \xtfiber to assign to this object\\
+\end{description}
+
+{\bfseries Return value}
+\begin{description}
+    \item[*this]
+\end{description}
+
+
+\subparagraph*{resume()}
+resumes a fiber\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{cross\_thread\_fiber\_context resume() &&} & (1)\\
+
+    \midrule
+
+    \cpp{template<typename Fn>}\\
+    \cpp{cross\_thread\_fiber\_context resume\_with(Fn&& fn) &&} & (2)\\
+
+    \midrule
+
+    \cpp{cross\_thread\_fiber\_context resume\_other\_thread() &&} & (3)\\
+
+    \midrule
+
+    \cpp{template<typename Fn>}\\
+    \cpp{cross\_thread\_fiber\_context resume\_other\_thread\_with(Fn&& fn) &&} & (4)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1) and 3)] suspends the active fiber, resumes fiber \cpp{*this}
+    \item[2) and 4)] suspends the active fiber, resumes fiber \cpp{*this}
+              but calls \cpp{fn()} in the resumed fiber (as if called by the
+              suspended function)
+\end{description}
+
+{\bfseries Parameters}
+\begin{description}
+    \item[fn] function injected into resumed fiber\\
+\end{description}
+
+{\bfseries Return value}
+\begin{description}
+    \item[cross\_thread\_fiber\_context] the returned instance represents the fiber that has been
+                 suspended in order to resume the current fiber
+\end{description}
+
+{\bfseries Exceptions}
+\begin{description}
+    \item[1)] \resume, \resumewith, \xtresume or \xtresumewith might throw \unwindex if, while suspended,
+              the calling \xtfiber is destroyed
+    \item[2)] \resume, \resumewith, \xtresume or \xtresumewith might throw \emph{any} exception if,
+              while suspended:
+              \begin{itemize}
+                  \item some other fiber calls \resumewith or \xtresumewith to resume this
+                        suspended fiber
+                  \item the function \cpp{fn} passed to \resumewith or \xtresumewith -- or some
+                        function called by \cpp{fn} -- throws an exception
+              \end{itemize}
+    \item[3)] Any exception thrown by the function \cpp{fn} passed to
+              \resumewith or \xtresumewith, or any function called by \cpp{fn}, is thrown in the
+              fiber referenced by \cpp{*this} rather than in the fiber of
+              the caller of \resumewith or \xtresumewith.
+\end{description}
+
+{\bfseries Preconditions}
+\begin{description}
+    \item[1)] \cpp{*this} represents a valid fiber (\opbool returns \cpp{true})
+    \item[2)] For \resume and \resumewith, the current \thread is the same as the thread on which
+              \cpp{*this} was originally launched. An implementation may verify.
+    \item[3)] For \xtresume and \xtresumewith, if \anythread returns
+              \cpp{true}, the current \thread need not be the same as the
+              thread on which \cpp{*this} was originally launched.
+\end{description}
+
+{\bfseries Postcondition}
+\begin{description}
+    \item[1)] \cpp{*this} is invalidated (\opbool returns \cpp{false})
+\end{description}
+
+{\bfseries Notes}
+\newline
+\resume preserves the execution context of the calling fiber. Those data are
+restored if the calling fiber is resumed.\\
+A suspended \cpp{cross\_thread\_fiber\_context} can be destroyed. Its resources will be cleaned
+up at that time.\\
+The returned \cpp{cross\_thread\_fiber\_context} indicates via \opbool whether the previous active
+fiber has terminated (returned from \entryfn).\\
+Because \resume invalidates the instance on which it is called, \emph{no valid
+\xtfiber instance ever represents the currently-running fiber.} In order to
+express the invalidation explicitly, \resume, \resumewith, \xtresume and \xtresumewith are
+rvalue-reference qualified. This means that those methods can only be invoked on
+rvalues.\\
+When calling \resume, it is conventional to replace the newly-invalidated
+instance -- the instance on which \resume was called -- with the new instance
+returned by that \resume call. This helps to avoid inadvertent calls to \resume
+on the old, invalidated instance.
+\newline
+An injected function \cpp{fn()} must accept \cpp{std::cross\_thread\_fiber\_context&&} and
+return \xtfiber. The \xtfiber instance returned by \cpp{fn()} is, in turn, used as
+the return value for the suspended function: \resume, \resumewith, \xtresume
+or \xtresumewith.
+
+\subparagraph*{any\_thread()}
+query whether this \xtfiber instance can be resumed on a different thread than
+the one on which it was originally launched
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{bool any\_thread() const noexcept} & (1)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] returns \cpp{false} for an invalid \xtfiber; returns \cpp{false}
+              for an \xtfiber representing \main or the top-level function of
+              a \thread; otherwise returns \cpp{true}
+\end{description}
+
+{\bfseries Notes}
+\newline
+When \anythread is called on an \xtfiber instance representing \main or the
+top-level function of a \thread, it returns \cpp{false}. Attempting to resume
+such a \xtfiber on a thread other than the one on which it was launched results in
+Undefined Behavior.
+
+\subparagraph*{operator bool}
+test whether \xtfiber is valid\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{explicit operator bool() const noexcept} & (1)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] returns \cpp{true} if \cpp{*this} represents a fiber of
+              execution, \cpp{false} otherwise.
+\end{description}
+
+{\bfseries Notes}
+\newline
+A \xtfiber instance might not represent a valid fiber for any of a number of reasons.
+\begin{itemize}
+    \item It might have been default-constructed.
+    \item It might have been assigned to another instance, or passed into a
+          function.\\
+          \xtfiber instances are move-only.
+    \item It might already have been resumed -- calling \resume invalidates the
+          instance.
+    \item The \entryfn\xspace might have voluntarily terminated the fiber by
+          returning.
+\end{itemize}
+The essential points:
+\begin{itemize}
+    \item Regardless of the number of \xtfiber declarations, exactly one\\
+          \xtfiber instance represents each suspended fiber.
+    \item No \xtfiber instance represents the currently-running fiber.
+\end{itemize}
+
+
+\subparagraph*{operator!}
+test whether \xtfiber is invalid\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{bool operator\!() const noexcept} & (1)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] returns \cpp{false} if \cpp{*this} represents a valid fiber,
+              \cpp{true} otherwise.
+\end{description}
+
+{\bfseries Notes}
+\newline
+See {\bfseries Notes} for \opbool.
+
+\subparagraph*{(comparisons)}
+establish an arbitrary total ordering for \xtfiber instances\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{bool operator<(const cross\_thread\_fiber\_context& other) const noexcept} & (1)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] This comparison establishes an arbitrary total ordering of \xtfiber
+              instances, for example to store in ordered containers. (However,
+              key lookup is meaningless, since you cannot construct a search key
+              that would compare equal to any entry.) There is no significance
+              to the relative order of two instances.
+\end{description}
+
+
+\subparagraph*{swap}
+swaps two \xtfiber instances\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{void swap(cross\_thread\_fiber\_context& other) noexcept} & (1)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] Exchanges the state of \cpp{*this} with \cpp{other}.\\
+\end{description}
