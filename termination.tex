@@ -32,7 +32,12 @@ Therefore, any of the following will gracefully terminate a fiber:
 thread's \entryfn, of course there is no implicit top-level stack frame, no
 implicit \cpp{catch (std::unwind\_exception)}. In a conforming implementation,
 returning from a thread's \entryfn\xspace may terminate all fibers on that
-thread. Returning from \main may terminate the whole process.)
+thread. Returning from \main may terminate the whole process.)\\
+
+In an environment that forbids exceptions, every \fiber you launch must
+terminate gracefully, by returning from its top-level function. You may not
+call \unwindfib. You may not call \dtor, explicitly or implicitly, on a
+valid \fiber instance.\\
 
 When an explicitly-launched fiber's \entryfn\xspace returns a valid \fiber
 instance, that fiber is terminated. Control switches to the fiber indicated by
