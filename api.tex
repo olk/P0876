@@ -382,9 +382,10 @@ the caller of \fiber's constructor. The stack allocator concept is
 implementation-dependent; the means by which an implementation's
 stack allocators communicate with \fiber's constructor is unspecified.\\
 
-An implementation may provide zero or more stack allocators. However, a stack
-allocator with semantics matching any of the following must use the
-corresponding name.
+An implementation must provide at least a \cpp{fixedsize} stack allocator.
+Portable code may rely on \cpp{fixedsize}. An implementation may provide
+additional stack allocators as appropriate, but a stack allocator with
+semantics matching any of the following must use the corresponding name.
 \begin{description}
   \item[protected\_fixedsize] The constructor accepts a \cpp{size\_t} parameter.
         This stack allocator constructs a contiguous stack of specified size,

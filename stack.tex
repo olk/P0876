@@ -43,8 +43,9 @@ implementation detail, used only by the internal mechanisms of the
 implementation. Different implementations might use different StackAllocator
 concepts.\\
 
-However, when an implementation provides a stack allocator matching one of
-the descriptions below, it should use the specified name.\\
+An implementation must provide at least \cpp{fixedsize}. It may provide
+additional stack allocators. When an implementation provides a stack allocator
+matching one of the descriptions below, it should use the specified name.\\
 
 Possible types of stack allocators:
 \begin{itemize}
