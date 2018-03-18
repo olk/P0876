@@ -2,5 +2,21 @@
 
 \fiber is TLS-agnostic - best practice related to TLS applies to fibers too
 (see P0772R0.)\\
-Migration between threads is forbidden. A \fiber may only be resumed on the
-\cpp{std::thread} on which it was launched.
+
+%A \fiber may not migrate between threads: it may only be resumed on the
+%\thread on which it was launched.
+%
+%Certain \fiber instances may be migrated between threads, using special
+%methods as described below. However, if \anythread returns \cpp{false}, that
+%instance may not migrate between threads.
+%
+%\cpp{cross\_thread\_fiber\_context::resume()}
+%and \cpp{cross\_thread\_fiber\_context::resume\_with()} may only be called on
+%the same \thread on which the fiber represented by that \fiber was last
+%running.
+%
+%If \anythread
+%returns \cpp{true}, \cpp{cross\_thread\_fiber\_context::resume\_other\_thread()}
+%and \cpp{cross\_thread\_fiber\_context::resume\_other\_thread\_with()} may be
+%called on a different \thread than the one on which the fiber represented by
+%that \fiber was last running. \fiber does not have either of these methods.
