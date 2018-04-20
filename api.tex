@@ -206,21 +206,23 @@ An injected function \cpp{fn()} must accept \cpp{std::fiber\_context&&} and
 return \fiber. The \fiber instance returned by \cpp{fn()} is, in turn, used as
 the return value for the suspended function: \resume or \resumewith.
 
-\subparagraph*{any\_thread()}
-query whether this \fiber instance can be resumed on a different thread than
-the one on which it was originally launched
+\subparagraph*{uses\_system\_stack()}
+query whether this \fiber instance uses a system provided stack. A \fiber
+instance using a system provided stack can not be resumed on a different thread
+than the one on which it was originally launched.
 
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{bool any\_thread() const noexcept} & (1)\\
+    \cpp{bool uses\_system\_stack()} & (1)\\
 
     \midrule
 \end{tabular}
 
 \begin{description}
-    \item[1)] \cpp{fiber\_context::any\_thread()} unconditionally
-              returns \cpp{false}.
+    \item[1)] \cpp{fiber\_context::uses\_system\_stack()} returns \cpp{false}
+        if the stack used by the fiber was not provided by the operating system;
+        otherwise \cpp{true}.
 \end{description}
 
 {\bfseries Notes}
@@ -228,6 +230,25 @@ the one on which it was originally launched
 \fiber is optimized for use only within a single \thread. Resuming
 it on a thread other than the one on which it was launched results in
 Undefined Behavior.
+
+\subparagraph*{previous\_thread()}
+returns the \cpp{std::thread::id} of the thread at which the \fiber instance was
+suspended. A \fiber instance that was not resumed yet, returns a
+default constructed \cpp{std::thread::id}.
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{std::thread::id previous\_thread()} & (1)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] returns \cpp{std::thread::id} of the thread at which \cpp{*this}
+        was suspended. If the \fiber was not started yet, an default constructed
+        \cpp{std::thread::id} will be returned.
+\end{description}
 
 \subparagraph*{operator bool}
 test whether \fiber is valid\\
