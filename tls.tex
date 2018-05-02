@@ -1,22 +1,36 @@
 \abschnitt{multi-threading environment}
 
+Member function \usessysstack returns \cpp{true} if the stack used by the
+\fiber instance was created by the operating system (main application or thread
+stack); otherwise \cpp{false} will be returned. Instance that use a stack
+provided by the operating system must not be migrated to other threads!
+\footnote{A possible implementation could mark the first stack frame by creating
+a special marker (for instance \emph{0xBADCAFFEE} etc.) at a specific offset
+in the first stack frame or use a special function name for the first function 
+and walk the stack searching for these markers.}\\
+
+To decide if a \fiber instance might safely resumed on  a thread \prevtid
+returns the \cpp{std::thread::id} of the thread that has suspended the fiber. If
+the fiber was not resumed for the first time, a default constructed
+\cpp{std::thread::id} will be returned.\\
+
 \fiber is TLS-agnostic - best practice related to TLS applies to fibers too
 (see P0772R0.)\\
 
-A \fiber may not migrate between threads: it may only be resumed on the
-\thread on which it was launched.
-
-Certain \xtfiber instances may be migrated between threads, using special
-methods as described below. However, if \anythread returns \cpp{false}, that
-instance may not migrate between threads.
-
-\cpp{cross\_thread\_fiber\_context::resume()}
-and \cpp{cross\_thread\_fiber\_context::resume\_with()} may only be called on
-the same \thread on which the fiber represented by that \xtfiber was last
-running.
-
-If \anythread
-returns \cpp{true}, \cpp{cross\_thread\_fiber\_context::resume\_other\_thread()}
-and \cpp{cross\_thread\_fiber\_context::resume\_other\_thread\_with()} may be
-called on a different \thread than the one on which the fiber represented by
-that \xtfiber was last running. \fiber does not have either of these methods.
+%A \fiber may not migrate between threads: it may only be resumed on the
+%\thread on which it was launched.
+%
+%Certain \fiber instances may be migrated between threads, using special
+%methods as described below. However, if \usessysstack returns \cpp{false}, that
+%instance may not migrate between threads.
+%
+%\cpp{cross\_thread\_fiber\_context::resume()}
+%and \cpp{cross\_thread\_fiber\_context::resume\_with()} may only be called on
+%the same \thread on which the fiber represented by that \fiber was last
+%running.
+%
+%If \usessysstack
+%returns \cpp{true}, \cpp{cross\_thread\_fiber\_context::resume\_other\_thread()}
+%and \cpp{cross\_thread\_fiber\_context::resume\_other\_thread\_with()} may be
+%called on a different \thread than the one on which the fiber represented by
+%that \fiber was last running. \fiber does not have either of these methods.

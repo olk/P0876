@@ -43,20 +43,30 @@
 \begin{document}
 \small
 \begin{tabbing}
-    Document number: \= D0876R1\\
-    Date:            \> 2018-03-16\\
+    Document number: \= P0876R2\\
+    Date:            \> 2018-04-20\\
     Author:          \> Oliver Kowalke (oliver.kowalke@gmail.com)\\
                      \> Nat Goodspeed (nat@lindenlab.com)\\
     Audience:        \> SG1\\
 \end{tabbing}
 
-\section*{fibers without scheduler}
+\section*{\emph{fiber\_context} - fibers without scheduler}
 
 %//////////////////////////////////////////////////////////////////////////////
 
 \tableofcontents
 
 %//////////////////////////////////////////////////////////////////////////////
+
+\abschnitt{Revision History}
+This document supersedes P0876R1.\\
+\newline
+Changes since P0876R1.
+
+\begin{itemize}
+    \item introduction of member function \usessysstack
+    \item introduction of member function \prevtid
+\end{itemize}
 
 \input{abstract}
 \input{control_transfer}

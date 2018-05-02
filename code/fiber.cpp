@@ -19,7 +19,8 @@ public:
     template<typename Fn>
     fiber_context resume_with(Fn&& fn) &&;
 
-    bool any_thread() const noexcept;
+    bool uses_system_stack();
+    std::thread::id previous_thread();
 
     explicit operator bool() const noexcept;
     bool operator!() const noexcept;
