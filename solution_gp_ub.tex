@@ -102,9 +102,10 @@ signature `\cpp{fiber\_context(fiber\_context&&)}`. Using \fiber as the return
 value from such a function avoids global variables.}
 
 \uabschnitt{returning synthesized \fiber instance from \cpp{resume()}}\label{fiberreturn}
-An instance of \fiber remains invalid after return from \resume or \resumewith --
-the synthesized fiber is returned, instead of implicitly updating the \fiber
-instance on which \resume was called.\\
+An instance of \fiber remains invalid after return from \resume, \resumewith,
+\xtresume or\\
+\xtresumewith -- the synthesized fiber is returned, instead of
+implicitly updating the \fiber instance on which \resume was called.\\
 If the \fiber object were implicitly udpated, the fiber would 
 change its identity because each fiber is associated with a stack. Each stack
 contains a chain of function calls (call stack). If this association were
@@ -129,21 +130,22 @@ fact the instance \cpp{f2} gets the synthesized \fiber of \cpp{f3} implicitly
 assigned. Remember that at line 7 fiber \cpp{f3} gets suspended while \cpp{f1}
 is resumed through \cpp{f1.resume()}.\\
 
-This problem can be solved by returning the synthesized \fiber from  \resume or
-\resumewith. 
+This problem can be solved by returning the synthesized \fiber from \resume,
+\resumewith, \xtresume or \xtresumewith.
 \cppf{return_from_resume_invalid}
 
 In the example above the synthesized \fiber returned by \resume is
 move-assigned to the invoking \fiber instance (that has resumed the current
 fiber).\\
 
-\zs{The synthesized \fiber must be returned from \resume and \resumewith in order
-to prevent changing the identity of the fiber.}
+\zs{The synthesized \fiber must be returned from \resume, \resumewith,
+\xtresume and \xtresumewith in order to prevent changing the identity of the
+fiber.}
 \xspace\newline
 
-If the overall control flow isn't known, member function \resumewith (see section
-\nameref{resumewith}) can be used to assign the synthesized \fiber to the correct \fiber
-instance (the caller).
+If the overall control flow isn't known, member functions \resumewith
+or \xtresumewith (see section \nameref{resumewith}) can be used to assign the
+synthesized \fiber to the correct \fiber instance (the caller).
 \cppf{assign_resumewith}
 
 Member function \cpp{resume_next()} resumes the next \cpp{filament} passed as
