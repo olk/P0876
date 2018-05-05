@@ -1,3 +1,6 @@
+\newpage
+\abschnitt{API}\label{api}
+
 \uabschnitt{class fiber\_context}
 
 \cppf{fiber}
@@ -5,7 +8,7 @@
 \paragraph*{member functions}
 
 \subparagraph*{(constructor)}
-constructs new fiber for use solely within the current \thread\\
+constructs new \cpp{fiber\_context}\\
 
 \begin{tabular}{ l l }
     \midrule
@@ -56,11 +59,16 @@ constructs new fiber for use solely within the current \thread\\
 \begin{description}
     \item The entry-function \cpp{fn} is \emph{not} immediately entered. The
           stack and any other necessary resources are created on construction,
-          but \cpp{fn} is not entered until \resume or \resumewith is called.
-    \item The entry-function \cpp{fn} passed to \fiber will be passed a synthesized \fiber
-          instance representing the suspended caller of \resume.
-    \item The function \cpp{fn} passed to \resumewith will be passed a
-          synthesized \fiber instance representing the suspended caller of \resumewith.
+          but \cpp{fn} is not entered until \resume, \resumewith, \xtresume or
+          \xtresumewith is called.
+    \item The entry-function \cpp{fn} passed to \fiber will be passed a
+          synthesized \fiber instance representing the suspended caller
+          of \resume, \resumewith, \xtresume or\\
+          \xtresumewith.
+    \item The function \cpp{fn} passed to \resumewith or \xtresumewith will be
+          passed a synthesized\\
+          \fiber instance representing the suspended caller of \resumewith
+          or \xtresumewith.
 \end{description}
 
 \subparagraph*{(destructor)}\label{destructor}
@@ -133,11 +141,20 @@ resumes a fiber\\
     \cpp{fiber\_context resume\_with(Fn&& fn) &&} & (2)\\
 
     \midrule
+
+    \cpp{fiber\_context resume\_other\_thread() &&} & (3)\\
+
+    \midrule
+
+    \cpp{template<typename Fn>}\\
+    \cpp{fiber\_context resume\_other\_thread\_with(Fn&& fn) &&} & (4)\\
+
+    \midrule
 \end{tabular}
 
 \begin{description}
-    \item[1)] suspends the active fiber, resumes fiber \cpp{*this}
-    \item[2)] suspends the active fiber, resumes fiber \cpp{*this}
+    \item[1),3)] suspends the active fiber, resumes fiber \cpp{*this}
+    \item[2),4)] suspends the active fiber, resumes fiber \cpp{*this}
               but calls \cpp{fn()} in the resumed fiber (as if called by the
               suspended function)
 \end{description}
@@ -155,28 +172,39 @@ resumes a fiber\\
 
 {\bfseries Exceptions}
 \begin{description}
-    \item[1)] \resume or \resumewith might throw \unwindex if, while suspended,
-              the calling \fiber is destroyed
-    \item[2)] \resume or \resumewith might throw \emph{any} exception if,
-              while suspended:
+    \item[1)] \resume or \resumewith might throw \cpp{std::domain\_error} if
+              the current \thread is not the same as the thread on
+              which \cpp{*this} was most recently run
+    \item[2)] \xtresume or \xtresumewith might throw \cpp{std::domain\_error} if\\
+              \usessysstack would return \cpp{true} and the current \thread
+              is not the same as the thread represented
+              by \cpp{*this}\footnote{\bfs{SG1: is this validation desired?}}
+    \item[3)] \resume, \resumewith, \xtresume or \xtresumewith might throw\\
+              \unwindex if, while suspended, the calling \fiber is destroyed
+    \item[4)] \resume, \resumewith, \xtresume or \xtresumewith might
+              throw \emph{any} exception if, while suspended:
               \begin{itemize}
-                  \item some other fiber calls \resumewith to resume this
-                        suspended fiber
-                  \item the function \cpp{fn} passed to \resumewith -- or some
-                        function called by \cpp{fn} -- throws an exception
+                  \item some other fiber calls \resumewith or \xtresumewith to
+                        resume this suspended fiber
+                  \item the function \cpp{fn} passed to \resumewith
+                        or \xtresumewith -- or some function called
+                        by \cpp{fn} -- throws an exception
               \end{itemize}
-    \item[3)] Any exception thrown by the function \cpp{fn} passed to
-              \resumewith, or any function called by \cpp{fn}, is thrown in the
-              fiber referenced by \cpp{*this} rather than in the fiber of
-              the caller of \resumewith.
+    \item[5)] Any exception thrown by the function \cpp{fn} passed
+              to \resumewith or \xtresumewith, or any function called
+              by \cpp{fn}, is thrown in the fiber referenced by \cpp{*this}
+              rather than in the fiber of the caller of \resumewith
+              or \xtresumewith.
 \end{description}
 
 {\bfseries Preconditions}
 \begin{description}
     \item[1)] \cpp{*this} represents a valid fiber (\opbool returns \cpp{true})
-    \item[2)] the current \thread is the same as the thread on which
-              \cpp{*this} was originally launched. An implementation is not
-              required to verify.
+    \item[2)] for \resume and \resumewith, the current \thread is the same as
+              the thread on which \cpp{*this} was most recently run
+    \item[3)] for \resume, \resumewith, \xtresume and \xtresumewith, if\\
+              \usessysstack would return \cpp{true}, the current \thread is
+              the same as the thread represented by \cpp{*this}
 \end{description}
 
 {\bfseries Postcondition}
@@ -186,69 +214,94 @@ resumes a fiber\\
 
 {\bfseries Notes}
 \newline
-\resume preserves the execution context of the calling fiber. Those data are
-restored if the calling fiber is resumed.\\
+\resume, \resumewith, \xtresume and \xtresumewith preserve the execution
+context of the calling fiber. Those data are restored if the calling fiber is
+resumed.\\
 A suspended \cpp{fiber\_context} can be destroyed. Its resources will be cleaned
 up at that time.\\
 The returned \cpp{fiber\_context} indicates via \opbool whether the previous active
 fiber has terminated (returned from \entryfn).\\
-Because \resume invalidates the instance on which it is called, \emph{no valid
-\fiber instance ever represents the currently-running fiber.} In order to
-express the invalidation explicitly, \resume and \resumewith are
-rvalue-reference qualified. This means that both functions can only be invoked on
-rvalues.\\
-When calling \resume, it is conventional to replace the newly-invalidated
-instance -- the instance on which \resume was called -- with the new instance
-returned by that \resume call. This helps to avoid inadvertent calls to \resume
-on the old, invalidated instance.
+Because \resume, \resumewith, \xtresume and \xtresumewith invalidate the
+instance on which they are called, \emph{no valid \fiber instance ever
+represents the currently-running fiber.} In order to express the invalidation
+explicitly, these methods are rvalue-reference qualified. This means that such
+methods can only be invoked on rvalues.\\
+When calling any of these methods, it is conventional to replace the
+newly-invalidated instance -- the instance on which the method was was called
+-- with the new instance returned by that call. This helps to avoid subsequent
+inadvertent attempts to resume the old, invalidated instance.
 \newline
 An injected function \cpp{fn()} must accept \cpp{std::fiber\_context&&} and
 return \fiber. The \fiber instance returned by \cpp{fn()} is, in turn, used as
-the return value for the suspended function: \resume or \resumewith.
+the return value for the suspended function: \resume, \resumewith, \xtresume
+or \xtresumewith.
 
 \subparagraph*{uses\_system\_stack()}
-query whether this \fiber instance uses a system provided stack. A \fiber
-instance using a system provided stack can not be resumed on a different thread
-than the one on which it was originally launched.
+query whether this \fiber instance uses a system provided stack. A\\
+\fiber instance using a system provided stack may not be resumed on a
+different thread than the one represented by that \fiber instance.\\
 
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{bool uses\_system\_stack()} & (1)\\
+    \cpp{bool uses\_system\_stack() noexcept} & (1)\\
 
     \midrule
 \end{tabular}
 
 \begin{description}
-    \item[1)] \cpp{fiber\_context::uses\_system\_stack()} returns \cpp{false}
-        if the stack used by the fiber was not provided by the operating system;
-        otherwise \cpp{true}.
+    \item[1)] \cpp{fiber\_context::uses\_system\_stack()} returns \cpp{true}
+        if the stack used by the fiber was provided by the operating system;
+        otherwise \cpp{false}.
+\end{description}
+
+{\bfseries Precondition}
+\begin{description}
+    \item[1)] \cpp{*this} represents a valid fiber (\opbool returns \cpp{true})
 \end{description}
 
 {\bfseries Notes}
 \newline
-\fiber is optimized for use only within a single \thread. Resuming
-it on a thread other than the one on which it was launched results in
-Undefined Behavior.
+When \cpp{main()}, or the entry-function of a \thread, or any function
+directly called by these, is suspended, a \fiber instance represents that
+suspended fiber. \usessysstack distinguishes a suspended fiber whose stack was
+provided by the system (returns \cpp{true}) from a suspended fiber whose stack
+was created by \fiber's constructor (returns \cpp{false}). Attempting to
+resume a \fiber whose stack belongs to \cpp{main()} or a \thread on some
+other \thread results in Undefined Behavior.\\
+
+\usessysstack is not marked \cpp{const} because in at least one
+implementation, it requires an internal context switch.
 
 \subparagraph*{previous\_thread()}
-returns the \cpp{std::thread::id} of the thread at which the \fiber instance was
-suspended. A \fiber instance that was not resumed yet, returns a
-default constructed \cpp{std::thread::id}.
+returns the \cpp{std::thread::id} of the thread on which the \fiber instance
+was suspended. When called on a valid \fiber instance that has not yet been
+resumed, returns a default constructed \cpp{std::thread::id}.\\
 
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{std::thread::id previous\_thread()} & (1)\\
+    \cpp{std::thread::id previous\_thread() noexcept} & (1)\\
 
     \midrule
 \end{tabular}
 
 \begin{description}
-    \item[1)] returns \cpp{std::thread::id} of the thread at which \cpp{*this}
-        was suspended. If the \fiber was not started yet, an default constructed
-        \cpp{std::thread::id} will be returned.
+    \item[1)] returns \cpp{std::thread::id} of the thread on which \cpp{*this}
+        was suspended. If the \fiber has not yet run and has therefore never
+        been suspended, a default-constructed \cpp{std::thread::id} will be
+        returned.
 \end{description}
+
+{\bfseries Precondition}
+\begin{description}
+    \item[1)] \cpp{*this} represents a valid fiber (\opbool returns \cpp{true})
+\end{description}
+
+{\bfseries Notes}
+\newline
+\prevtid is not marked \cpp{const} because in at least one
+implementation, it requires an internal context switch.
 
 \subparagraph*{operator bool}
 test whether \fiber is valid\\
@@ -274,8 +327,8 @@ A \fiber instance might not represent a valid fiber for any of a number of reaso
     \item It might have been assigned to another instance, or passed into a
           function.\\
           \fiber instances are move-only.
-    \item It might already have been resumed -- calling \resume invalidates the
-          instance.
+    \item It might already have been resumed -- calling \resume, \resumewith,
+          \xtresume or \xtresumewith invalidates the instance.
     \item The \entryfn\xspace might have voluntarily terminated the fiber by
           returning.
 \end{itemize}
@@ -340,4 +393,80 @@ swaps two \fiber instances\\
 
 \begin{description}
     \item[1)] Exchanges the state of \cpp{*this} with \cpp{other}.\\
+\end{description}
+
+
+\uabschnitt{std::unwind\_fiber()}
+
+terminate the current running fiber, switching to the fiber represented by
+the passed \fiber. This is like returning that \fiber from the \entryfn, but may
+be called from any function on that fiber.\\
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{void unwind\_fiber(fiber\_context&& other)} & (1)\\
+
+    \midrule
+\end{tabular}
+
+\begin{description}
+    \item[1)] throws \unwindex, binding the passed \fiber. The running fiber's
+              first stack entry catches \unwindex, extracts the bound \fiber
+              and terminates the current fiber by returning that \fiber.
+\end{description}
+
+\bfs{Parameters}
+\begin{description}
+    \item[other] the \fiber to which to switch once the current fiber has terminated
+\end{description}
+
+\bfs{Preconditions}
+\begin{description}
+    \item[1)] \cpp{other} must be valid (\cpp{operator bool()} returns \cpp{true})
+\end{description}
+
+\bfs{Return value}
+\begin{description}
+    \item[1)] None: \unwindfib does not return
+\end{description}
+
+\bfs{Exceptions}
+\begin{description}
+    \item[1)] throws \unwindex
+\end{description}
+
+
+\uabschnitt{std::unwind\_exception}
+
+is the exception used to unwind the stack referenced by a \fiber being destroyed.
+It is thrown by \unwindfib. \unwindex binds a \fiber referencing the fiber to
+which control should be passed once the current fiber is unwound and destroyed.
+
+
+\uabschnitt{Stack allocators}\label{stackalloc}
+
+are the means by which stacks with non-default properties may be requested by
+the caller of \fiber's constructor. The stack allocator concept is
+implementation-dependent; the means by which an implementation's
+stack allocators communicate with \fiber's constructor is unspecified.\\
+
+An implementation must provide at least a \cpp{fixedsize} stack allocator.
+Portable code may rely on \cpp{fixedsize}. An implementation may provide
+additional stack allocators as appropriate, but a stack allocator with
+semantics matching any of the following must use the corresponding name.
+\begin{description}
+  \item[protected\_fixedsize] The constructor accepts a \cpp{size\_t} parameter.
+        This stack allocator constructs a contiguous stack of specified size,
+        appending a guard page at the end to protect against overflow. If the
+        guard page is accessed (read or write operation), a segmentation
+        fault/access violation is generated by the operating system.
+  \item[fixedsize] The constructor accepts a \cpp{size\_t} parameter.
+        This stack allocator constructs a contiguous stack of specified size.
+        In contrast to \cpp{protected\_fixedsize}, it does not append a guard
+        page. The memory is simply managed by \cpp{std::malloc()}
+        and \cpp{std::free()}, avoiding kernel involvement.
+  \item[segmented] The constructor accepts a \cpp{size\_t} parameter.
+        This stack allocator creates a segmented stack\cite{gccsplit} with the
+        specified initial size, which grows on demand.
 \end{description}

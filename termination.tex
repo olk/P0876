@@ -47,10 +47,10 @@ Returning an invalid \fiber instance (\opbool returns \cpp{false}) invokes
 undefined behavior.\\
 
 If the \entryfn\xspace returns the same \fiber instance it was originally
-passed (or rather, the \fiber instance most recently returned by \resume
-or \resumewith), control returns to the fiber that most recently resumed the
-running fiber. However, the \entryfn\xspace may return (switch to) any
-reachable valid \fiber instance.\\
+passed (or rather, the \fiber instance most recently returned by \resume,
+\resumewith, \xtresume or \xtresumewith), control returns to the fiber that
+most recently resumed the running fiber. However, the \entryfn\xspace may
+return (switch to) any reachable valid \fiber instance.\\
 
 \emph{Calling} \resume means: ``Please switch to the indicated fiber; I
 am suspending; please resume me later.''\\

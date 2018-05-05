@@ -10,8 +10,9 @@ If the fiber represented by the \fiber instance \cpp{f} has called a function
 if \cpp{suspender()}'s \resume call had directly called \cpp{fn()}.\\
 
 Like an \entryfn\xspace passed to \fiber, \cpp{fn()} must accept
-\cpp{std::fiber\_context&&} and return \fiber. The \fiber instance returned by \cpp{fn()}
-will, in turn, be returned to \cpp{suspender()} by \resume.\\
+\cpp{std::fiber\_context&&} and return\\
+\fiber. The \fiber instance returned by \cpp{fn()} will, in turn, be returned
+to \cpp{suspender()} by \resume.\\
 
 Suppose that code running on the program's main fiber calls \resume (line 12), thereby
 entering the first lambda shown below. This is the point at which \cpp{m} is
@@ -51,5 +52,14 @@ at line 8.\\
 Finally, the first lambda returns at line 10 the \cpp{m} variable updated at
 line 8, switching back to the main fiber.\\
 
-\zs{Member function \resumewith allows you to inject a function into a suspended
-fiber.}
+One case worth pointing out is when you call \resumewith (or \xtresumewith) on
+a \fiber that has not yet been resumed for the first time:
+\cppfl{initial_resume_with}
+
+In this situation, \cpp{injected()} is called with a \fiber instance
+representing the caller of \resumewith. When \cpp{injected()} eventually
+returns that (or some other valid) \fiber instance, the returned \fiber
+instance is passed into \cpp{topfunc()} as its \cpp{prev} parameter.
+
+\zs{Member functions \resumewith and \xtresumewith allow you to inject a
+function into a suspended fiber.}

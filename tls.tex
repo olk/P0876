@@ -2,35 +2,34 @@
 
 Member function \usessysstack returns \cpp{true} if the stack used by the
 \fiber instance was created by the operating system (main application or thread
-stack); otherwise \cpp{false} will be returned. Instance that use a stack
-provided by the operating system must not be migrated to other threads!
-\footnote{A possible implementation could mark the first stack frame by creating
+stack). When the stack represented by the \fiber instance was created
+by \fiber's constructor, \usessysstack returns \cpp{false}. You must not
+attempt to resume an instance representing a stack
+provided by the operating system on some other thread!\footnote{A possible
+implementation could mark the first stack frame by creating
 a special marker (for instance \emph{0xBADCAFFEE} etc.) at a specific offset
 in the first stack frame or use a special function name for the first function 
 and walk the stack searching for these markers.}\\
 
-To decide if a \fiber instance might safely resumed on  a thread \prevtid
-returns the \cpp{std::thread::id} of the thread that has suspended the fiber. If
-the fiber was not resumed for the first time, a default constructed
-\cpp{std::thread::id} will be returned.\\
+To decide whether a given \fiber instance might safely be resumed on a
+particular thread, \prevtid returns the \cpp{std::thread::id} of the thread on
+which the fiber was suspended: the fiber on which it most recently ran. If the
+fiber has not yet run at all, a default-constructed \cpp{std::thread::id} will
+be returned.\\
 
-\fiber is TLS-agnostic - best practice related to TLS applies to fibers too
+\fiber is TLS-agnostic - best practices related to TLS apply to fibers too
 (see P0772R0.)\\
 
-%A \fiber may not migrate between threads: it may only be resumed on the
-%\thread on which it was launched.
-%
-%Certain \fiber instances may be migrated between threads, using special
-%methods as described below. However, if \usessysstack returns \cpp{false}, that
-%instance may not migrate between threads.
-%
-%\cpp{cross\_thread\_fiber\_context::resume()}
-%and \cpp{cross\_thread\_fiber\_context::resume\_with()} may only be called on
-%the same \thread on which the fiber represented by that \fiber was last
-%running.
-%
-%If \usessysstack
-%returns \cpp{true}, \cpp{cross\_thread\_fiber\_context::resume\_other\_thread()}
-%and \cpp{cross\_thread\_fiber\_context::resume\_other\_thread\_with()} may be
-%called on a different \thread than the one on which the fiber represented by
-%that \fiber was last running. \fiber does not have either of these methods.
+There could potentially be Undefined Behavior if:
+\begin{itemize}
+    \item code running on a fiber references \cpp{thread\_local} variables
+    \item the compiler/runtime implementation caches a pointer
+          to \cpp{thread\_local} storage on the stack
+    \item that fiber is suspended, and
+    \item the suspended fiber is resumed on some thread other than \prevtid.
+\end{itemize}
+
+For a runtime that caches TLS pointers in such fashion, an implementation
+of \xtresume or\\
+\xtresumewith could conceivably walk the suspended stack,
+patching cached pointers.

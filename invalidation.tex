@@ -10,8 +10,8 @@ deallocated).\\
 As a consequence each call of \resume will invalidate the \fiber instance, i.e.
 no valid instance of \fiber represents the currently-running fiber.\\
 Whether a \fiber is valid or not can be tested with member function \opbool.\\
-To make this more explicit, functions \resume and \resumewith are
-rvalue-reference qualified (binding only on rvalues).
+To make this more explicit, functions \resume, \resumewith, \xtresume
+and \xtresumewith are rvalue-reference qualified (binding only on rvalues).
 %If a fiber calls \cpp{f.resume()} then the  fiber is suspended and \cpp{f} is
 %invalidated. When the fiber is resumed later, it returns from \cpp{f.resume()}
 %and instance \cpp{f} references the calling fiber (the fiber that has resumed
@@ -33,7 +33,7 @@ A fiber API must:
     \item prevent accidentally resuming a running fiber
     \item prevent accidentally resuming a terminated (computation has finished)
           fiber
-    \item \resume and \resumewith are rvalue-reference qualified to bind on
-           rvalues only
+    \item \resume, \resumewith, \xtresume and \xtresumewith are
+          rvalue-reference qualified to bind on rvalues only
 \end{itemize}
 }
