@@ -59,7 +59,7 @@ constructs new \cpp{fiber\_context}\\
 \begin{description}
     \item The entry-function \cpp{fn} is \emph{not} immediately entered. The
           stack and any other necessary resources are created on construction,
-          but \cpp{fn} is not entered until \resume, \resumewith, \xtresume or
+          but \cpp{fn} is not entered until \resume, \resumewith, \xtresume or\\
           \xtresumewith is called.
     \item The entry-function \cpp{fn} passed to \fiber will be passed a
           synthesized \fiber instance representing the suspended caller
@@ -68,7 +68,7 @@ constructs new \cpp{fiber\_context}\\
     \item The function \cpp{fn} passed to \resumewith or \xtresumewith will be
           passed a synthesized\\
           \fiber instance representing the suspended caller of \resumewith
-          or \xtresumewith.
+          or\\\xtresumewith.
 \end{description}
 
 \subparagraph*{(destructor)}\label{destructor}
@@ -232,7 +232,7 @@ newly-invalidated instance -- the instance on which the method was was called
 inadvertent attempts to resume the old, invalidated instance.
 \newline
 An injected function \cpp{fn()} must accept \cpp{std::fiber\_context&&} and
-return \fiber. The \fiber instance returned by \cpp{fn()} is, in turn, used as
+return \fiber. The\\\fiber instance returned by \cpp{fn()} is, in turn, used as
 the return value for the suspended function: \resume, \resumewith, \xtresume
 or \xtresumewith.
 
@@ -328,7 +328,7 @@ A \fiber instance might not represent a valid fiber for any of a number of reaso
           function.\\
           \fiber instances are move-only.
     \item It might already have been resumed -- calling \resume, \resumewith,
-          \xtresume or \xtresumewith invalidates the instance.
+          \xtresume or\\\xtresumewith invalidates the instance.
     \item The \entryfn\xspace might have voluntarily terminated the fiber by
           returning.
 \end{itemize}
@@ -399,7 +399,7 @@ swaps two \fiber instances\\
 \uabschnitt{std::unwind\_fiber()}
 
 terminate the current running fiber, switching to the fiber represented by
-the passed \fiber. This is like returning that \fiber from the \entryfn, but may
+the passed\\\fiber. This is like returning that \fiber from the \entryfn, but may
 be called from any function on that fiber.\\
 
 \begin{tabular}{ l l }

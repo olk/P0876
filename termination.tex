@@ -19,8 +19,8 @@ Therefore, any of the following will gracefully terminate a fiber:
           throw \unwindex, binding the \fiber you intend to resume next. This
           is what \unwindfib does internally.
     \item Call \cpp{fiber\_context::resume\_with(unwind\_fiber)}. This is what \dtor
-          does. Since \unwindfib accepts a \fiber, and since \resumewith
-          synthesizes a \fiber representing its caller and passes it to the
+          does. Since\\\unwindfib accepts a \fiber, and since \resumewith
+          synthesizes a\\\fiber representing its caller and passes it to the
           subject function, this terminates the fiber referenced by the
           original \fiber instance and switches back to the caller.
     \item Engage \dtor: switch to some other fiber, which will
@@ -47,7 +47,7 @@ Returning an invalid \fiber instance (\opbool returns \cpp{false}) invokes
 undefined behavior.\\
 
 If the \entryfn\xspace returns the same \fiber instance it was originally
-passed (or rather, the \fiber instance most recently returned by \resume,
+passed (or rather, the\\\fiber instance most recently returned by \resume,
 \resumewith, \xtresume or \xtresumewith), control returns to the fiber that
 most recently resumed the running fiber. However, the \entryfn\xspace may
 return (switch to) any reachable valid \fiber instance.\\

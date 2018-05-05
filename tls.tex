@@ -12,7 +12,7 @@ in the first stack frame or use a special function name for the first function
 and walk the stack searching for these markers.}\\
 
 To decide whether a given \fiber instance might safely be resumed on a
-particular thread, \prevtid returns the \cpp{std::thread::id} of the thread on
+particular thread,\\\prevtid returns the \cpp{std::thread::id} of the thread on
 which the fiber was suspended: the fiber on which it most recently ran. If the
 fiber has not yet run at all, a default-constructed \cpp{std::thread::id} will
 be returned.\\

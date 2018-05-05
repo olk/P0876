@@ -105,7 +105,7 @@ value from such a function avoids global variables.}
 An instance of \fiber remains invalid after return from \resume, \resumewith,
 \xtresume or\\
 \xtresumewith -- the synthesized fiber is returned, instead of
-implicitly updating the \fiber instance on which \resume was called.\\
+implicitly updating the\\\fiber instance on which \resume was called.\\
 If the \fiber object were implicitly udpated, the fiber would 
 change its identity because each fiber is associated with a stack. Each stack
 contains a chain of function calls (call stack). If this association were
@@ -149,7 +149,7 @@ synthesized \fiber to the correct \fiber instance (the caller).
 \cppf{assign_resumewith}
 
 Member function \cpp{resume_next()} resumes the next \cpp{filament} passed as
-parameter. The active fiber invokes \resumewith on the \fiber aggregated by
+parameter. The active fiber invokes\\\resumewith on the \fiber aggregated by
 \cpp{fila}. The lambda captures \cpp{this}, the current fiber is suspended, a
 new \fiber is synthesized and passed as parameter \cpp{f} to the function
 (that's the lambda) injected to the resumed fiber of \cpp{fila}.\\
