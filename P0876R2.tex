@@ -44,7 +44,7 @@
 \small
 \begin{tabbing}
     Document number: \= P0876R2\\
-    Date:            \> 2018-05-05\\
+    Date:            \> 2018-05-06\\
     Author:          \> Oliver Kowalke (oliver.kowalke@gmail.com)\\
                      \> Nat Goodspeed (nat@lindenlab.com)\\
     Audience:        \> SG1\\
@@ -59,14 +59,14 @@
 %//////////////////////////////////////////////////////////////////////////////
 
 \abschnitt{Revision History}
-This document supersedes P0876R1.\\
+This document supersedes P0876R0.\\
 \newline
-Changes since P0876R1.
+Changes since P0876R0.
 
 \begin{itemize}
     \item single \cpp{fiber\_context} type
     \item introduction of member functions \xtresume, \xtresumewith
-    \item throw on unintentional thread migration
+    \item throw on unintentional thread migration attempt
     \item introduction of member function \usessysstack
     \item introduction of member function \prevtid
     \item note about potential UB when migrating across threads with some TLS

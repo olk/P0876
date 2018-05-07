@@ -2,19 +2,20 @@
 Sometimes it is useful to inject a new function (for instance, to throw an
 exception or assign the synthesized fiber to the caller as described in
 \nameref{fiberreturn}) into a suspended fiber. For this purpose
-\cpp{resume\_with(Fn&& fn)} may be called, passing the function \cpp{fn()} to
-execute.\\
-If the fiber represented by the \fiber instance \cpp{f} has called a function
-\cpp{suspender()}, which has called \resume and is now suspended, the call 
-\cpp{f.resume\_with(fn)} injects function \cpp{fn()} into fiber \cpp{f} as
-if \cpp{suspender()}'s \resume call had directly called \cpp{fn()}.\\
+\cpp{resume\_with(Fn&& fn)} (or \xtresumewith) may be called, passing the
+function \cpp{fn()} to execute.
+
+\cppfl{suspender}
+The \resumewith call at line 11 injects function \cpp{fn()} into
+fiber \cpp{f} as if the \resume call at line 3 had directly
+called \cpp{fn()}.\\
 
 Like an \entryfn\xspace passed to \fiber, \cpp{fn()} must accept
 \cpp{std::fiber\_context&&} and return\\
 \fiber. The \fiber instance returned by \cpp{fn()} will, in turn, be returned
-to \cpp{suspender()} by \resume.\\
+to \cpp{f}'s lambda by the \resume at line 3.\\
 
-Suppose that code running on the program's main fiber calls \resume (line 12), thereby
+Suppose that code running on the program's main fiber calls \resume (line 12 below), thereby
 entering the first lambda shown below. This is the point at which \cpp{m} is
 synthesized and passed into the lambda at line 2.\\
 Suppose further that after doing some work (line 4), the lambda calls
@@ -36,7 +37,8 @@ matters when control leaves it in either of two ways:
         in \nameref{exceptions}, if there is no matching \cpp{catch}
         clause in that fiber, \cpp{std::terminate()} is called.}
   \item If the function returns, the returned \fiber instance is returned by
-        the suspended \cpp{m.resume()} (or \resumewith) call.
+        the suspended \cpp{m.resume()} (or \resumewith, or \xtresume, or
+        \xtresumewith) call.
 \end{enumerate}
 
 \cppfl{ontop}

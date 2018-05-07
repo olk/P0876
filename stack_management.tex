@@ -26,7 +26,7 @@ must be copied too. That presents two implementation choices.
 \zs{
 A fiber API must:
 \begin{itemize}
-    \item encapsulate the stack (hiding for user)
+    \item encapsulate the stack
     \item manage lifespan of an explicitly-allocated stack: the stack gets
           deallocated when \fiber goes out of scope
     \item prevent accidentally copying the stack

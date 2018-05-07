@@ -3,13 +3,13 @@
 Member function \usessysstack returns \cpp{true} if the stack used by the
 \fiber instance was created by the operating system (main application or thread
 stack). When the stack represented by the \fiber instance was created
-by \fiber's constructor, \usessysstack returns \cpp{false}. You must not
-attempt to resume an instance representing a stack
-provided by the operating system on some other thread!\footnote{A possible
+by \fiber's constructor, \usessysstack returns \cpp{false}.\footnote{A possible
 implementation could mark the first stack frame by creating
 a special marker (for instance \emph{0xBADCAFFEE} etc.) at a specific offset
 in the first stack frame or use a special function name for the first function 
-and walk the stack searching for these markers.}\\
+and walk the stack searching for these markers.} You must not
+attempt to resume an instance representing a stack
+provided by the operating system on some other thread!\\
 
 To decide whether a given \fiber instance might safely be resumed on a
 particular thread,\\\prevtid returns the \cpp{std::thread::id} of the thread on

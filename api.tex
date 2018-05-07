@@ -38,7 +38,7 @@ constructs new \cpp{fiber\_context}\\
 
 \begin{description}
     \item[1)] this constructor instantiates an invalid \fiber. Its \opbool
-              returns \cpp{false}; its \cpp{operator\!()} returns \cpp{true}.
+              returns \cpp{false}.
     \item[2)] takes a callable (function, lambda, object with \op) as
               argument. The callable must have signature as described
               in \nameref{solution_gpub}. The stack is constructed using
@@ -65,10 +65,6 @@ constructs new \cpp{fiber\_context}\\
           synthesized \fiber instance representing the suspended caller
           of \resume, \resumewith, \xtresume or\\
           \xtresumewith.
-    \item The function \cpp{fn} passed to \resumewith or \xtresumewith will be
-          passed a synthesized\\
-          \fiber instance representing the suspended caller of \resumewith
-          or\\\xtresumewith.
 \end{description}
 
 \subparagraph*{(destructor)}\label{destructor}
@@ -126,6 +122,11 @@ moves the \fiber object\\
     \item[*this]
 \end{description}
 
+{\bfseries Postcondition}
+\begin{description}
+    \item[1)] \cpp{other} is invalidated (\opbool returns \cpp{false})
+\end{description}
+
 
 \subparagraph*{resume()}
 resumes a fiber\\
@@ -180,7 +181,8 @@ resumes a fiber\\
               is not the same as the thread represented
               by \cpp{*this}\footnote{\bfs{SG1: is this validation desired?}}
     \item[3)] \resume, \resumewith, \xtresume or \xtresumewith might throw\\
-              \unwindex if, while suspended, the calling \fiber is destroyed
+              \unwindex if, while suspended, the \fiber instance representing
+              the suspended fiber is destroyed
     \item[4)] \resume, \resumewith, \xtresume or \xtresumewith might
               throw \emph{any} exception if, while suspended:
               \begin{itemize}
@@ -224,17 +226,17 @@ fiber has terminated (returned from \entryfn).\\
 Because \resume, \resumewith, \xtresume and \xtresumewith invalidate the
 instance on which they are called, \emph{no valid \fiber instance ever
 represents the currently-running fiber.} In order to express the invalidation
-explicitly, these methods are rvalue-reference qualified. This means that such
-methods can only be invoked on rvalues.\\
+explicitly, these methods are rvalue-reference qualified.\\
 When calling any of these methods, it is conventional to replace the
 newly-invalidated instance -- the instance on which the method was was called
 -- with the new instance returned by that call. This helps to avoid subsequent
 inadvertent attempts to resume the old, invalidated instance.
 \newline
 An injected function \cpp{fn()} must accept \cpp{std::fiber\_context&&} and
-return \fiber. The\\\fiber instance returned by \cpp{fn()} is, in turn, used as
-the return value for the suspended function: \resume, \resumewith, \xtresume
-or \xtresumewith.
+return \fiber. It will be passed a synthesized \fiber instance representing
+the suspended caller of \resumewith or \xtresumewith. The \fiber instance
+returned by \cpp{fn()} is, in turn, used as the return value for the suspended
+function: \resume, \resumewith, \xtresume or \xtresumewith.
 
 \subparagraph*{uses\_system\_stack()}
 query whether this \fiber instance uses a system provided stack. A\\
@@ -340,26 +342,6 @@ The essential points:
 \end{itemize}
 
 
-\subparagraph*{operator!}
-test whether \fiber is invalid\\
-
-\begin{tabular}{ l l }
-    \midrule
-
-    \cpp{bool operator\!() const noexcept} & (1)\\
-
-    \midrule
-\end{tabular}
-
-\begin{description}
-    \item[1)] returns \cpp{false} if \cpp{*this} represents a valid fiber,
-              \cpp{true} otherwise.
-\end{description}
-
-{\bfseries Notes}
-\newline
-See {\bfseries Notes} for \opbool.
-
 \subparagraph*{(comparisons)}
 establish an arbitrary total ordering for \fiber instances\\
 
@@ -375,7 +357,7 @@ establish an arbitrary total ordering for \fiber instances\\
     \item[1)] This comparison establishes an arbitrary total ordering of \fiber
               instances, for example to store in ordered containers. (However,
               key lookup is meaningless, since you cannot construct a search key
-              that would compare equal to any entry.) There is no significance
+              that would compare equal to any valid entry.) There is no significance
               to the relative order of two instances.
 \end{description}
 
