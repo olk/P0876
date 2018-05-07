@@ -12,7 +12,7 @@ no valid instance of \fiber represents the currently-running fiber.\\
 Whether a \fiber is valid or not can be tested with member function \opbool.\\
 To make this more explicit, functions \resume, \resumewith, \xtresume
 and\\
-\xtresumewith are rvalue-reference qualified (binding only on rvalues).
+\xtresumewith are rvalue-reference qualified.
 %If a fiber calls \cpp{f.resume()} then the  fiber is suspended and \cpp{f} is
 %invalidated. When the fiber is resumed later, it returns from \cpp{f.resume()}
 %and instance \cpp{f} references the calling fiber (the fiber that has resumed

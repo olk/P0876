@@ -26,7 +26,6 @@ public:
     std::thread::id previous_thread() noexcept;
 
     explicit operator bool() const noexcept;
-    bool operator!() const noexcept;
     bool operator<(const fiber_context& other) const noexcept;
     void swap(fiber_context& other) noexcept;
 };

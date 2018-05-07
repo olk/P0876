@@ -8,7 +8,7 @@ impact on the design of the \fiber API!}
 The problem of global variables or the need for a static member function
 returning the active fiber can be avoided by \bfs{synthesizing} the
 \bfs{suspended fiber} and passing it into the resumed fiber (as parameter when the
-fiber is started the first time or returned from \resume).
+fiber is first started, or returned from \resume).
 \cppfl{synthesized_foo}
 
 In the pseudo-code above the fiber \cpp{f} is started by invoking its member
@@ -35,7 +35,7 @@ instead it is a special representation of the same coroutine. Thus \main or
 the current thread's \entryfn\xspace can \bfs{not} be represented by \cpp{yield_type}
 (see next section \nameref{representation}).\\
 Because \cpp{symmetric_coroutine<>::yield_type()} yields back to the starting
-point, e.g. invocation of\\
+point, i.e. invocation of\\
 \cpp{symmetric_coroutine<>::call_type::operator()()},
 both instances (\cpp{call_type} as well as \cpp{yield_type}) must be preserved.
 Additionally the caller must be kept alive until the called coroutine terminates
@@ -52,14 +52,15 @@ into the resumed fiber as an instance of \fiber.\\
 The mechanism presented in this proposal describes switching between stacks: each
 fiber has its own stack. The stacks of \main and explicitly-launched threads
 are not excluded; these can be used as targets too.\\
-Thus every program can be considered to consist of fibers -- some
+\bfs{Thus every program can be considered to consist of fibers -- some
 created by the OS (\main stack; each thread's initial stack) and some created
-explicitly by the code.\\
+explicitly by the code.}\\
 This is a nice feature because it allows (the stacks of) \main and each
 thread's \entryfn\xspace to be represented as fibers.
 A \fiber representing \main or a thread's \entryfn\xspace
 can be handled like an explicitly created \fiber: it can passed to and returned
-from functions or stored in a container.\\
+from functions or stored in a container. When called on such an
+instance, \usessysstack returns \cpp{true}.\\
 
 In the code snippet above the suspended \main is represented by instance
 \cpp{m} and could be stored in containers or managed just like \cpp{f}
@@ -106,7 +107,7 @@ An instance of \fiber remains invalid after return from \resume, \resumewith,
 \xtresume or\\
 \xtresumewith -- the synthesized fiber is returned, instead of
 implicitly updating the\\\fiber instance on which \resume was called.\\
-If the \fiber object were implicitly udpated, the fiber would 
+If the \fiber object were implicitly updated, the fiber would 
 change its identity because each fiber is associated with a stack. Each stack
 contains a chain of function calls (call stack). If this association were
 implicitly modified, unexpected behaviour happens.\\
@@ -148,16 +149,35 @@ or \xtresumewith (see section \nameref{resumewith}) can be used to assign the
 synthesized \fiber to the correct \fiber instance (the caller).
 \cppf{assign_resumewith}
 
-Member function \cpp{resume_next()} resumes the next \cpp{filament} passed as
-parameter. The active fiber invokes\\\resumewith on the \fiber aggregated by
-\cpp{fila}. The lambda captures \cpp{this}, the current fiber is suspended, a
-new \fiber is synthesized and passed as parameter \cpp{f} to the function
-(that's the lambda) injected to the resumed fiber of \cpp{fila}.\\
-Inside the lambda \cpp{f} is moved into the instance \cpp{f_} aggregated by the
-\cpp{filament} that was suspended.\footnote{\bfiber\cite{bfiber} uses this 
-pattern for resuming user-land threads.
-The injected lambda assigns the synthesized \fiber to the caller and unlocks a
-spinlock if provided or re-schedules the suspended user-land thread.}
+Picture a higher-level framework in which every fiber can find its associated
+\cpp{filament} instance, as well as others. Every context switch must be mediated by
+passing \emph{the target} \cpp{filament} instance to \emph{the running fiber's}
+\cpp{resume\_next()}.\\
+
+Running fiber A has an associated \cpp{filament} instance \cpp{filamentA},
+whose \fiber \cpp{f\_} is invalid -- because fiber A is running.\\
+
+Desiring to switch to suspended fiber B (with associated
+\cpp{filament} \cpp{filamentB}), running fiber A calls\\
+\cpp{filamentA.resume\_next(filamentB)}.\\
+
+\cpp{resume\_next()} calls \cpp{filamentB.f\_.resume\_with(<lambda>)}.
+This invalidates \cpp{filamentB.f\_} -- because fiber B is now running.\\
+
+The lambda binds \cpp{&filamentA} as \cpp{this}. Running on fiber B, it
+receives a \fiber instance representing the newly-suspended fiber A as its
+parameter \cpp{f}. It moves that \fiber instance to \cpp{filamentA.f\_}.\\
+
+The lambda then returns a default-constructed (therefore invalid) \fiber
+instance. That invalid instance is returned by the previously-suspended
+\resumewith call in \cpp{filamentB.resume\_next()} -- which is fine because
+\cpp{resume\_next()} drops it on the floor anyway.\\
+
+Thus, the running fiber's associated \cpp{filament::f\_} is always invalid,
+whereas the \cpp{filament} associated with each suspended fiber is continually
+updated with the \fiber instance representing that
+fiber.\footnote{\bfiber\cite{bfiber} uses this pattern for resuming user-land
+threads.}
 
 \zs{It is not necessary to know the overall control flow. It is sufficient to
 pass a reference/pointer of the \emph{caller} (fiber that gets suspended) to the

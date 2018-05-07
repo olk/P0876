@@ -1,6 +1,6 @@
 \abschnitt{passing data between fibers}
 
-Data can be transferred between two fibers via global pointer, calling
+Data can be transferred between two fibers via global pointer, a calling
 wrapper (like \cpp{std::bind}) or lambda capture.
 \cppfl{passing_lambda}
 
@@ -19,9 +19,8 @@ Since the updated \cpp{caller} represents the fiber suspended by the call at
 line 10, control returns to \main.\\
 
 However, since context \cpp{lambda} has now terminated, the updated \cpp{lambda}
-is invalid. Its \opbool returns \cpp{false}; its \cpp{operator\!()} returns
-\cpp{true}.\\
+is invalid. Its \opbool returns \cpp{false}.\\
 
 \zs{Using lambda capture is the preferred way to transfer data between two
-fibers; global pointer and calling wrapper (like \cpp{std::bind}) are
+fibers; global pointers or a calling wrapper (such as \cpp{std::bind}) are
 alternatives.}

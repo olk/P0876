@@ -11,7 +11,7 @@ clause returns the bound \fiber from that top-level function.\\
 Therefore, any of the following will gracefully terminate a fiber:
 
 \begin{itemize}
-    \item Cause its \entryfn to return a valid \fiber.
+    \item Cause its \entryfn\xspace to return a valid \fiber.
     \item From within the fiber you wish to terminate, call \unwindfib with a
           valid \fiber. This throws a \unwindex instance that binds the passed
           \fiber; that fiber will be resumed when the active fiber terminates.
@@ -34,6 +34,9 @@ implicit \cpp{catch (std::unwind\_exception)}. In a conforming implementation,
 returning from a thread's \entryfn\xspace may terminate all fibers on that
 thread. Returning from \main may terminate the whole process.)\\
 
+The above are all equivalent: stack variables are properly destroyed, since
+the stack is unwound by throwing an exception. (See \nameref{destruction}.)\\
+
 In an environment that forbids exceptions, every \fiber you launch must
 terminate gracefully, by returning from its top-level function. You may not
 call \unwindfib. You may not call \dtor, explicitly or implicitly, on a
@@ -41,16 +44,13 @@ valid \fiber instance.\\
 
 When an explicitly-launched fiber's \entryfn\xspace returns a valid \fiber
 instance, that fiber is terminated. Control switches to the fiber indicated by
-the returned \fiber instance.\\
+the returned \fiber instance. The \entryfn\xspace may return (switch to) any
+reachable valid \fiber instance -- it need not be the instance originally
+passed in, or an instance returned from any of the \resume family of
+methods.\\
 
 Returning an invalid \fiber instance (\opbool returns \cpp{false}) invokes
 undefined behavior.\\
-
-If the \entryfn\xspace returns the same \fiber instance it was originally
-passed (or rather, the\\\fiber instance most recently returned by \resume,
-\resumewith, \xtresume or \xtresumewith), control returns to the fiber that
-most recently resumed the running fiber. However, the \entryfn\xspace may
-return (switch to) any reachable valid \fiber instance.\\
 
 \emph{Calling} \resume means: ``Please switch to the indicated fiber; I
 am suspending; please resume me later.''\\
