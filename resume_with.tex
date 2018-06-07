@@ -11,7 +11,7 @@ fiber \cpp{f} as if the \resume call at line 3 had directly
 called \cpp{fn()}.\\
 
 Like an \entryfn\xspace passed to \fiber, \cpp{fn()} must accept
-\cpp{std::fiber\_context&&} and return\\
+\cpp{std::fiber\_handle&&} and return\\
 \fiber. The \fiber instance returned by \cpp{fn()} will, in turn, be returned
 to \cpp{f}'s lambda by the \resume at line 3.\\
 
@@ -22,7 +22,7 @@ Suppose further that after doing some work (line 4), the lambda calls
 \cpp{m.resume()}, thereby switching back to the main fiber. The lambda remains
 suspended in the call to \cpp{m.resume()} at line 5.\\
 At line 18 the main fiber calls \cpp{f.resume\_with()} where the passed lambda
-accepts \cpp{fiber\_context &&}. That new lambda is called on the fiber of the suspended
+accepts \cpp{fiber\_handle &&}. That new lambda is called on the fiber of the suspended
 lambda. It is as if the \cpp{m.resume()} call at line 8 directly called the second
 lambda.\\
 

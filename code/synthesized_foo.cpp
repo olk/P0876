@@ -1,5 +1,5 @@
 void foo(){
-    fiber_context f{[](fiber_context&& m){
+    fiber_handle f{[](fiber_handle&& m){
         m=std::move(m).resume(); // switch to `foo()`
         m=std::move(m).resume(); // switch to `foo()`
         ...

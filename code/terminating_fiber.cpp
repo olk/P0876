@@ -1,5 +1,5 @@
 int main(){
-    fiber_context f{[](fiber_context&& m){
+    fiber_handle f{[](fiber_handle&& m){
         return std::move(m); // resume `main()` by returning `m`
     }};
     std::move(f).resume(); // resume `f`

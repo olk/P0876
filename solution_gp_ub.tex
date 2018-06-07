@@ -56,11 +56,11 @@ are not excluded; these can be used as targets too.\\
 created by the OS (\main stack; each thread's initial stack) and some created
 explicitly by the code.}\\
 This is a nice feature because it allows (the stacks of) \main and each
-thread's \entryfn\xspace to be represented as fibers.
-A \fiber representing \main or a thread's \entryfn\xspace
-can be handled like an explicitly created \fiber: it can passed to and returned
-from functions or stored in a container. When called on such an
-instance, \usessysstack returns \cpp{true}.\\
+thread's \entryfn\xspace to be represented as fibers. A \fiber
+representing \main or a thread's \entryfn\xspace can be handled like an
+explicitly created \fiber: it can passed to and returned from functions or
+stored in a container. When called on such an instance, \canxtresume indicates
+whether it is valid to call \xtresume or \xtresumewith on that instance.\\
 
 In the code snippet above the suspended \main is represented by instance
 \cpp{m} and could be stored in containers or managed just like \cpp{f}
@@ -77,7 +77,7 @@ internal global variables that point to \main is to explicitly return a valid
 \cppfl{terminating_fiber}
 
 In line 5 the fiber is started by invoking \resume on instance \cpp{f}. \main
-is suspended and an instance of type \cpp{fiber\_context} is synthesized and passed as
+is suspended and an instance of type \cpp{fiber\_handle} is synthesized and passed as
 parameter \cpp{m} to the lambda at line 2. The fiber terminates by returning
 \cpp{m}. Control is transferred to \main (returning from \cpp{f.resume()} at
 line 5) while fiber \cpp{f} is destroyed.\\
@@ -99,14 +99,14 @@ the captured \fiber\xspace \cpp{m} as return value (line 6). Control is returned
 \main, returning from \cpp{f2.resume()} at line 13.\\
 
 \zs{The function passed to \fiber's constructor must have
-signature `\cpp{fiber\_context(fiber\_context&&)}`. Using \fiber as the return
+signature `\cpp{fiber\_handle(fiber\_handle&&)}`. Using \fiber as the return
 value from such a function avoids global variables.}
 
 \uabschnitt{returning synthesized \fiber instance from \cpp{resume()}}\label{fiberreturn}
 An instance of \fiber remains invalid after return from \resume, \resumewith,
 \xtresume or\\
 \xtresumewith -- the synthesized fiber is returned, instead of
-implicitly updating the\\\fiber instance on which \resume was called.\\
+implicitly updating the \fiber instance on which \resume was called.\\
 If the \fiber object were implicitly updated, the fiber would 
 change its identity because each fiber is associated with a stack. Each stack
 contains a chain of function calls (call stack). If this association were
