@@ -129,12 +129,12 @@ resumes a fiber\\
 
     \midrule
 
-    \cpp{fiber\_handle resume\_other\_thread() &&} & (3)\\
+    \cpp{fiber\_handle resume\_from\_any\_thread() &&} & (3)\\
 
     \midrule
 
     \cpp{template<typename Fn>}\\
-    \cpp{fiber\_handle resume\_other\_thread\_with(Fn&& fn) &&} & (4)\\
+    \cpp{fiber\_handle resume\_from\_any\_thread\_with(Fn&& fn) &&} & (4)\\
 
     \midrule
 \end{tabular}
@@ -162,14 +162,10 @@ resumes a fiber\\
     \item[1)] \resume or \resumewith might throw \cpp{std::domain\_error} if
               the current \thread is not the same as the thread on
               which \cpp{*this} was most recently run
-    \item[2)] \xtresume or \xtresumewith might throw \cpp{std::domain\_error} if\\
-              \canxtresume would return \cpp{false} and the current \thread
-              is not the same as the thread represented
-              by \cpp{*this}\footnote{\bfs{SG1: is this validation desired?}}
-    \item[3)] \resume, \resumewith, \xtresume or \xtresumewith might throw\\
+    \item[2)] \resume, \resumewith, \xtresume or \xtresumewith might throw\\
               \unwindex if, while suspended, the \fiber instance representing
               the suspended fiber is destroyed
-    \item[4)] \resume, \resumewith, \xtresume or \xtresumewith might
+    \item[3)] \resume, \resumewith, \xtresume or \xtresumewith might
               throw \emph{any} exception if, while suspended:
               \begin{itemize}
                   \item some other fiber calls \resumewith or \xtresumewith to
@@ -178,7 +174,7 @@ resumes a fiber\\
                         or \xtresumewith -- or some function called
                         by \cpp{fn} -- throws an exception
               \end{itemize}
-    \item[5)] Any exception thrown by the function \cpp{fn} passed
+    \item[4)] Any exception thrown by the function \cpp{fn} passed
               to \resumewith or \xtresumewith, or any function called
               by \cpp{fn}, is thrown in the fiber referenced by \cpp{*this}
               rather than in the fiber of the caller of \resumewith
@@ -202,6 +198,19 @@ resumes a fiber\\
 
 {\bfseries Notes}
 \newline
+The intent of the distinction between \resume and \xtresume, as
+between \resumewith and \xtresumewith, is both for validation and for code
+auditing. If an application only ever calls \resume and \resumewith, no fiber
+will ever be resumed on a thread other than the one on which it was initially
+resumed. Any attempt to do so will throw.\\
+
+The intent of the names \xtresume and \xtresumewith is to clarify the
+direction in which cross-thread resumption occurs. The calling thread always
+directly resumes a suspended fiber: control is passed into the suspended
+fiber, and the currently-running fiber suspends. These method names mean that
+the fiber represented by \cpp{*this} will be resumed whether or not it was
+last resumed on the calling thread.\\
+
 \resume, \resumewith, \xtresume and \xtresumewith preserve the execution
 context of the calling fiber. Those data are restored if the calling fiber is
 resumed.\\
@@ -225,7 +234,7 @@ the suspended caller of \resumewith or\\
 the return value for the suspended function: \resume, \resumewith, \xtresume
 or\\\xtresumewith.
 
-\subparagraph*{can\_resume\_other\_thread()}
+\subparagraph*{can\_resume\_from\_any\_thread()}
 query whether the calling thread can resume the suspended \fiber instance by
 calling \xtresume or \xtresumewith. The implementation must return \cpp{false}
 if the suspended \fiber instance represents a fiber with a system-provided
@@ -234,13 +243,13 @@ stack, and the calling thread is not that thread.\\
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{bool can\_resume\_other\_thread() noexcept} & (1)\\
+    \cpp{bool can\_resume\_from\_any\_thread() noexcept} & (1)\\
 
     \midrule
 \end{tabular}
 
 \begin{description}
-    \item[1)] \cpp{fiber\_handle::can\_resume\_other\_thread()} returns \cpp{false}
+    \item[1)] \cpp{fiber\_handle::can\_resume\_from\_any\_thread()} returns \cpp{false}
         if the stack used by the fiber was provided by the operating system,
         and the calling thread is not that thread; otherwise \cpp{true}.
 \end{description}

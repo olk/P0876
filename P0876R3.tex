@@ -43,11 +43,11 @@
 \begin{document}
 \small
 \begin{tabbing}
-    Document number: \= D0876R3\\
-    Date:            \> 2018-06-07\\
+    Document number: \= P0876R3\\
+    Date:            \> 2018-06-08\\
     Author:          \> Oliver Kowalke (oliver.kowalke@gmail.com)\\
                      \> Nat Goodspeed (nat@lindenlab.com)\\
-    Audience:        \> SG1\\
+    Audience:        \> LEWG\\
 \end{tabbing}
 
 \section*{\emph{fiber\_handle} - fibers without scheduler}
@@ -66,9 +66,11 @@ Changes since P0876R2.
 \begin{itemize}
     \item rename \cpp{fiber\_context} to \cpp{fiber\_handle}
     \item remove \emph{StackAllocator} constructor and related material
+    \item rename \cpp{resume\_other\_thread()} to \xtresume
+    \item rename \cpp{resume\_other\_thread\_with()} to \xtresumewith
     \item replace \cpp{uses\_system\_stack()} with
-          \cpp{can\_resume\_other\_thread()} (with inverted return sense)
-    \item replace \cpp{previous\_thread()} with \cpp{can\_resume()}
+          \canxtresume (with inverted return sense)
+    \item replace \cpp{previous\_thread()} with \canresume
           (with bool return)
 \end{itemize}
 

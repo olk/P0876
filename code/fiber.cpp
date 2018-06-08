@@ -15,12 +15,12 @@ public:
     fiber_handle resume() &&;
     template<typename Fn>
     fiber_handle resume_with(Fn&& fn) &&;
-    fiber_handle resume_other_thread() &&;
+    fiber_handle resume_from_any_thread() &&;
     template<typename Fn>
-    fiber_handle resume_other_thread_with(Fn&& fn) &&;
+    fiber_handle resume_from_any_thread_with(Fn&& fn) &&;
 
     bool can_resume() noexcept;
-    bool can_resume_other_thread() noexcept;
+    bool can_resume_from_any_thread() noexcept;
 
     explicit operator bool() const noexcept;
     bool operator<(const fiber_handle& other) const noexcept;
