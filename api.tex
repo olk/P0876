@@ -223,7 +223,7 @@ return \fiber. It will be passed a synthesized \fiber instance representing
 the suspended caller of \resumewith or\\
 \xtresumewith. The \fiber instance returned by \cpp{fn()} is, in turn, used as
 the return value for the suspended function: \resume, \resumewith, \xtresume
-or \xtresumewith.
+or\\\xtresumewith.
 
 \subparagraph*{can\_resume\_other\_thread()}
 query whether the calling thread can resume the suspended \fiber instance by
@@ -259,8 +259,8 @@ using any of \resume, \resumewith, \xtresume or \xtresumewith. Attempting to
 resume that suspended fiber from any other thread is Undefined Behavior.
 
 \canxtresume returns \cpp{true} if the calling thread is the same as the
-thread represented by the \fiber instance, or if the \fiber instance
-represents a fiber explicitly created by \fiber's constructor.
+thread represented by the\\\fiber instance, or if the \fiber instance
+represents a fiber explicitly created by\\\fiber's constructor.
 
 \canxtresume is not marked \cpp{const} because in at least one
 implementation, it requires an internal context switch.
@@ -373,7 +373,7 @@ swaps two \fiber instances\\
 \uabschnitt{std::unwind\_fiber()}
 
 terminate the current running fiber, switching to the fiber represented by
-the passed \fiber. This is like returning that \fiber from the \entryfn, but may
+the passed\\\fiber. This is like returning that \fiber from the \entryfn, but may
 be called from any function on that fiber.\\
 
 \begin{tabular}{ l l }

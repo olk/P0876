@@ -19,8 +19,8 @@ Therefore, any of the following will gracefully terminate a fiber:
           throw \unwindex, binding the \fiber you intend to resume next. This
           is what \unwindfib does internally.
     \item Call \cpp{fiber\_handle::resume\_with(unwind\_fiber)}. This is what \dtor
-          does. Since \unwindfib accepts a \fiber, and since \resumewith
-          synthesizes a \fiber representing its caller and passes it to the
+          does. Since\\\unwindfib accepts a \fiber, and since \resumewith
+          synthesizes a\\\fiber representing its caller and passes it to the
           subject function, this terminates the fiber referenced by the
           original \fiber instance and switches back to the caller.
     \item Engage \dtor: switch to some other fiber, which will
