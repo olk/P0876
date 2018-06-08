@@ -1,2 +1,2 @@
-fiber_context m=fiber_context::current();
+fiber_handle m=fiber_handle::current();
 m.resume(); // tries to resume active fiber == UB

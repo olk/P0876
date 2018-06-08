@@ -62,17 +62,17 @@
         stringstyle=\ttfamily\color{magenta}
 ] {code/#1.cpp}}
 
-\newcommand{\dtor}{\cpp{\~fiber\_context()}}
+\newcommand{\dtor}{\cpp{\~fiber\_handle()}}
 \newcommand{\main}{\cpp{main()}}
-\newcommand{\fiber}{\cpp{std::fiber\_context}}
+\newcommand{\fiber}{\cpp{std::fiber\_handle}}
 \newcommand{\op}{\cpp{operator()()}}
 \newcommand{\opbool}{\cpp{operator bool()}}
 \newcommand{\resume}{\cpp{resume()}}
 \newcommand{\resumewith}{\cpp{resume\_with()}}
 \newcommand{\xtresume}{\cpp{resume\_other\_thread()}}
 \newcommand{\xtresumewith}{\cpp{resume\_other\_thread\_with()}}
-\newcommand{\usessysstack}{\cpp{uses\_system\_stack()}}
-\newcommand{\prevtid}{\cpp{previous\_thread()}}
+\newcommand{\canresume}{\cpp{can\_resume()}}
+\newcommand{\canxtresume}{\cpp{can\_resume\_other\_thread()}}
 \newcommand{\thread}{\cpp{std::thread}}
 \newcommand{\unwindex}{\cpp{std::unwind\_exception}}
 \newcommand{\unwindfib}{\cpp{std::unwind\_fiber()}}

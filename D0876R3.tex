@@ -31,7 +31,7 @@
             pdftex,
             pdfsubject  = {},
             pdfauthor   = {Oliver Kowalke},
-            pdfkeywords = {C++,callcc,call/cc,context,continuation,coroutine,execution,fiber,fiber_context,switch,P0099,P0534,P0876},
+            pdfkeywords = {C++,callcc,call/cc,context,continuation,coroutine,execution,fiber,fiber_handle,switch,P0099,P0534,P0876},
             pdftitle    = {fibers without scheduler}]{hyperref}
 
 %//////////////////////////////////////////////////////////////////////////////
@@ -43,14 +43,14 @@
 \begin{document}
 \small
 \begin{tabbing}
-    Document number: \= P0876R2\\
-    Date:            \> 2018-05-06\\
+    Document number: \= D0876R3\\
+    Date:            \> 2018-06-07\\
     Author:          \> Oliver Kowalke (oliver.kowalke@gmail.com)\\
                      \> Nat Goodspeed (nat@lindenlab.com)\\
     Audience:        \> SG1\\
 \end{tabbing}
 
-\section*{\emph{fiber\_context} - fibers without scheduler}
+\section*{\emph{fiber\_handle} - fibers without scheduler}
 
 %//////////////////////////////////////////////////////////////////////////////
 
@@ -59,18 +59,17 @@
 %//////////////////////////////////////////////////////////////////////////////
 
 \abschnitt{Revision History}
-This document supersedes P0876R0.\\
+This document supersedes P0876R2.\\
 \newline
-Changes since P0876R0.
+Changes since P0876R2.
 
 \begin{itemize}
-    \item single \cpp{fiber\_context} type
-    \item introduction of member functions \xtresume, \xtresumewith
-    \item throw on unintentional thread migration attempt
-    \item introduction of member function \usessysstack
-    \item introduction of member function \prevtid
-    \item note about potential UB when migrating across threads with some TLS
-          implementations
+    \item rename \cpp{fiber\_context} to \cpp{fiber\_handle}
+    \item remove \emph{StackAllocator} constructor and related material
+    \item replace \cpp{uses\_system\_stack()} with
+          \cpp{can\_resume\_other\_thread()} (with inverted return sense)
+    \item replace \cpp{previous\_thread()} with \cpp{can\_resume()}
+          (with bool return)
 \end{itemize}
 
 \input{abstract}

@@ -1,11 +1,11 @@
 class filament{
 private:
-    fiber_context       f_;
+    fiber_handle       f_;
 
 public:
     ...
     void resume_next( filament& fila){
-        std::move(fila.f_).resume_with([this](fiber_context&& f)->fiber_context{
+        std::move(fila.f_).resume_with([this](fiber_handle&& f)->fiber_handle{
             f_=std::move(f);
             return {};
         }
