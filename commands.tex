@@ -62,9 +62,9 @@
         stringstyle=\ttfamily\color{magenta}
 ] {code/#1.cpp}}
 
-\newcommand{\dtor}{\cpp{\~fiber\_handle()}}
+\newcommand{\dtor}{\cpp{\~fiber\_context()}}
 \newcommand{\main}{\cpp{main()}}
-\newcommand{\fiber}{\cpp{std::fiber\_handle}}
+\newcommand{\fiber}{\cpp{std::fiber\_context}}
 \newcommand{\op}{\cpp{operator()()}}
 \newcommand{\opbool}{\cpp{operator bool()}}
 \newcommand{\resume}{\cpp{resume()}}
@@ -74,6 +74,9 @@
 \newcommand{\canresume}{\cpp{can\_resume()}}
 \newcommand{\canxtresume}{\cpp{can\_resume\_from\_any\_thread()}}
 \newcommand{\thread}{\cpp{std::thread}}
+\newcommand{\Currthread}{The calling thread\xspace}
+\newcommand{\currthread}{the calling thread\xspace}
+\newcommand{\lastthread}{the thread on which the fiber represented by \cpp{*this} was most recently run}
 \newcommand{\unwindex}{\cpp{std::unwind\_exception}}
 \newcommand{\unwindfib}{\cpp{std::unwind\_fiber()}}
 

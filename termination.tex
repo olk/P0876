@@ -18,7 +18,7 @@ Therefore, any of the following will gracefully terminate a fiber:
     \item From within the fiber you wish to terminate, construct and
           throw \unwindex, binding the \fiber you intend to resume next. This
           is what \unwindfib does internally.
-    \item Call \cpp{fiber\_handle::resume\_with(unwind\_fiber)}. This is what \dtor
+    \item Call \cpp{fiber\_context::resume\_with(unwind\_fiber)}. This is what \dtor
           does. Since\\\unwindfib accepts a \fiber, and since \resumewith
           synthesizes a\\\fiber representing its caller and passes it to the
           subject function, this terminates the fiber referenced by the

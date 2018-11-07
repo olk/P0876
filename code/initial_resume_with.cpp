@@ -1,6 +1,6 @@
-fiber_handle topfunc(fiber_handle&& prev);
-fiber_handle injected(fiber_handle&& prev);
+fiber_context topfunc(fiber_context&& prev);
+fiber_context injected(fiber_context&& prev);
 
-fiber_handle f(topfunc);
+fiber_context f(topfunc);
 // topfunc() has not yet been entered
 std::move(f).resume_with(injected);

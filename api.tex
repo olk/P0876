@@ -1,41 +1,41 @@
 \newpage
 \abschnitt{API}\label{api}
 
-\uabschnitt{class fiber\_handle}
+\uabschnitt{class fiber\_context}
 
 \cppf{fiber}
 
 \paragraph*{member functions}
 
 \subparagraph*{(constructor)}
-constructs new \cpp{fiber\_handle}\\
+constructs new \cpp{fiber\_context}\\
 
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{fiber\_handle() noexcept} & (1)\\
+    \cpp{fiber\_context() noexcept} & (1)\\
 
     \midrule
 
     \cpp{template<typename Fn>}\\
-    \cpp{explicit fiber\_handle(Fn&& fn)} & (2)\\
+    \cpp{explicit fiber\_context(Fn&& fn)} & (2)\\
 
     \midrule
 
-    \cpp{fiber\_handle(fiber\_handle&& other) noexcept} & (3)\\
+    \cpp{fiber\_context(fiber\_context&& other) noexcept} & (3)\\
 
     \midrule
 
-    \cpp{fiber\_handle(const fiber\_handle& other)=delete} & (4)\\
+    \cpp{fiber\_context(const fiber\_context& other)=delete} & (4)\\
 
     \midrule
 \end{tabular}
 
 \begin{description}
-    \item[1)] this constructor instantiates an invalid \fiber. Its \opbool
+    \item[1)] this constructor instantiates an invalid \fiber. Its \cpp{valid()} method
               returns \cpp{false}.
-    \item[2)] takes a callable (function, lambda, object with \op) as
-              argument. The callable must have signature as described
+    \item[2)] takes an invokable (function, lambda, object with \op) as
+              argument. The invokable must have signature as described
               in \nameref{solution_gpub}.
     \item[3)] moves underlying state to new \fiber
     \item[4)] copy constructor deleted
@@ -66,7 +66,7 @@ destroys a fiber\\
 
 \begin{description}
     \item[1)] destroys a \fiber instance. If this instance represents a fiber
-              of execution (\opbool returns \cpp{true}), then the fiber of
+              of execution (\cpp{valid()} returns \cpp{true}), then the fiber of
               execution is destroyed too. Specifically, the stack is unwound
               by throwing \unwindex.\footnote{ In a program in which exceptions
               are thrown, it is prudent to code a fiber's \entryfn\xspace with a
@@ -84,11 +84,11 @@ moves the \fiber object\\
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{fiber\_handle& operator=(fiber\_handle&& other) noexcept} & (1)\\
+    \cpp{fiber\_context& operator=(fiber\_context&& other) noexcept} & (1)\\
 
     \midrule
 
-    \cpp{fiber\_handle& operator=(const fiber\_handle& other)=delete} & (2)\\
+    \cpp{fiber\_context& operator=(const fiber\_context& other)=delete} & (2)\\
 
     \midrule
 \end{tabular}
@@ -110,7 +110,7 @@ moves the \fiber object\\
 
 {\bfseries Postcondition}
 \begin{description}
-    \item[1)] \cpp{other} is invalidated (\opbool returns \cpp{false})
+    \item[1)] \cpp{other} is invalidated (\cpp{valid()} returns \cpp{false})
 \end{description}
 
 
@@ -120,21 +120,21 @@ resumes a fiber\\
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{fiber\_handle resume() &&} & (1)\\
+    \cpp{fiber\_context resume() &&} & (1)\\
 
     \midrule
 
     \cpp{template<typename Fn>}\\
-    \cpp{fiber\_handle resume\_with(Fn&& fn) &&} & (2)\\
+    \cpp{fiber\_context resume\_with(Fn&& fn) &&} & (2)\\
 
     \midrule
 
-    \cpp{fiber\_handle resume\_from\_any\_thread() &&} & (3)\\
+    \cpp{fiber\_context resume\_from\_any\_thread() &&} & (3)\\
 
     \midrule
 
     \cpp{template<typename Fn>}\\
-    \cpp{fiber\_handle resume\_from\_any\_thread\_with(Fn&& fn) &&} & (4)\\
+    \cpp{fiber\_context resume\_from\_any\_thread\_with(Fn&& fn) &&} & (4)\\
 
     \midrule
 \end{tabular}
@@ -148,24 +148,21 @@ resumes a fiber\\
 
 {\bfseries Parameters}
 \begin{description}
-    \item[fn] function injected into resumed fiber\\
+    \item[fn] invokable injected into resumed fiber\\
 \end{description}
 
 {\bfseries Return value}
 \begin{description}
-    \item[fiber\_handle] the returned instance represents the fiber that has been
+    \item[fiber\_context] the returned instance represents the fiber that has been
                  suspended in order to resume the current fiber
 \end{description}
 
 {\bfseries Exceptions}
 \begin{description}
-    \item[1)] \resume or \resumewith might throw \cpp{std::domain\_error} if
-              the current \thread is not the same as the thread on
-              which \cpp{*this} was most recently run
-    \item[2)] \resume, \resumewith, \xtresume or \xtresumewith might throw\\
-              \unwindex if, while suspended, the \fiber instance representing
+    \item[1)] \resume, \resumewith, \xtresume or \xtresumewith throws\\
+              \unwindex when, while suspended, the \fiber instance representing
               the suspended fiber is destroyed
-    \item[3)] \resume, \resumewith, \xtresume or \xtresumewith might
+    \item[2)] \resume, \resumewith, \xtresume or \xtresumewith can
               throw \emph{any} exception if, while suspended:
               \begin{itemize}
                   \item some other fiber calls \resumewith or \xtresumewith to
@@ -174,7 +171,7 @@ resumes a fiber\\
                         or \xtresumewith -- or some function called
                         by \cpp{fn} -- throws an exception
               \end{itemize}
-    \item[4)] Any exception thrown by the function \cpp{fn} passed
+    \item[3)] Any exception thrown by the function \cpp{fn} passed
               to \resumewith or \xtresumewith, or any function called
               by \cpp{fn}, is thrown in the fiber referenced by \cpp{*this}
               rather than in the fiber of the caller of \resumewith
@@ -183,17 +180,17 @@ resumes a fiber\\
 
 {\bfseries Preconditions}
 \begin{description}
-    \item[1)] \cpp{*this} represents a valid fiber (\opbool returns \cpp{true})
-    \item[2)] for \resume and \resumewith, the current \thread is the same as
-              the thread on which \cpp{*this} was most recently run
+    \item[1)] \cpp{*this} represents a valid fiber (\cpp{valid()} returns \cpp{true})
+    \item[2)] for \resume and \resumewith, \currthread is the same as
+              \lastthread
     \item[3)] for \resume, \resumewith, \xtresume and \xtresumewith, if\\
-              \canxtresume would return \cpp{false}, the current \thread is
-              the same as the thread represented by \cpp{*this}
+              \canxtresume would return \cpp{false}, \currthread is
+              the same as \lastthread
 \end{description}
 
 {\bfseries Postcondition}
 \begin{description}
-    \item[1)] \cpp{*this} is invalidated (\opbool returns \cpp{false})
+    \item[1)] \cpp{*this} is invalidated (\cpp{valid()} returns \cpp{false})
 \end{description}
 
 {\bfseries Notes}
@@ -202,21 +199,21 @@ The intent of the distinction between \resume and \xtresume, as
 between \resumewith and \xtresumewith, is both for validation and for code
 auditing. If an application only ever calls \resume and \resumewith, no fiber
 will ever be resumed on a thread other than the one on which it was initially
-resumed. Any attempt to do so will throw.\\
+resumed.\\
 
 The intent of the names \xtresume and \xtresumewith is to clarify the
-direction in which cross-thread resumption occurs. The calling thread always
+direction in which cross-thread resumption occurs. \Currthread always
 directly resumes a suspended fiber: control is passed into the suspended
 fiber, and the currently-running fiber suspends. These method names mean that
 the fiber represented by \cpp{*this} will be resumed whether or not it was
-last resumed on the calling thread.\\
+last resumed on \currthread.\\
 
 \resume, \resumewith, \xtresume and \xtresumewith preserve the execution
 context of the calling fiber. Those data are restored if the calling fiber is
 resumed.\\
-A suspended \cpp{fiber\_handle} can be destroyed. Its resources will be cleaned
+A suspended \cpp{fiber\_context} can be destroyed. Its resources will be cleaned
 up at that time.\\
-The returned \cpp{fiber\_handle} indicates via \opbool whether the previous active
+The returned \cpp{fiber\_context} indicates via \cpp{valid()} whether the previous active
 fiber has terminated (returned from \entryfn).\\
 Because \resume, \resumewith, \xtresume and \xtresumewith invalidate the
 instance on which they are called, \emph{no valid \fiber instance ever
@@ -227,18 +224,19 @@ newly-invalidated instance -- the instance on which the method was was called
 -- with the new instance returned by that call. This helps to avoid subsequent
 inadvertent attempts to resume the old, invalidated instance.
 \newline
-An injected function \cpp{fn()} must accept \cpp{std::fiber\_handle&&} and
-return \fiber. It will be passed a synthesized \fiber instance representing
+An injected function \cpp{fn()} must have signature
+\cpp{std::fiber\_context fn(std::fiber\_context&&)}.
+It will be passed a synthesized \fiber instance representing
 the suspended caller of \resumewith or\\
 \xtresumewith. The \fiber instance returned by \cpp{fn()} is, in turn, used as
 the return value for the suspended function: \resume, \resumewith, \xtresume
 or\\\xtresumewith.
 
 \subparagraph*{can\_resume\_from\_any\_thread()}
-query whether the calling thread can resume the suspended \fiber instance by
+query whether \currthread can resume the suspended \fiber instance by
 calling \xtresume or \xtresumewith. The implementation must return \cpp{false}
 if the suspended \fiber instance represents a fiber with a system-provided
-stack, and the calling thread is not that thread.\\
+stack, and \currthread is not that thread.\\
 
 \begin{tabular}{ l l }
     \midrule
@@ -249,14 +247,10 @@ stack, and the calling thread is not that thread.\\
 \end{tabular}
 
 \begin{description}
-    \item[1)] \cpp{fiber\_handle::can\_resume\_from\_any\_thread()} returns \cpp{false}
+    \item[1)] \cpp{fiber\_context::can\_resume\_from\_any\_thread()} returns \cpp{false}
+        if \cpp{*this} does not represent a valid fiber, or
         if the stack used by the fiber was provided by the operating system,
-        and the calling thread is not that thread; otherwise \cpp{true}.
-\end{description}
-
-{\bfseries Precondition}
-\begin{description}
-    \item[1)] \cpp{*this} represents a valid fiber (\opbool returns \cpp{true})
+        and \currthread is not that thread; otherwise \cpp{true}.
 \end{description}
 
 {\bfseries Notes}
@@ -267,16 +261,16 @@ suspended fiber. You may resume that suspended fiber \emph{on the same thread}
 using any of \resume, \resumewith, \xtresume or \xtresumewith. Attempting to
 resume that suspended fiber from any other thread is Undefined Behavior.
 
-\canxtresume returns \cpp{true} if the calling thread is the same as the
-thread represented by the\\\fiber instance, or if the \fiber instance
-represents a fiber explicitly created by\\\fiber's constructor.
+\canxtresume returns \cpp{true} if \currthread is the same as \lastthread,
+or if the \fiber instance
+represents a fiber explicitly created by \fiber's constructor.
 
 \canxtresume is not marked \cpp{const} because in at least one
 implementation, it requires an internal context switch.
 
 \subparagraph*{can\_resume()}
-returns \cpp{true} if the \fiber instance was suspended on the same thread as
-the caller, or if it has not yet been resumed. When \canresume
+returns \cpp{true} if \currthread is the same as \lastthread,
+or if \cpp{*this} has not yet been resumed. When \canresume
 returns \cpp{true}, the \fiber instance may be resumed
 by \resume, \resumewith, \xtresume or \xtresumewith.\\
 
@@ -289,15 +283,10 @@ by \resume, \resumewith, \xtresume or \xtresumewith.\\
 \end{tabular}
 
 \begin{description}
-    \item[1)] returns \cpp{true} if the calling thread is the same as the
-        thread on which \cpp{*this} was suspended. If the \fiber has not yet
+    \item[1)] returns \cpp{true} if \cpp{*this} represents a valid fiber,
+        and \currthread is the same as \lastthread. If the \fiber has not yet
         run and has therefore never been suspended, returns \cpp{true} as
         well.
-\end{description}
-
-{\bfseries Precondition}
-\begin{description}
-    \item[1)] \cpp{*this} represents a valid fiber (\opbool returns \cpp{true})
 \end{description}
 
 {\bfseries Notes}
@@ -305,13 +294,17 @@ by \resume, \resumewith, \xtresume or \xtresumewith.\\
 \canresume is not marked \cpp{const} because in at least one
 implementation, it requires an internal context switch.
 
-\subparagraph*{operator bool}
+\subparagraph*{valid()}
 test whether \fiber is valid\\
 
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{explicit operator bool() const noexcept} & (1)\\
+    \cpp{bool valid() const noexcept} & (1)\\
+
+    \midrule
+
+    \cpp{explicit operator bool() const noexcept} & (2)\\
 
     \midrule
 \end{tabular}
@@ -319,6 +312,7 @@ test whether \fiber is valid\\
 \begin{description}
     \item[1)] returns \cpp{true} if \cpp{*this} represents a fiber of
               execution, \cpp{false} otherwise.
+    \item[2)] alias for \cpp{valid()}
 \end{description}
 
 {\bfseries Notes}
@@ -326,9 +320,7 @@ test whether \fiber is valid\\
 A \fiber instance might not represent a valid fiber for any of a number of reasons.
 \begin{itemize}
     \item It might have been default-constructed.
-    \item It might have been assigned to another instance, or passed into a
-          function.\\
-          \fiber instances are move-only.
+    \item It might have been moved from.
     \item It might already have been resumed -- calling \resume, \resumewith,
           \xtresume or\\
           \xtresumewith invalidates the instance.
@@ -343,33 +335,13 @@ The essential points:
 \end{itemize}
 
 
-\subparagraph*{(comparisons)}
-establish an arbitrary total ordering for \fiber instances\\
-
-\begin{tabular}{ l l }
-    \midrule
-
-    \cpp{bool operator<(const fiber\_handle& other) const noexcept} & (1)\\
-
-    \midrule
-\end{tabular}
-
-\begin{description}
-    \item[1)] This comparison establishes an arbitrary total ordering of \fiber
-              instances, for example to store in ordered containers. (However,
-              key lookup is meaningless, since you cannot construct a search key
-              that would compare equal to any valid entry.) There is no significance
-              to the relative order of two instances.
-\end{description}
-
-
 \subparagraph*{swap}
 swaps two \fiber instances\\
 
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{void swap(fiber\_handle& other) noexcept} & (1)\\
+    \cpp{void swap(fiber\_context& other) noexcept} & (1)\\
 
     \midrule
 \end{tabular}
@@ -388,7 +360,7 @@ be called from any function on that fiber.\\
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{void unwind\_fiber(fiber\_handle&& other)} & (1)\\
+    \cpp{[[ noreturn ]] void unwind\_fiber(fiber\_context&& other)} & (1)\\
 
     \midrule
 \end{tabular}
@@ -406,7 +378,7 @@ be called from any function on that fiber.\\
 
 \bfs{Preconditions}
 \begin{description}
-    \item[1)] \cpp{other} must be valid (\cpp{operator bool()} returns \cpp{true})
+    \item[1)] \cpp{other} must be valid (\cpp{valid()} returns \cpp{true})
 \end{description}
 
 \bfs{Return value}

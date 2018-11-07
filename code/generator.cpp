@@ -1,5 +1,5 @@
 int a;
-std::fiber_handle g{[&a](std::fiber_handle&& m){
+std::fiber_context g{[&a](std::fiber_context&& m){
     a=0;
     int b=1;
     for(;;){

@@ -1,28 +1,28 @@
-class fiber_handle {
+class fiber_context {
 public:
-    fiber_handle() noexcept;
+    fiber_context() noexcept;
 
     template<typename Fn>
-    explicit fiber_handle(Fn&& fn);
+    explicit fiber_context(Fn&& fn);
 
-    ~fiber_handle();
+    ~fiber_context();
 
-    fiber_handle(fiber_handle&& other) noexcept;
-    fiber_handle& operator=(fiber_handle&& other) noexcept;
-    fiber_handle(const fiber_handle& other) noexcept = delete;
-    fiber_handle& operator=(const fiber_handle& other) noexcept = delete;
+    fiber_context(fiber_context&& other) noexcept;
+    fiber_context& operator=(fiber_context&& other) noexcept;
+    fiber_context(const fiber_context& other) noexcept = delete;
+    fiber_context& operator=(const fiber_context& other) noexcept = delete;
 
-    fiber_handle resume() &&;
+    fiber_context resume() &&;
     template<typename Fn>
-    fiber_handle resume_with(Fn&& fn) &&;
-    fiber_handle resume_from_any_thread() &&;
+    fiber_context resume_with(Fn&& fn) &&;
+    fiber_context resume_from_any_thread() &&;
     template<typename Fn>
-    fiber_handle resume_from_any_thread_with(Fn&& fn) &&;
+    fiber_context resume_from_any_thread_with(Fn&& fn) &&;
 
     bool can_resume() noexcept;
     bool can_resume_from_any_thread() noexcept;
 
     explicit operator bool() const noexcept;
-    bool operator<(const fiber_handle& other) const noexcept;
-    void swap(fiber_handle& other) noexcept;
+    bool valid() const noexcept;
+    void swap(fiber_context& other) noexcept;
 };
