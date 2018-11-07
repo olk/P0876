@@ -45,7 +45,7 @@ applications (for instance generators).
 
 But this solution requires an internal global variable pointing to the active
 fiber and some kind of reference counting. Reference counting is needed because
-\cpp{fiber\_handle::current()} necessarily requires multiple instances of \fiber for the
+\cpp{fiber\_context::current()} necessarily requires multiple instances of \fiber for the
 active fiber. Only when the last reference goes out of scope can the fiber be
 destroyed and its stack deallocated.
 \cppf{multi_current}

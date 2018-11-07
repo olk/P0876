@@ -1,10 +1,10 @@
-fiber_handle f([](fiber_handle&& caller){
+fiber_context f([](fiber_context&& caller){
     // ...
     std::move(caller).resume();
     // ...
 });
 
-fiber_handle fn(fiber_handle&&);
+fiber_context fn(fiber_context&&);
 
 f = std::move(f).resume();
 // ...

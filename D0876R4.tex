@@ -31,7 +31,7 @@
             pdftex,
             pdfsubject  = {},
             pdfauthor   = {Oliver Kowalke},
-            pdfkeywords = {C++,callcc,call/cc,context,continuation,coroutine,execution,fiber,fiber_handle,switch,P0099,P0534,P0876},
+            pdfkeywords = {C++,callcc,call/cc,context,continuation,coroutine,execution,fiber,fiber_context,switch,P0099,P0534,P0876},
             pdftitle    = {fibers without scheduler}]{hyperref}
 
 %//////////////////////////////////////////////////////////////////////////////
@@ -43,14 +43,14 @@
 \begin{document}
 \small
 \begin{tabbing}
-    Document number: \= P0876R3\\
-    Date:            \> 2018-06-08\\
+    Document number: \= D0876R4\\
+    Date:            \> 2018-11-06\\
     Author:          \> Oliver Kowalke (oliver.kowalke@gmail.com)\\
                      \> Nat Goodspeed (nat@lindenlab.com)\\
-    Audience:        \> LEWG\\
+    Audience:        \> LEWG, LEWGI\\
 \end{tabbing}
 
-\section*{\emph{fiber\_handle} - fibers without scheduler}
+\section*{\emph{fiber\_context} - fibers without scheduler}
 
 %//////////////////////////////////////////////////////////////////////////////
 
@@ -59,19 +59,19 @@
 %//////////////////////////////////////////////////////////////////////////////
 
 \abschnitt{Revision History}
-This document supersedes P0876R2.\\
+This document supersedes P0876R3.\\
 \newline
-Changes since P0876R2.
+Changes since P0876R3:
 
 \begin{itemize}
-    \item rename \cpp{fiber\_context} to \cpp{fiber\_handle}
-    \item remove \emph{StackAllocator} constructor and related material
-    \item rename \cpp{resume\_other\_thread()} to \xtresume
-    \item rename \cpp{resume\_other\_thread\_with()} to \xtresumewith
-    \item replace \cpp{uses\_system\_stack()} with
-          \canxtresume (with inverted return sense)
-    \item replace \cpp{previous\_thread()} with \canresume
-          (with bool return)
+    \item rename \cpp{fiber\_handle} back to \cpp{fiber\_context}
+    \item accept ``invokable'' rather than ``callable''
+    \item add \cpp{bool valid()} method
+    \item mark \cpp{unwind\_fiber()}\xspace\cpp{[[noreturn]]}
+    \item \cpp{resume()} or \cpp{resume\_with()} from different thread becomes UB
+    \item state more definitely when the implementation will throw
+    \item remove precondition from \cpp{can\_resume()}, \cpp{can\_resume\_from\_any\_thread()}
+    \item remove \cpp{operator<()}
 \end{itemize}
 
 \input{abstract}
