@@ -151,13 +151,6 @@ resumes a fiber\\
     \item[fn] invokable injected into resumed fiber\\
 \end{description}
 
-{\bfseries Preconditions}
-\begin{description}
-    \item[1),2),3),4)] \cpp{*this} is valid (\cpp{valid()} returns \cpp{true})
-    \item[1),2)] the current \thread is the same as the thread on
-              which the fiber represented by \cpp{*this} was most recently run
-\end{description}
-
 {\bfseries Return value}
 \begin{description}
     \item[fiber\_context] the returned instance represents the fiber that has been
@@ -188,11 +181,11 @@ resumes a fiber\\
 {\bfseries Preconditions}
 \begin{description}
     \item[1)] \cpp{*this} represents a valid fiber (\cpp{valid()} returns \cpp{true})
-    \item[2)] for \resume and \resumewith, the current \thread is the same as
-              the thread on which \cpp{*this} was most recently run
+    \item[2)] for \resume and \resumewith, \currthread is the same as
+              \lastthread
     \item[3)] for \resume, \resumewith, \xtresume and \xtresumewith, if\\
-              \canxtresume would return \cpp{false}, the current \thread is
-              the same as the thread represented by \cpp{*this}
+              \canxtresume would return \cpp{false}, \currthread is
+              the same as \lastthread
 \end{description}
 
 {\bfseries Postcondition}
@@ -209,11 +202,11 @@ will ever be resumed on a thread other than the one on which it was initially
 resumed. Any attempt to do so will throw.\\
 
 The intent of the names \xtresume and \xtresumewith is to clarify the
-direction in which cross-thread resumption occurs. The calling thread always
+direction in which cross-thread resumption occurs. \Currthread always
 directly resumes a suspended fiber: control is passed into the suspended
 fiber, and the currently-running fiber suspends. These method names mean that
 the fiber represented by \cpp{*this} will be resumed whether or not it was
-last resumed on the calling thread.\\
+last resumed on \currthread.\\
 
 \resume, \resumewith, \xtresume and \xtresumewith preserve the execution
 context of the calling fiber. Those data are restored if the calling fiber is
@@ -239,10 +232,10 @@ the return value for the suspended function: \resume, \resumewith, \xtresume
 or\\\xtresumewith.
 
 \subparagraph*{can\_resume\_from\_any\_thread()}
-query whether the calling thread can resume the suspended \fiber instance by
+query whether \currthread can resume the suspended \fiber instance by
 calling \xtresume or \xtresumewith. The implementation must return \cpp{false}
 if the suspended \fiber instance represents a fiber with a system-provided
-stack, and the calling thread is not that thread.\\
+stack, and \currthread is not that thread.\\
 
 \begin{tabular}{ l l }
     \midrule
@@ -256,7 +249,7 @@ stack, and the calling thread is not that thread.\\
     \item[1)] \cpp{fiber\_context::can\_resume\_from\_any\_thread()} returns \cpp{false}
         if \cpp{*this} does not represent a valid fiber, or
         if the stack used by the fiber was provided by the operating system,
-        and the calling thread is not that thread; otherwise \cpp{true}.
+        and \currthread is not that thread; otherwise \cpp{true}.
 \end{description}
 
 {\bfseries Notes}
@@ -267,8 +260,8 @@ suspended fiber. You may resume that suspended fiber \emph{on the same thread}
 using any of \resume, \resumewith, \xtresume or \xtresumewith. Attempting to
 resume that suspended fiber from any other thread is Undefined Behavior.
 
-\canxtresume returns \cpp{true} if the calling thread is the same as the
-thread represented by the\\\fiber instance, or if the \fiber instance
+\canxtresume returns \cpp{true} if \currthread is the same as \lastthread,
+or if the \fiber instance
 represents a fiber explicitly created by\\\fiber's constructor.
 
 \canxtresume is not marked \cpp{const} because in at least one
@@ -290,8 +283,7 @@ by \resume, \resumewith, \xtresume or \xtresumewith.\\
 
 \begin{description}
     \item[1)] returns \cpp{true} if \cpp{*this} represents a valid fiber,
-        and the calling thread is the same as the
-        thread on which \cpp{*this} was suspended. If the \fiber has not yet
+        and \currthread is the same as \lastthread. If the \fiber has not yet
         run and has therefore never been suspended, returns \cpp{true} as
         well.
 \end{description}
@@ -327,9 +319,7 @@ test whether \fiber is valid\\
 A \fiber instance might not represent a valid fiber for any of a number of reasons.
 \begin{itemize}
     \item It might have been default-constructed.
-    \item It might have been assigned to another instance, or passed into a
-          function.\\
-          \fiber instances are move-only.
+    \item It might have been moved from.
     \item It might already have been resumed -- calling \resume, \resumewith,
           \xtresume or\\
           \xtresumewith invalidates the instance.
