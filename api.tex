@@ -199,7 +199,7 @@ The intent of the distinction between \resume and \xtresume, as
 between \resumewith and \xtresumewith, is both for validation and for code
 auditing. If an application only ever calls \resume and \resumewith, no fiber
 will ever be resumed on a thread other than the one on which it was initially
-resumed. Any attempt to do so will throw.\\
+resumed.\\
 
 The intent of the names \xtresume and \xtresumewith is to clarify the
 direction in which cross-thread resumption occurs. \Currthread always
@@ -224,8 +224,9 @@ newly-invalidated instance -- the instance on which the method was was called
 -- with the new instance returned by that call. This helps to avoid subsequent
 inadvertent attempts to resume the old, invalidated instance.
 \newline
-An injected function \cpp{fn()} must accept \cpp{std::fiber\_context&&} and
-return \fiber. It will be passed a synthesized \fiber instance representing
+An injected function \cpp{fn()} must have signature
+\cpp{std::fiber\_context fn(std::fiber\_context&&)}.
+It will be passed a synthesized \fiber instance representing
 the suspended caller of \resumewith or\\
 \xtresumewith. The \fiber instance returned by \cpp{fn()} is, in turn, used as
 the return value for the suspended function: \resume, \resumewith, \xtresume
@@ -262,14 +263,14 @@ resume that suspended fiber from any other thread is Undefined Behavior.
 
 \canxtresume returns \cpp{true} if \currthread is the same as \lastthread,
 or if the \fiber instance
-represents a fiber explicitly created by\\\fiber's constructor.
+represents a fiber explicitly created by \fiber's constructor.
 
 \canxtresume is not marked \cpp{const} because in at least one
 implementation, it requires an internal context switch.
 
 \subparagraph*{can\_resume()}
-returns \cpp{true} if the \fiber instance was suspended on the same thread as
-the caller, or if it has not yet been resumed. When \canresume
+returns \cpp{true} if \currthread is the same as \lastthread,
+or if \cpp{*this} has not yet been resumed. When \canresume
 returns \cpp{true}, the \fiber instance may be resumed
 by \resume, \resumewith, \xtresume or \xtresumewith.\\
 
