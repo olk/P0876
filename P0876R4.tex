@@ -43,7 +43,7 @@
 \begin{document}
 \small
 \begin{tabbing}
-    Document number: \= D0876R4\\
+    Document number: \= P0876R4\\
     Date:            \> 2018-11-06\\
     Author:          \> Oliver Kowalke (oliver.kowalke@gmail.com)\\
                      \> Nat Goodspeed (nat@lindenlab.com)\\
@@ -65,12 +65,13 @@ Changes since P0876R3:
 
 \begin{itemize}
     \item rename \cpp{fiber\_handle} back to \cpp{fiber\_context}
-    \item accept ``invokable'' rather than ``callable''
+    \item accept ``invocable'' rather than ``callable''
+    \item constrain the invocable accepted by constructor, resume
     \item add \cpp{bool valid()} method
-    \item mark \cpp{unwind\_fiber()}\xspace\cpp{[[noreturn]]}
-    \item \cpp{resume()} or \cpp{resume\_with()} from different thread becomes UB
+    \item mark \unwindfib\xspace\cpp{[[noreturn]]}
+    \item \resume or \resumewith from different thread becomes UB
     \item state more definitely when the implementation will throw
-    \item remove precondition from \cpp{can\_resume()}, \cpp{can\_resume\_from\_any\_thread()}
+    \item remove precondition from \canresume, \canxtresume
     \item remove \cpp{operator<()}
 \end{itemize}
 

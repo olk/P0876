@@ -34,8 +34,8 @@ constructs new \cpp{fiber\_context}\\
 \begin{description}
     \item[1)] this constructor instantiates an invalid \fiber. Its \cpp{valid()} method
               returns \cpp{false}.
-    \item[2)] takes an invokable (function, lambda, object with \op) as
-              argument. The invokable must have signature as described
+    \item[2)] takes an invocable (function, lambda, object with \op) as
+              argument. The invocable must have signature as described
               in \nameref{solution_gpub}.
               This constructor template shall not participate in overload
               resolution unless \cpp{Fn} is \emph{LvalueCallable} (23.14.13.2)
@@ -156,7 +156,7 @@ resumes a fiber\\
 
 {\bfseries Parameters}
 \begin{description}
-    \item[fn] invokable injected into resumed fiber\\
+    \item[fn] invocable injected into resumed fiber\\
 \end{description}
 
 {\bfseries Return value}
