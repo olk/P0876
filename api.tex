@@ -148,7 +148,7 @@ resumes a fiber\\
     \item[2),4)] suspends the active fiber, resumes fiber \cpp{*this}
               but calls \cpp{fn()} in the resumed fiber (as if called by the
               suspended function)
-              These constructor templates shall not participate in overload
+              These member function templates shall not participate in overload
               resolution unless \cpp{Fn} is \emph{LvalueCallable} (23.14.13.2)
               for the argument type \cpp{std::fiber\_context&&} and the return
               type \fiber.
