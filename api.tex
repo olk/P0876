@@ -37,6 +37,10 @@ constructs new \cpp{fiber\_context}\\
     \item[2)] takes an invokable (function, lambda, object with \op) as
               argument. The invokable must have signature as described
               in \nameref{solution_gpub}.
+              This constructor template shall not participate in overload
+              resolution unless \cpp{Fn} is \emph{LvalueCallable} (23.14.13.2)
+              for the argument type \cpp{std::fiber\_context&&} and the return
+              type \fiber.
     \item[3)] moves underlying state to new \fiber
     \item[4)] copy constructor deleted
 \end{description}
@@ -144,6 +148,10 @@ resumes a fiber\\
     \item[2),4)] suspends the active fiber, resumes fiber \cpp{*this}
               but calls \cpp{fn()} in the resumed fiber (as if called by the
               suspended function)
+              These member function templates shall not participate in overload
+              resolution unless \cpp{Fn} is \emph{LvalueCallable} (23.14.13.2)
+              for the argument type \cpp{std::fiber\_context&&} and the return
+              type \fiber.
 \end{description}
 
 {\bfseries Parameters}
