@@ -1,13 +1,23 @@
 \newpage
+
+\setcounter{section}{33}
+\setcounter{subsection}{6}
+
 \abschnitt{API}\label{api}
 
-\uabschnitt{class fiber\_context}
+\rSec2[fiber-context]{Cooperative User-Mode Threads}
+
+\rSec3[fiber-context.general]{General}
+
+\rSec3[fiber-context.synopis]{Header <experimental/fiber\_context> synopsis}
+
+\cppf{synopsis}
+
+\rSec3[fiber-context.class]{Class fiber\_context}
 
 \cppf{fiber}
 
-\paragraph*{member functions}
-
-\subparagraph*{(constructor)}
+(constructor)
 constructs new \cpp{fiber\_context}\\
 
 \begin{tabular}{ l l }
@@ -359,7 +369,7 @@ swaps two \fiber instances\\
 \end{description}
 
 
-\uabschnitt{std::unwind\_fiber()}
+\rSec3[fiber-context.unwinding]{Function unwind\_fiber()}
 
 terminate the current running fiber, switching to the fiber represented by
 the passed\\\fiber. This is like returning that \fiber from the \entryfn, but may
@@ -400,7 +410,7 @@ be called from any function on that fiber.\\
 \end{description}
 
 
-\uabschnitt{std::unwind\_exception}
+\rSec3[fiber-context.exception]{Class unwind\_exception}
 
 is the exception used to unwind the stack referenced by a \fiber being destroyed.
 It is thrown by \unwindfib. \unwindex binds a \fiber referencing the fiber to

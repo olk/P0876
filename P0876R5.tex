@@ -4,35 +4,51 @@
 
 \usepackage[T1]{fontenc}
 \usepackage[latin1]{inputenc}
-\usepackage[british]{babel}
-
-\usepackage{amsmath}
-\usepackage{ellipsis}
-\usepackage{ragged2e}
-\usepackage[final]{microtype}
-
-\usepackage{palatino}
-
-\usepackage{overcite}
-\usepackage{booktabs}
-\usepackage{boxedminipage}
-\usepackage{fancyhdr}
-\usepackage{listings}
-\usepackage{perpage}
-\usepackage{rotating}
-\usepackage{soul}
-\usepackage{svg}
-\usepackage{tikz}
+\usepackage[american]{babel}        % required for ISO dates
+\usepackage[iso,american]{isodate}  % ISO format of dates
+\usepackage[final]{listings}        % code listings
+\usepackage{booktabs}               % fancy tables
+\usepackage{longtable}              % auto breaking tables
+\usepackage{ltcaption}              % fix captions for long tables
+\usepackage{relsize}                % provide relative font size changes
+%\usepackage{underscore}             % remove special status of '_' in ordinary text
+%\usepackage{verbatim}               % improved verbatim environment
+\usepackage{parskip}                % handle non-indented paragraphs "properly"
+\usepackage{array}                  % new column definitions for tables
+\usepackage[normalem]{ulem}         % underline commands
+\usepackage{xcolor}                 % driver-independent color extensions
+\usepackage{amsmath}                % mathematical symbols
+\usepackage{mathrsfs}               % mathscr font
+\usepackage{xspace}                 % inserts a space to replace one "eaten" by TeX
+\usepackage[final]{microtype}       % micro-typographic extensions introduced by pdfTeX
+\usepackage{xstring}                % manipulating strings
+\usepackage{fixme}                  % collaborative annotations
+\usepackage{multicol}               % intermix single and multiple columns
+\usepackage{perpage}                % counter reset at every page boundary
+\usepackage{palatino}               % Adobe Palatino font
+\usepackage{overcite}               % citations
+\usepackage{boxedminipage}          % framed mini­pages
+\usepackage{fancyhdr}               % control of page headers and footers
+\usepackage{soul}                   % hyphenatable spacingout), underlining, striking out, et.
+\usepackage{svg}                    % SVG pictures
+\usepackage{tikz}                   % creating PS and PDF graphics
 \usetikzlibrary{arrows,automata}
-\usepackage{xcolor}
-\usepackage{xspace}
-\usepackage[colorlinks=true,
-            urlcolor=blue,
-            pdftex,
+
+\usepackage[pdftex,
+            pdftitle    = {fibers without scheduler},
             pdfsubject  = {},
             pdfauthor   = {Oliver Kowalke},
             pdfkeywords = {C++,callcc,call/cc,context,continuation,coroutine,execution,fiber,fiber_context,switch,P0099,P0534,P0876},
-            pdftitle    = {fibers without scheduler}]{hyperref}
+            bookmarks=true,
+            bookmarksnumbered=true,
+            pdfpagelabels=true,
+            pdfpagemode=UseOutlines,
+            pdfstartview=FitH,
+            linktocpage=true,
+            colorlinks=true,
+            linkcolor=blue,
+            plainpages=false
+           ]{hyperref}
 
 %//////////////////////////////////////////////////////////////////////////////
 
@@ -63,8 +79,9 @@ This document supersedes P0876R4.\\
 \newline
 Changes since P0876R4:
 
-\begin{itemize}
-\end{itemize}
+%\begin{itemize}
+%    \item
+%\end{itemize}
 
 \input{abstract}
 \input{control_transfer}

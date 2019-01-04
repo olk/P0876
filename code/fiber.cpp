@@ -1,3 +1,7 @@
+namespace std {
+namespace experimental {
+inline namespace concurrency_v2 {
+
 class fiber_context {
 public:
     fiber_context() noexcept;
@@ -26,3 +30,7 @@ public:
     bool valid() const noexcept;
     void swap(fiber_context& other) noexcept;
 };
+
+} // namespace concurrency_v2
+} // namespace experimental
+} // namespace std
