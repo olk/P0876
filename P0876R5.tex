@@ -43,8 +43,8 @@
 \begin{document}
 \small
 \begin{tabbing}
-    Document number: \= P0876R4\\
-    Date:            \> 2018-11-06\\
+    Document number: \= P0876R5\\
+    Date:            \> 2019-01-04\\
     Author:          \> Oliver Kowalke (oliver.kowalke@gmail.com)\\
                      \> Nat Goodspeed (nat@lindenlab.com)\\
     Audience:        \> LEWG, LEWGI\\
@@ -59,20 +59,11 @@
 %//////////////////////////////////////////////////////////////////////////////
 
 \abschnitt{Revision History}
-This document supersedes P0876R3.\\
+This document supersedes P0876R4.\\
 \newline
-Changes since P0876R3:
+Changes since P0876R4:
 
 \begin{itemize}
-    \item rename \cpp{fiber\_handle} back to \cpp{fiber\_context}
-    \item accept ``invocable'' rather than ``callable''
-    \item constrain the invocable accepted by constructor, resume
-    \item add \cpp{bool valid()} method
-    \item mark \unwindfib\xspace\cpp{[[noreturn]]}
-    \item \resume or \resumewith from different thread becomes UB
-    \item state more definitely when the implementation will throw
-    \item remove precondition from \canresume, \canxtresume
-    \item remove \cpp{operator<()}
 \end{itemize}
 
 \input{abstract}
