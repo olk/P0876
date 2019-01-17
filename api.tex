@@ -9,6 +9,57 @@
 
 \rSec3[fiber-context.general]{General}
 
+The extensions proposed here support creation and activation of cooperative
+user-mode threads, here called \emph{fibers}.
+
+The term ``user-mode'' means that a given fiber can be activated without
+entering the operating-system kernel.
+
+The term ``cooperative'' means that typically multiple fibers share an
+underlying execution agent, for example a \cpp{std::thread}. On a
+given \cpp{std::thread}, only one fiber is running at any given time. Sharing
+that agent is explicit rather than pre-emptive. The running
+fiber \emph{suspends} (or \emph{yields}) to another fiber. This
+action \emph{launches} a new fiber, or \emph{resumes} a previously-suspended
+fiber.
+
+Suspending the running fiber in order to resume (or launch) another is
+called \emph{context switching}.
+
+The term ``thread'' here means that even though a given fiber may suspend and
+later be resumed, it is logically a thread of execution as defined in
+[intro.multithread].
+
+Every C++ function that has been called, but has neither returned nor
+suspended, requires some storage for its variables with automatic storage
+duration [basic.stc.auto]. Typically this storage also contains bookkeeping
+data such as the location of the function's most recent caller, to support
+the \cpp{return} statement [stmt.return]. This storage is called the
+function's \emph{activation record} or \emph{activation frame}.
+
+Activation frames for active functions are logically kept in a \emph{function
+stack}, or simply \emph{stack}, as discussed in Exceptions [except],
+particularly sections Constructors and destructors [except.ctor], Handling an
+exception [except.handle], The \cpp{std::terminate} function
+[except.terminate] and The \cpp{std::uncaught\_exceptions()} function
+[except.uncaught].
+
+The term ``stack'' simply means that each function call causes the called
+function to construct a new activation frame. Return from that function
+destroys that activation frame, in last-in-first-out fashion. Each recursive
+call to a function causes a new activation frame to be constructed even though
+its previous activation frame(s) still exist.
+
+The implementation of such a stack is implementation-dependent.
+
+Launching a fiber logically creates a new stack, which remains associated with
+that fiber throughout its lifetime. Calling functions on a particular fiber,
+and returning from them, is independent of function calls and returns on any
+other fiber.
+
+Context switching can be effected by designating some other fiber's stack as
+current, in a manner appropriate to the implementation of function stacks.
+
 \rSec3[fiber-context.synopis]{Header <experimental/fiber\_context> synopsis}
 
 \cppf{synopsis}
