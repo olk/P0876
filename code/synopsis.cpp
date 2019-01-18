@@ -1,5 +1,7 @@
 #include <fiber_context>
 
+#define __cpp_lib_experimental_fiber_context 201902
+
 namespace std {
 namespace experimental {
 inline namespace concurrency_v2 {
