@@ -6,7 +6,8 @@ following four frameworks are based on the low-level fiber switching API of
 \bcontext\cite{bcontext} (implements the API of this proposal).
 
 \uabschnitt{\bcoroutine}\cite{bcoroutine2} implements \bfs{asymmetric coroutines}
-\cpp{coroutine<>::push_type} and \cpp{coroutine<>::pull_type}, providing a
+\cpp{coroutine<>::push_type} and\\
+\cpp{coroutine<>::pull_type}, providing a
 unidirectional transfer of data. These stackful coroutines are only used in
 pairs. When \cpp{coroutine<>::push_type} is explicitly
 instantiated, \cpp{coroutine<>::pull_type} is synthesized and passed as

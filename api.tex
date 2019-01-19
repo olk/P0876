@@ -293,7 +293,8 @@ the return value for the suspended function: \resume, \resumewith, \xtresume
 or\\\xtresumewith.
 
 \subparagraph*{can\_resume\_from\_any\_thread()}
-query whether \currthread can resume the suspended \fiber instance by
+query whether \currthread can resume the suspended\\
+\fiber instance by
 calling \xtresume or \xtresumewith. The implementation must return \cpp{false}
 if the suspended \fiber instance represents a fiber with a system-provided
 stack, and \currthread is not that thread.\\
@@ -331,7 +332,8 @@ implementation, it requires an internal context switch.
 \subparagraph*{can\_resume()}
 returns \cpp{true} if \currthread is the same as \lastthread,
 or if \cpp{*this} has not yet been resumed. When \canresume
-returns \cpp{true}, the \fiber instance may be resumed
+returns \cpp{true}, the\\
+\fiber instance may be resumed
 by \resume, \resumewith, \xtresume or \xtresumewith.\\
 
 \begin{tabular}{ l l }

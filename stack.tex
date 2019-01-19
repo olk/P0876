@@ -11,7 +11,8 @@ representing \cpp{f1}.\\
 \cpp{f1}'s destructor, running on \cpp{f2}, implicitly calls member-function
 \resumewith, passing \unwindfib as
 argument. Fiber \cpp{f1} will be temporarily resumed and \unwindfib is
-invoked. Function \unwindfib binds an instance of \fiber that
+invoked.\\
+Function \unwindfib binds an instance of \fiber that
 represents \cpp{f2}, then throws exception \unwindex, which
 unwinds \cpp{f1}'s stack
 (walking the stack and destroying automatic variables in reverse order of

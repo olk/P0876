@@ -106,7 +106,7 @@ value from such a function avoids global variables.}
 An instance of \fiber remains invalid after return from \resume, \resumewith,
 \xtresume or\\
 \xtresumewith -- the synthesized fiber is returned, instead of
-implicitly updating the \fiber instance on which \resume was called.\\
+implicitly updating the\\\fiber instance on which \resume was called.\\
 If the \fiber object were implicitly updated, the fiber would 
 change its identity because each fiber is associated with a stack. Each stack
 contains a chain of function calls (call stack). If this association were
