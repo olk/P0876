@@ -83,12 +83,19 @@
 \newcommand{\Currthread}{The calling thread\xspace}
 \newcommand{\currthread}{the calling thread\xspace}
 \newcommand{\lastthread}{the thread on which the fiber represented by \cpp{*this} was most recently run}
-\newcommand{\unwindex}{\cpp{std::unwind\_exception}}
+%\newcommand{\unwindex}{\cpp{std::unwind\_exception}}
 \newcommand{\unwindfib}{\cpp{std::unwind\_fiber()}}
+\newcommand{\uwforced}{\cpp{_Unwind_ForcedUnwind()}}
+\newcommand{\curex}{\cpp{std::current_exception()}}
+\newcommand{\uncex}{\cpp{std::uncaught_exception()}}
+\newcommand{\uncexs}{\cpp{std::uncaught_exceptions()}}
 
 \newcommand{\sym}{\emph{symmetric}\xspace}
 \newcommand{\asym}{\emph{asymmetric}\xspace}
 \newcommand{\entryfn}{\emph{entry-function}}
+\newcommand{\dbframe}{\emph{.debug\_frame}}
+\newcommand{\ehframe}{\emph{.eh\_frame}}
+\newcommand{\foreignex}{\emph{foreign exception}}
 
 \newcommand{\abschnitt}[1]{\addcontentsline{toc}{subsection}{#1}\subsection*{#1}}
 \newcommand{\uabschnitt}[1]{\paragraph*{#1}}

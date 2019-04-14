@@ -120,7 +120,7 @@ constructs new \cpp{fiber\_context}\\
     \item[---] destroys a \fiber instance. If this instance represents a fiber
               of execution (\cpp{valid()} returns \cpp{true}), then the fiber of
               execution is destroyed too. Specifically, the stack is unwound
-              by throwing \unwindex.
+              using \unwindfib.
 \end{description}
 
 \remarks
@@ -221,9 +221,9 @@ resumes a fiber\\
 
 \except
 \begin{description}
-    \item[---] \resume, \resumewith, \xtresume or \xtresumewith throws\\
-              \unwindex when, while suspended, the \fiber instance representing
-              the suspended fiber is destroyed
+%   \item[---] \resume, \resumewith, \xtresume or \xtresumewith throws\\
+%             \unwindex when, while suspended, the \fiber instance representing
+%             the suspended fiber is destroyed
     \item[---] \resume, \resumewith, \xtresume or \xtresumewith can
               throw \emph{any} exception if, while suspended:
               \begin{itemize}
@@ -400,19 +400,20 @@ The essential points:
 
 \effects
 terminate the current running fiber, switching to the fiber represented by
-the passed\\\fiber. This is like returning that \fiber from the \entryfn, but may
-be called from any function on that fiber.
+the passed\\\fiber. This is like returning that \fiber from the \entryfn, but
+may be called from any function on that fiber.
 
 \remarks
 \begin{description}
-    \item[---] throws \unwindex, binding the passed \fiber. The running fiber's
-              first stack entry catches \unwindex, extracts the bound \fiber
-              and terminates the current fiber by returning that \fiber.
+    \item[---] The underlying Unwinding facility (for instance unwind facility
+               described in \emph{System V ABI for AMD64}) unwinds the stack
+               till the end of stack is reached and terminates the current fiber
+               by returning the bound \fiber.
 \end{description}
 
 \params
 \begin{description}
-    \item[other] the \fiber to which to switch once the current fiber has terminated
+    \item[other] the \fiber to which to switch once the current fiber hasterminated
 \end{description}
 
 \requires
@@ -427,14 +428,5 @@ be called from any function on that fiber.
 
 \except
 \begin{description}
-    \item[---] throws \unwindex
+    \item[---] throws a foreign exception (not catchable by C++)
 \end{description}
-
-
-\rSec3[fiber-context.exception]{Class unwind\_exception}
-
-\mbrhdr{class unwind\_exception}
-
-is the exception used to unwind the stack referenced by a \fiber being destroyed.
-It is thrown by \unwindfib. \unwindex binds a \fiber referencing the fiber to
-which control should be passed once the current fiber is unwound and destroyed.

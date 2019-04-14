@@ -13,8 +13,7 @@ representing \cpp{f1}.\\
 argument. Fiber \cpp{f1} will be temporarily resumed and \unwindfib is
 invoked.\\
 Function \unwindfib binds an instance of \fiber that
-represents \cpp{f2}, then throws exception \unwindex, which
-unwinds \cpp{f1}'s stack
+represents \cpp{f2}, then it unwinds \cpp{f1}'s stack
 (walking the stack and destroying automatic variables in reverse order of
 construction).
 The first frame on \cpp{f1}'s stack, the one created by \fiber's constructor,
