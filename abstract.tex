@@ -1,4 +1,4 @@
-\abschnitt{abstract}
+\abschnitt{abstract}\label{abstract}
 
 This paper addresses concerns, questions and suggestions from the past meetings.
 The proposed API supersedes the former proposals N3985\cite{N3985},
@@ -10,11 +10,6 @@ in the context of \cpp{future::then()}, the committee has indicated
 that \emph{fiber} is preferable. However, given the foundational, low-level
 nature of this proposal, we choose \emph{fiber\_context}, leaving the
 term \emph{fiber} for a higher-level facility built on top of this one.\\
-
-A previous revision of this proposal suggested \emph{fiber\_context}, but SG1
-felt that use of the term ``context'' posed potential confusion. The name 
-\emph{basic\_fiber} has also been suggested. Consider that the name is not yet
-final.\\
 
 The minimal API enables stackful context switching \bfs{without} the need for a
 \bfs{scheduler}. The API is suitable to act as building-block for high-level

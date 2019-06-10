@@ -1,0 +1,31 @@
+\abschnitt{Revision History}\label{history}
+This document supersedes P0876R5.\\
+\newline
+Changes since P0876R5:
+
+\begin{itemize}
+    \item \cpp{std::unwind\_exception} removed: stack unwinding must be
+      performed by platform facilities.
+\end{itemize}
+
+The change to unwinding fiber stacks using an anonymous \foreignex not
+catchable by C++ \cpp{try} / \cpp{catch} blocks is in response to deep
+discussions in Kona 2019 of the surprisingly numerous problems surfaced by
+using an ordinary C++ exception for that purpose.
+
+Further information about the specific mechanism can be found in
+\nameref{unwinding} et ff.
+
+
+
+Solved issues:
+\begin{itemize}
+    \item exception had to bind a \fiber, \fiber is not copyable, but exceptions must be copyable
+    \item catching and discarding exceptions
+    \item extracting the \fiber and rethrowing the exception with a moved-from \fiber instance
+    \item catching and not rethrowing the unwind exception
+    \item C++ rule that throwing an exception during exception unwinding terminates the program, since destroying a \fiber no longer causes a C++ exception to be thrown
+    \item capturing the unwind exception with \cpp{std::exception_ptr} and migrating it to a different fiber -- or a different thread.
+    \item what happens when unwind exception is thrown on any thread's original stack (e.g. \main).
+\end{itemize}
+

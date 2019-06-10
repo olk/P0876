@@ -10,7 +10,7 @@ The \resumewith call at line 11 injects function \cpp{fn()} into
 fiber \cpp{f} as if the \resume call at line 3 had directly
 called \cpp{fn()}.\\
 
-Like an \entryfn\xspace passed to \fiber, \cpp{fn()} must accept
+Like an \entryfn passed to \fiber, \cpp{fn()} must accept
 \cpp{std::fiber\_context&&} and return\\
 \fiber. The \fiber instance returned by \cpp{fn()} will, in turn, be returned
 to \cpp{f}'s lambda by the \resume at line 3.\\

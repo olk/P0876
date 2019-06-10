@@ -32,7 +32,7 @@ Class \cpp{symmetric_coroutine<>::yield_type} from N3985\cite{N3985} is
 \bfs{not} equivalent to the synthesized \fiber.\\
 \cpp{symmetric_coroutine<>::yield_type} does not represent the suspended context,
 instead it is a special representation of the same coroutine. Thus \main or
-the current thread's \entryfn\xspace can \bfs{not} be represented by \cpp{yield_type}
+the current thread's \entryfn can \bfs{not} be represented by \cpp{yield_type}
 (see next section \nameref{representation}).\\
 Because \cpp{symmetric_coroutine<>::yield_type()} yields back to the starting
 point, i.e. invocation of\\
@@ -44,7 +44,7 @@ or UB happens at resumption.\\
 \zs{This API is specified in terms of passing the suspended \fiber. A higher
 level layer can hide that by using private variables.}
 
-\uabschnitt{representing \emph{main()} and thread's \entryfn\xspace as fiber}\label{representation}
+\uabschnitt{representing \emph{main()} and thread's \entryfn as fiber}\label{representation}
 As shown in the previous section a synthesized fiber is created and passed
 into the resumed fiber as an instance of \fiber.\\
 \cppf{synthesized_main}
@@ -56,8 +56,8 @@ are not excluded; these can be used as targets too.\\
 created by the OS (\main stack; each thread's initial stack) and some created
 explicitly by the code.}\\
 This is a nice feature because it allows (the stacks of) \main and each
-thread's \entryfn\xspace to be represented as fibers. A \fiber
-representing \main or a thread's \entryfn\xspace can be handled like an
+thread's \entryfn to be represented as fibers. A \fiber
+representing \main or a thread's \entryfn can be handled like an
 explicitly created \fiber: it can passed to and returned from functions or
 stored in a container. When called on such an instance, \canxtresume indicates
 whether it is valid to call \xtresume or \xtresumewith on that instance.\\
@@ -67,7 +67,7 @@ In the code snippet above the suspended \main is represented by instance
 by a scheduling algorithm.\\
 
 \zs{The proposed fiber API allows representing and handling \main and the
-current thread's \entryfn\xspace by an instance of \fiber in the same way as
+current thread's \entryfn by an instance of \fiber in the same way as
 explicitly created fibers.}
 
 \uabschnitt{fiber returns (terminates)} When a fiber returns (terminates), what
@@ -120,7 +120,7 @@ the next fiber (f1 -> f2 -> f3 -> f1 -> ...).\\
 Fiber \cpp{f1} is started at line 26. The synthesized \fiber\xspace \cpp{main} passed 
 to the resumed fiber is not used (control flow cycles through the three
 fibers).\footnote{The operating-system stack provided for \main or the current
-thread's \entryfn\xspace is not destroyed when the corresponding \fiber instance is
+thread's \entryfn is not destroyed when the corresponding \fiber instance is
 destroyed.}
 The for-loop prints the name \emph{f1} and resumes fiber \cpp{f2}. Inside 
 \cpp{f2}'s for-loop the name is printed and \cpp{f3} is resumed. Fiber \cpp{f3}

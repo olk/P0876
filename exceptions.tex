@@ -1,6 +1,7 @@
 \abschnitt{exceptions}\label{exceptions}
 
-In general, if an uncaught exception escapes from the \entryfn,
-\cpp{std::terminate} is called. There is one exception: \foreignex. The \fiber
-facility internally uses \foreignex to clean up the stack of a suspended context
-being destroyed. Because this exception is an \foreignex it can not be catched.
+In general, if an uncaught exception escapes from a fiber's \entryfn,
+\cpp{std::terminate} is called. There is one exception: the \foreignex used to
+unwind fiber stacks. The \fiber facility internally uses this \foreignex to
+clean up the stack of a suspended fiber being destroyed. Because this
+exception is a \foreignex, it can not be caught.

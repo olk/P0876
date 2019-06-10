@@ -1,0 +1,22 @@
+
+Every C++ function that has been called, but has neither returned nor
+suspended, requires some storage for its variables with automatic storage
+duration [basic.stc.auto]. Typically this storage also contains bookkeeping
+data such as the location of the function's most recent caller, to support
+the \cpp{return} statement [stmt.return]. This storage is called the
+function's \emph{activation record} or \emph{activation frame}.
+
+Activation frames for active functions are logically kept in a \emph{function
+stack}, or simply \emph{stack}, as discussed in Exceptions [except],
+particularly sections Constructors and destructors [except.ctor], Handling an
+exception [except.handle], The \cpp{std::terminate} function
+[except.terminate] and The \cpp{std::uncaught\_exceptions()} function
+[except.uncaught].
+
+The term ``stack'' simply means that each function call causes the called
+function to construct a new activation frame. Return from that function
+destroys that activation frame, in last-in-first-out fashion. Each recursive
+call to a function causes a new activation frame to be constructed even though
+its previous activation frame(s) still exist.
+
+The implementation of such a stack is implementation-dependent.

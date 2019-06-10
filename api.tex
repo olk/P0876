@@ -30,35 +30,32 @@ The term ``thread'' here means that even though a given fiber may suspend and
 later be resumed, it is logically a thread of execution as defined in
 [intro.multithread].
 
-Every C++ function that has been called, but has neither returned nor
-suspended, requires some storage for its variables with automatic storage
-duration [basic.stc.auto]. Typically this storage also contains bookkeeping
-data such as the location of the function's most recent caller, to support
-the \cpp{return} statement [stmt.return]. This storage is called the
-function's \emph{activation record} or \emph{activation frame}.
-
-Activation frames for active functions are logically kept in a \emph{function
-stack}, or simply \emph{stack}, as discussed in Exceptions [except],
-particularly sections Constructors and destructors [except.ctor], Handling an
-exception [except.handle], The \cpp{std::terminate} function
-[except.terminate] and The \cpp{std::uncaught\_exceptions()} function
-[except.uncaught].
-
-The term ``stack'' simply means that each function call causes the called
-function to construct a new activation frame. Return from that function
-destroys that activation frame, in last-in-first-out fashion. Each recursive
-call to a function causes a new activation frame to be constructed even though
-its previous activation frame(s) still exist.
-
-The implementation of such a stack is implementation-dependent.
-
-Launching a fiber logically creates a new stack, which remains associated with
-that fiber throughout its lifetime. Calling functions on a particular fiber,
-and returning from them, is independent of function calls and returns on any
-other fiber.
+Launching a fiber logically creates a new function stack, which remains
+associated with that fiber throughout its lifetime. Calling functions on a
+particular fiber, and returning from them, is independent of function calls
+and returns on any other fiber.
 
 Context switching can be effected by designating some other fiber's stack as
 current, in a manner appropriate to the implementation of function stacks.
+
+\rSec3[fiber-context.toplevel]{Implicit Top-Level Stack Frame}
+
+When a fiber is explicitly launched by invoking \fiber's constructor, the
+facility injects an implicit top-level stack frame above the \entryfn passed to
+the constructor. If the fiber is later unwound, this implicit top-level stack
+frame serves as delimiter: this point is where unwinding stops.
+
+Unwinding requires a non-empty \fiber instance indicating the fiber to which
+control should subsequently be passed. Once the terminated fiber's stack has
+been fully unwound, the implicit top-level function resumes the indicated fiber.
+
+Similarly, the runtime must pass control through an implicit top-level
+function above \main and above the \entryfn for each explicitly
+launched \thread. The stack frame delimits stack unwinding for each of these
+stacks.
+
+However, the top-level function above \main and each \thread must destroy
+the \fiber instance indicating the fiber that triggered stack unwinding.
 
 \rSec3[fiber-context.synopis]{Header <experimental/fiber\_context> synopsis}
 
@@ -119,19 +116,19 @@ constructs new \cpp{fiber\_context}\\
 \begin{description}
     \item[---] destroys a \fiber instance. If this instance represents a fiber
               of execution (\cpp{valid()} returns \cpp{true}), then the fiber of
-              execution is destroyed too. Specifically, the stack is unwound
-              using \unwindfib.
+              execution is destroyed too.
 \end{description}
 
 \remarks
 \begin{description}
-    \item[---] In a program in which exceptions
-              are thrown, it is prudent to code a fiber's \entryfn\ with a
-              last-ditch \cpp{catch (...)} clause: in general, exceptions must
-              \emph{not} leak out of the \entryfn. However, since stack
-              unwinding is implemented by throwing an exception, a correct
-              \entryfn\ \cpp{try} statement must also
-              \cpp{catch (std::unwind\_exception const&)} and rethrow it.
+    \item[---] Destroying a suspended fiber causes its stack to be unwound as
+               if the destructor called \cpp{resume\_with(unwind\_fiber)}.
+    \item[---] The destructors of the stack variables on the suspended fiber
+               represented by \cpp{*this}, and relevant \cpp{catch (...)}
+               clauses, are run on the thread calling \dtor.
+    \item[---] As a consequence, destroying a \fiber instance
+               representing \main or the \entryfn of a \thread from some other
+               thread engages Undefined Behavior.
 \end{description}
 
 \subparagraph*{operator=}
@@ -317,7 +314,7 @@ stack, and \currthread is not that thread.\\
 
 \remarks
 \begin{description}
-    \item[---] When \cpp{main()}, or the entry-function of a \thread, or any function
+    \item[---] When \main, or the entry-function of a \thread, or any function
         directly called by these, is suspended, a \fiber instance represents that
         suspended fiber. You may resume that suspended fiber \emph{on the same thread}
         using any of \resume, \resumewith, \xtresume or \xtresumewith. Attempting to
@@ -377,7 +374,7 @@ test whether \fiber is valid\\
     \item It might already have been resumed -- calling \resume, \resumewith,
           \xtresume or\\
           \xtresumewith invalidates the instance.
-    \item The \entryfn\xspace might have voluntarily terminated the fiber by
+    \item The \entryfn might have voluntarily terminated the fiber by
           returning.
 \end{itemize}
 The essential points:
@@ -399,21 +396,40 @@ The essential points:
 \mbrhdr{[[ noreturn ]] void unwind\_fiber(fiber\_context&& other)}
 
 \effects
-terminate the current running fiber, switching to the fiber represented by
-the passed\\\fiber. This is like returning that \fiber from the \entryfn, but
-may be called from any function on that fiber.
+terminate the current running fiber.
 
 \remarks
 \begin{description}
+    \item[---] On an explicitly launched fiber, once the running fiber has
+               been fully unwound, \unwindfib resumes the fiber represented
+               by \cpp{other}. This is like returning \cpp{other} from
+               the \entryfn, but may be called from any function on that
+               fiber.
+    \item[---] On the fiber running \main or the default fiber for a \thread,
+               once the running fiber has been fully unwound, \unwindfib
+               destroys the fiber represented by \cpp{other}.
     \item[---] The underlying Unwinding facility (for instance unwind facility
                described in \emph{System V ABI for AMD64}) unwinds the stack
-               till the end of stack is reached and terminates the current fiber
-               by returning the bound \fiber.
+               to the implicit top-level stack frame and terminates the
+               current fiber as described above.
+    \item[---] Unwinding the fiber's stack causes its stack variables to be
+               destroyed.
+    \item[---] Unwinding the fiber's stack causes relevant \cpp{catch (...)}
+               clauses to be executed.
+    \item[---] During this specific stack unwinding, a \cpp{catch (...)}
+               clause that does not execute a \cpp{throw;} statement behaves
+               as if it ended with a \cpp{throw;} statement.
+    \item[---] During this specific stack unwinding, a \cpp{catch (...)}
+               clause that attempts to throw any C++ exception engages
+               Undefined Behavior.
+    \item[---] During this specific stack unwinding, only \cpp{catch (...)}
+               clauses are executed. No other \cpp{catch} clauses are
+               executed.
 \end{description}
 
 \params
 \begin{description}
-    \item[other] the \fiber to which to switch once the current fiber hasterminated
+    \item[other] the \fiber to which to switch once the current fiber has terminated
 \end{description}
 
 \requires
@@ -428,5 +444,5 @@ may be called from any function on that fiber.
 
 \except
 \begin{description}
-    \item[---] throws a foreign exception (not catchable by C++)
+    \item[---] None catchable by C++
 \end{description}
