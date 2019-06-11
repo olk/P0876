@@ -12,15 +12,15 @@ fiber is first started, or returned from \resume).
 \cppfl{synthesized_foo}
 
 In the pseudo-code above the fiber \cpp{f} is started by invoking its member
-function \resume at line 7. This operation suspends \cpp{foo}, invalidates
+function \resume at line 7. This operation suspends \cpp{foo}, empties
 instance \cpp{f} and synthesizes a new \fiber\xspace \cpp{m} that is passed as parameter
 to the lambda of \cpp{f} (line 2).\\
-Invoking \cpp{m.resume()} (line 3) suspends the lambda, invalidates \cpp{m} and
+Invoking \cpp{m.resume()} (line 3) suspends the lambda, empties \cpp{m} and
 synthesizes a \fiber that is returned by \cpp{f.resume()} at line 7. The
 synthesized \fiber is assigned to \cpp{f}. Instance \cpp{f} now represents the
 suspended fiber running the lambda (suspended at line 3). Control is
 transferred from line 3 (lambda) to line 7 (\cpp{foo()}).\\
-Call \cpp{f.resume()} at line 8 invalidates \cpp{f} and suspends \cpp{foo()}
+Call \cpp{f.resume()} at line 8 empties \cpp{f} and suspends \cpp{foo()}
 again. A \fiber representing the suspended \cpp{foo()} is synthesized, returned
 from \cpp{m.resume()} and assigned to \cpp{m} at line 3. Control
 is transferred back to the lambda and instance \cpp{m} represents the suspended
@@ -60,7 +60,7 @@ thread's \entryfn to be represented as fibers. A \fiber
 representing \main or a thread's \entryfn can be handled like an
 explicitly created \fiber: it can passed to and returned from functions or
 stored in a container. When called on such an instance, \canxtresume indicates
-whether it is valid to call \xtresume or \xtresumewith on that instance.\\
+whether it is valid to call \xtresumesome on that instance.\\
 
 In the code snippet above the suspended \main is represented by instance
 \cpp{m} and could be stored in containers or managed just like \cpp{f}
@@ -72,7 +72,7 @@ explicitly created fibers.}
 
 \uabschnitt{fiber returns (terminates)} When a fiber returns (terminates), what
 should happen next? Which fiber should be resumed next? The only way to avoid
-internal global variables that point to \main is to explicitly return a valid
+internal global variables that point to \main is to explicitly return a non-empty
 \fiber instance that will be resumed after the active fiber terminates.
 \cppfl{terminating_fiber}
 
@@ -94,7 +94,7 @@ returns. Fiber \cpp{f2} uses \cpp{f1}, that was also captured by the lambda, as
 return value. Fiber \cpp{f2} terminates while fiber \cpp{f1} is resumed (entered
 the first time). The synthesized \fiber\xspace \cpp{f} passed into the lambda at line 3
 represents the terminated fiber \cpp{f2} (e.g. the calling fiber). Thus instance
-\cpp{f} is invalid as the assert statement verifies at line 5. Fiber \cpp{f1} uses
+\cpp{f} is empty as the assert statement verifies at line 5. Fiber \cpp{f1} uses
 the captured \fiber\xspace \cpp{m} as return value (line 6). Control is returned to
 \main, returning from \cpp{f2.resume()} at line 13.\\
 
@@ -103,7 +103,7 @@ signature `\cpp{fiber\_context(fiber\_context&&)}`. Using \fiber as the return
 value from such a function avoids global variables.}
 
 \uabschnitt{returning synthesized \fiber instance from \cpp{resume()}}\label{fiberreturn}
-An instance of \fiber remains invalid after return from \resume, \resumewith,
+An instance of \fiber remains empty after return from \resume, \resumewith,
 \xtresume or\\
 \xtresumewith -- the synthesized fiber is returned, instead of
 implicitly updating the\\\fiber instance on which \resume was called.\\
@@ -155,25 +155,25 @@ passing \emph{the target} \cpp{filament} instance to \emph{the running fiber's}
 \cpp{resume\_next()}.\\
 
 Running fiber A has an associated \cpp{filament} instance \cpp{filamentA},
-whose \fiber \cpp{f\_} is invalid -- because fiber A is running.\\
+whose \fiber \cpp{f\_} is empty -- because fiber A is running.\\
 
 Desiring to switch to suspended fiber B (with associated
 \cpp{filament} \cpp{filamentB}), running fiber A calls\\
 \cpp{filamentA.resume\_next(filamentB)}.\\
 
 \cpp{resume\_next()} calls \cpp{filamentB.f\_.resume\_with(<lambda>)}.
-This invalidates \cpp{filamentB.f\_} -- because fiber B is now running.\\
+This empties \cpp{filamentB.f\_} -- because fiber B is now running.\\
 
 The lambda binds \cpp{&filamentA} as \cpp{this}. Running on fiber B, it
 receives a \fiber instance representing the newly-suspended fiber A as its
 parameter \cpp{f}. It moves that \fiber instance to \cpp{filamentA.f\_}.\\
 
-The lambda then returns a default-constructed (therefore invalid) \fiber
-instance. That invalid instance is returned by the previously-suspended
+The lambda then returns a default-constructed (therefore empty) \fiber
+instance. That empty instance is returned by the previously-suspended
 \resumewith call in \cpp{filamentB.resume\_next()} -- which is fine because
 \cpp{resume\_next()} drops it on the floor anyway.\\
 
-Thus, the running fiber's associated \cpp{filament::f\_} is always invalid,
+Thus, the running fiber's associated \cpp{filament::f\_} is always empty,
 whereas the \cpp{filament} associated with each suspended fiber is continually
 updated with the \fiber instance representing that
 fiber.\footnote{\bfiber\cite{bfiber} uses this pattern for resuming user-land

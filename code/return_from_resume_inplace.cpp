@@ -1,5 +1,5 @@
 int main(){
-    fiber_context f1,f2,f3;
+    fiber_context f1,f2,f3, holder;
     f3=fiber_context{[&](fiber_context&& f)->fiber_context{
         f2=std::move(f);
         for(;;){
@@ -16,7 +16,10 @@ int main(){
         }
         return {};
     }};
-    f1=fiber_context{[&](fiber_context&& /*main*/)->fiber_context{
+    f1=fiber_context{[&](fiber_context&& main)->fiber_context{
+        // important not to destroy the fiber_context instance representing
+        // main()
+        holder = std::move(main);
         for(;;){
             std::cout << "f1 ";
             std::move(f2).resume();

@@ -7,9 +7,9 @@ frames (note, the stack is not copyable).  Resuming a terminated fiber will
 cause undefined behaviour because the stack might already be unwound (objects
 allocated on the stack were destroyed or the memory used as stack was already
 deallocated).\\
-As a consequence each call of \resume will invalidate the \fiber instance, i.e.
-no valid instance of \fiber represents the currently-running fiber.\\
-Whether a \fiber is valid or not can be tested with member function \opbool.\\
+As a consequence each call of \resume will empty the \fiber instance, therefore
+no instance of \fiber represents the currently-running fiber.\\
+Whether or not a \fiber is empty can be tested with member function \opbool.\\
 To make this more explicit, functions \resume, \resumewith, \xtresume
 and\\
 \xtresumewith are rvalue-reference qualified.

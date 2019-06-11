@@ -11,9 +11,9 @@ that top-level function, which returns to the \fiber passed to \unwindfib.\\
 Therefore, any of the following will gracefully terminate a fiber:
 
 \begin{itemize}
-    \item Cause its \entryfn to return a valid \fiber.
+    \item Cause its \entryfn to return a non-empty \fiber.
     \item From within the fiber you wish to terminate, call \unwindfib with a
-          valid \fiber. That fiber will be resumed
+          non-empty \fiber. That fiber will be resumed
           when the active fiber terminates.
     \item Call \cpp{fiber\_context::resume\_with(unwind\_fiber)}. This is what \dtor
           does. Since\\\unwindfib accepts a \fiber, and since \resumewith
@@ -25,28 +25,22 @@ Therefore, any of the following will gracefully terminate a fiber:
           other fiber destroy the received \fiber instance.
 \end{itemize}
 
-(However, since the operating system allocates the stack for \main and for a
-thread's \entryfn, of course there is no implicit top-level stack frame. In
-a conforming implementation, returning from a thread's \entryfn may
-terminate all fibers on that thread. Returning from \main may terminate the
-whole process.)\\
-
 The above are all equivalent: stack variables are properly destroyed, since
 the stack is unwound. (See \nameref{destruction}.)\\
 
 In an environment that forbids exceptions, every \fiber you launch must
 terminate gracefully, by returning from its top-level function. You may not
 call \unwindfib. You may not call \dtor, explicitly or implicitly, on a
-valid \fiber instance.\\
+non-empty \fiber instance.\\
 
-When an explicitly-launched fiber's \entryfn returns a valid \fiber
-instance, that fiber is terminated. Control switches to the fiber indicated by
-the returned \fiber instance. The \entryfn may return (switch to) any
-reachable valid \fiber instance -- it need not be the instance originally
+When an explicitly-launched fiber's \entryfn returns a non-empty \fiber
+instance, the running fiber is terminated. Control switches to the fiber
+indicated by the returned \fiber instance. The \entryfn may return (switch to)
+any reachable non-empty \fiber instance -- it need not be the instance originally
 passed in, or an instance returned from any of the \resume family of
 methods.\\
 
-Returning an invalid \fiber instance (\opbool returns \cpp{false}) invokes
+Returning an empty \fiber instance (\opbool returns \cpp{false}) invokes
 undefined behavior.\\
 
 \emph{Calling} \resume means: ``Please switch to the indicated fiber; I
@@ -129,30 +123,33 @@ The specific characteristics of a \foreignex:
     for this.
     \item Along the way, as with a normal C++ exception, every object in every
     stack frame is destroyed.
-    \item \cpp{catch (...)} clauses along the way are executed, but:
-    \begin{itemize}
-        \item \cpp{throw;} resumes stack unwinding, as usual
-        \item a \cpp{catch (...)} clause that does not execute a \cpp{throw;}
-        statement behaves as if it ends with a \cpp{throw;} statement
-        \item a \cpp{catch (...)} clause that attempts to throw a normal C++
-        exception engages Undefined Behavior
-    \end{itemize}
-    \item \cpp{catch (}\emph{anything else}\cpp{)} clauses along the way are ignored. This is
+%%  \item \catchall clauses along the way are executed, but:
+%%  \begin{itemize}
+%%      \item \cpp{throw;} resumes stack unwinding, as usual
+%%      \item a \catchall clause that does not execute a \cpp{throw;}
+%%      statement behaves as if it ends with a \cpp{throw;} statement
+%%      \item a \catchall clause that attempts to throw a normal C++
+%%      exception engages Undefined Behavior
+%%  \end{itemize}
+%%  \item \cpp{catch (}\emph{anything else}\cpp{)}
+    \item \cpp{catch} clauses along the way are ignored. This is
     what is meant by the shorthand "uncatchable."
 \end{itemize}
 
 Since unwinding a fiber's stack requires destroying objects declared in stack
-frames, and may involve executing \cpp{catch (...)} clauses, it is worth
-pointing out that destroying a non-empty \fiber on a thread other than the
-thread on which it was last resumed will run those object destructors
-and \cpp{catch (...)} clauses on the thread destroying the \fiber instance.\\
+frames,
+%% and may involve executing \catchall clauses,
+it is worth pointing out that destroying a non-empty \fiber on a thread other
+than the thread on which it was last resumed will run those object destructors
+%% and \catchall clauses
+on the thread destroying the \fiber instance.\\
 
-As a consequence, destroying a \fiber instance representing \main or
-the initial stack of a \thread from any other thread engages Undefined
-Behavior.\footnote{One unobvious case would be if a fiber running on non-\main
-thread \cpp{T} stores a \fiber representing \cpp{T}'s default fiber in a static
-variable, whether module-scope or function-scope. That variable will be
-destroyed at program termination, probably on a thread other than \cpp{T}.}\\
+As a consequence, destroying a \fiber instance representing an implicit fiber
+from any other thread engages Undefined Behavior.\footnote{One unobvious case
+would be if a fiber running on non-\main thread \cpp{T} stores a \fiber
+representing \cpp{T}'s default fiber in a static variable, whether
+module-scope or function-scope. That variable will be destroyed at program
+termination, probably on a thread other than \cpp{T}.}\\
 
 Otherwise:
 
