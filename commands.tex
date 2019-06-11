@@ -77,25 +77,32 @@
 \newcommand{\resumewith}{\cpp{resume\_with()}}
 \newcommand{\xtresume}{\cpp{resume\_from\_any\_thread()}}
 \newcommand{\xtresumewith}{\cpp{resume\_from\_any\_thread\_with()}}
+\newcommand{\someresume}{\resume or \xtresume}
+\newcommand{\someresumewith}{\resumewith or \xtresumewith}
+\newcommand{\resumesome}{\resume or \resumewith}
+\newcommand{\xtresumesome}{\xtresume or \xtresumewith}
+\newcommand{\allresume}{\resume, \resumewith, \xtresume or \xtresumewith}
 \newcommand{\canresume}{\cpp{can\_resume()}}
-\newcommand{\canxtresume}{\cpp{can\_resume\_from\_any\_thread()}}
+\newcommand{\canxtresume}{\cpp{can\_resume\_from\_this\_thread()}}
+\newcommand{\canresumesome}{\canresume or \canxtresume}
 \newcommand{\thread}{\cpp{std::thread}}
 \newcommand{\Currthread}{The calling thread\xspace}
 \newcommand{\currthread}{the calling thread\xspace}
-\newcommand{\lastthread}{the thread on which the fiber represented by \cpp{*this} was most recently run}
-%\newcommand{\unwindex}{\cpp{std::unwind\_exception}}
+\newcommand{\lastthread}{the thread on which the fiber represented by \cpp{*this} was most recently resumed}
+\newcommand{\unwindex}{\cpp{std::unwind\_exception}}
 \newcommand{\unwindfib}{\cpp{std::unwind\_fiber()}}
 \newcommand{\uwforced}{\cpp{_Unwind_ForcedUnwind()}}
 \newcommand{\curex}{\cpp{std::current_exception()}}
 \newcommand{\uncex}{\cpp{std::uncaught_exception()}}
 \newcommand{\uncexs}{\cpp{std::uncaught_exceptions()}}
+\newcommand{\catchall}{\cpp{catch (...)}}
 
 \newcommand{\sym}{\emph{symmetric}\xspace}
 \newcommand{\asym}{\emph{asymmetric}\xspace}
-\newcommand{\entryfn}{\emph{entry-function}}
+\newcommand{\entryfn}{\emph{entry-function}\xspace}
 \newcommand{\dbframe}{\emph{.debug\_frame}}
 \newcommand{\ehframe}{\emph{.eh\_frame}}
-\newcommand{\foreignex}{\emph{foreign exception}}
+\newcommand{\foreignex}{\emph{foreign exception}\xspace}
 
 \newcommand{\abschnitt}[1]{\addcontentsline{toc}{subsection}{#1}\subsection*{#1}}
 \newcommand{\uabschnitt}[1]{\paragraph*{#1}}

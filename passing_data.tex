@@ -10,7 +10,7 @@ new fiber. The value is incremented by one, as shown at line 4. The expression
 within the lambda by \cpp{caller}).\\
 The call to \cpp{lambda.resume()} at line 10 resumes the lambda, returning from
 the \cpp{caller.resume()} call at line 5. The \fiber instance \cpp{caller}
-invalidated by the \resume call at line 5 is replaced with the new instance
+emptied by the \resume call at line 5 is replaced with the new instance
 returned by that same \resume call.\\
 Finally the lambda returns (the updated) \cpp{caller} at line 6, terminating its
 context.\\
@@ -19,7 +19,7 @@ Since the updated \cpp{caller} represents the fiber suspended by the call at
 line 10, control returns to \main.\\
 
 However, since context \cpp{lambda} has now terminated, the updated \cpp{lambda}
-is invalid. Its \opbool returns \cpp{false}.\\
+is empty. Its \opbool returns \cpp{false}.\\
 
 \zs{Using lambda capture is the preferred way to transfer data between two
 fibers; global pointers or a calling wrapper (such as \cpp{std::bind}) are
