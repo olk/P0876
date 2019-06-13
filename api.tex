@@ -211,67 +211,45 @@ resumes a fiber\\
 \begin{tabular}{ l l }
     \midrule
 
-    \cpp{fiber\_context resume() &&} & (1)\\
-
-    \midrule
-
     \cpp{template<typename Fn>}\\
-    \cpp{fiber\_context resume\_with(Fn&& fn) &&} & (2)\\
-
-    \midrule
-
-    \cpp{fiber\_context resume\_from\_any\_thread() &&} & (3)\\
-
-    \midrule
-
-    \cpp{template<typename Fn>}\\
-    \cpp{fiber\_context resume\_from\_any\_thread\_with(Fn&& fn) &&} & (4)\\
+    \cpp{fiber\_context resume\_from\_any\_thread\_with(Fn&& fn) &&}\\
 
     \midrule
 \end{tabular}
 
+\requires
+\begin{description}
+    \item[---] \cpp{*this} represents a non-empty fiber (\cpp{empty()} returns \cpp{false})
+    \item[---] if \canxtresume would return \cpp{false}, \currthread is
+              the same as \lastthread
+\end{description}
+
 \effects
 \begin{description}
-    \item[1),3)]
-        \begin{description}
-            \item[---] The calling fiber is suspended.
-            \item[---] A new \fiber instance representing the suspended caller
-                       is synthesized. For purposes of exposition, call
-                       it \cpp{caller}.
-            \item[---] The fiber represented by \cpp{*this} is resumed.
-            \item[---] If this is the first entry to the fiber represented
-                       by \cpp{*this}, \cpp{caller} is passed to its \entryfn.
-            \item[---] Otherwise, the fiber represented by \cpp{*this}
-                       previously suspended by calling one
-                       of \allresume. \cpp{caller} is returned from whichever
-                       of the \cpp{resume} functions was called.
-        \end{description}
-    \item[2),4)] These member function templates shall not participate in overload
-              resolution unless \cpp{Fn} is \emph{Lvalue-Invocable} [func.wrap.func]
-              for the argument type \cpp{std::fiber\_context&&} and the return
-              type \fiber.\\
-              \bfs{SG1:} Needs update to \cpp{Invocable} idiom.
-        \begin{description}
-            \item[---] The calling fiber is suspended.
-            \item[---] A new \fiber instance representing the suspended caller
-                       is synthesized. For purposes of exposition, call
-                       it \cpp{caller}.
-            \item[---] The fiber represented by \cpp{*this} is resumed.
-            \item[---] Function \cpp{fn} is called on the newly-resumed fiber.
-            \item[---] \cpp{caller} is passed to \cpp{fn}.
-            \item[---] If \cpp{fn} throws an exception, the exception
-                       propagates on the newly-resumed fiber.
-            \item[---] Otherwise \cpp{fn} eventually returns a \fiber
-                       instance, which may or may not be the same
-                       as \cpp{caller}. For purposes of exposition, call
-                       it \cpp{returned}.
-            \item[---] If this is the first entry to the fiber represented
-                       by \cpp{*this}, \cpp{returned} is passed to its \entryfn.
-            \item[---] Otherwise, the fiber represented by \cpp{*this}
-                       previously suspended by calling one
-                       of \allresume. \cpp{returned} is returned from whichever
-                       of the \cpp{resume} functions was called.
-        \end{description}
+    \item[---] This member function template shall not participate in overload
+               resolution unless \cpp{Fn} is \emph{Lvalue-Invocable} [func.wrap.func]
+               for the argument type \cpp{std::fiber\_context&&} and the return
+               type \fiber.\\
+               \bfs{SG1:} Needs update to \cpp{Invocable} idiom.
+    \item[---] The execution context of the calling fiber is saved.
+    \item[---] The calling fiber is suspended.
+    \item[---] A new \fiber instance representing the suspended caller is
+               synthesized. For purposes of exposition, call it \cpp{caller}.
+    \item[---] The fiber represented by \cpp{*this} is resumed.
+    \item[---] The execution context of the resumed fiber is restored.
+    \item[---] The invocable \cpp{fn} is called on the newly-resumed fiber.
+    \item[---] \cpp{caller} is passed to \cpp{fn}.
+    \item[---] If \cpp{fn} throws an exception, the exception propagates on
+               the newly-resumed fiber.
+    \item[---] Otherwise \cpp{fn} eventually returns a \fiber instance. For
+               purposes of exposition, call it \cpp{returned}.
+               \tsnote{\cpp{returned} may or may not be the same as \cpp{caller}.}
+    \item[---] If this is the first entry to the fiber represented
+               by \cpp{*this}, \cpp{returned} is passed to its \entryfn.
+    \item[---] Otherwise, the fiber represented by \cpp{*this} previously
+               suspended itself by calling one of \allresume. \cpp{returned}
+               is returned from whichever of the \cpp{resume} functions was
+               called.
 \end{description}
 
 \params
@@ -281,8 +259,9 @@ resumes a fiber\\
 
 \returns
 \begin{description}
-    \item[fiber\_context] the returned instance represents the fiber that has been
-                 suspended in order to resume the current fiber
+    \item[fiber\_context] on resumption, \xtresumewith returns a \fiber
+               representing the immediately preceding fiber: the fiber that
+               resumed this one, thereby suspending itself
 \end{description}
 
 \except
@@ -290,29 +269,19 @@ resumes a fiber\\
 %   \item[---] \allresume throws
 %             \unwindex when, while suspended, the \fiber instance representing
 %             the suspended fiber is destroyed
-    \item[---] \allresume can
+    \item[---] \xtresumewith can
               throw \emph{any} exception if, while suspended:
               \begin{itemize}
                   \item some other fiber calls \someresumewith to
-                        resume this suspended fiber
+                        resume this suspended fiber, and
                   \item the function \cpp{fn} passed to \someresumewith
                         -- or some function called
                         by \cpp{fn} -- throws an exception
               \end{itemize}
     \item[---] Any exception thrown by the function \cpp{fn} passed
-              to \someresumewith, or any function called
+              to \xtresumewith, or any function called
               by \cpp{fn}, is thrown in the fiber referenced by \cpp{*this}
-              rather than in the fiber of the caller of \someresumewith.
-\end{description}
-
-\requires
-\begin{description}
-    \item[---] \cpp{*this} represents a non-empty fiber (\cpp{empty()} returns \cpp{false})
-    \item[---] for \resumesome, \currthread is the same as
-              \lastthread
-    \item[---] for \allresume, if\\
-              \canxtresume would return \cpp{false}, \currthread is
-              the same as \lastthread
+              rather than in the fiber of the caller of \xtresumewith.
 \end{description}
 
 \postcond
@@ -320,22 +289,12 @@ resumes a fiber\\
     \item[---] \cpp{*this} is made empty (\cpp{empty()} returns \cpp{true})
 \end{description}
 
-\tsnote{The intent of the distinction between \resume and \xtresume, as
-between \resumewith and \xtresumewith, is both for validation and for code
-auditing. If an application only ever calls \resumesome, no fiber
-will ever be resumed on a thread other than the one on which it was initially
-resumed.}
-
 \tsnote{The intent of the names \xtresume and \xtresumewith is to clarify the
 direction in which cross-thread resumption occurs. \Currthread always
 directly resumes a suspended fiber: control is passed into the suspended
 fiber, and the currently-running fiber suspends. These method names mean that
 the fiber represented by \cpp{*this} will be resumed whether or not it was
 last resumed on \currthread.}
-
-\tsnote{\allresume preserve the execution
-context of the calling fiber. Those data are restored if the calling fiber is
-resumed.}
 
 \tsnote{A suspended \cpp{fiber\_context} can be destroyed. Its resources will be cleaned
 up at that time.}
@@ -353,12 +312,57 @@ newly-emptied instance -- the instance on which the method was was called
 -- with the new instance returned by that call. This helps to avoid subsequent
 inadvertent attempts to resume the old, empty instance.}
 
-\tsnote{An injected function \cpp{fn()} must have signature
-\cpp{std::fiber\_context fn(std::fiber\_context&&)}.
-It will be passed a synthesized \fiber instance representing
-the suspended caller of \someresumewith.
-The \fiber instance returned by \cpp{fn()} is, in turn, used as
-the return value for the suspended function: \allresume.}
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{template<typename Fn>}\\
+    \cpp{fiber\_context resume\_with(Fn&& fn) &&}\\
+
+    \midrule
+\end{tabular}
+
+\tsnote{The intent of the distinction between \resume and \xtresume, as
+between \resumewith and \xtresumewith, is both for validation and for code
+auditing. If an application only ever calls \resumesome, no fiber in that
+application will ever be resumed on a thread other than the one on which it
+was previously resumed.}
+
+\requires
+\begin{description}
+    \item[---] \cpp{*this} represents a non-empty fiber (\cpp{empty()} returns \cpp{false})
+    \item[---] \currthread is the same as \lastthread
+\end{description}
+
+\effects
+\begin{description}
+    \item[---] \resumewith has the same semantics as \xtresumewith.
+    \item[---] In addition, \resumewith may validate that \currthread is the
+               same as \lastthread.
+\end{description}
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{fiber\_context resume\_from\_any\_thread() &&}\\
+
+    \midrule
+\end{tabular}
+
+\effects
+Equivalent to:\\
+\cpp{resume\_from\_any\_thread\_with([](fiber\_context&& caller)\{ return caller; \})}
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{fiber\_context resume() &&}\\
+
+    \midrule
+\end{tabular}
+
+\effects
+Equivalent to:\\
+\cpp{resume\_with([](fiber\_context&& caller)\{ return caller; \})}
 
 \mbrhdr{bool can\_resume\_from\_this\_thread() noexcept}
 
