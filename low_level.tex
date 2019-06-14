@@ -58,11 +58,11 @@ parallel \cpp{forEach} and \cpp{mapReduce} functions.
 
 \uabschnitt{Habanero Extreme Scale Software Research Project\cite{habanero}}
 provides a task-based parallel programming model via its \hclib\cite{hclib}.
-The runtime provides work-stealing, async-finish\footnote{async-finish is a
-variation of fork-join model. While a task might fork a group of
-child tasks the child tasks might fork even more tasks. All tasks can
-potentially run in parallel with each other. The model allows a parent task
-selectively joining on a sub-set of child tasks.},
+The runtime provides work-stealing, async-finish,\footnote{async-finish is a
+variant of the fork-join model. While a task might fork a group of
+child tasks, the child tasks might fork even more tasks. All tasks can
+potentially run in parallel with each other. The model allows a parent task to
+selectively join a subset of child tasks.}
 parallel-for and future-promise parallel programming patterns. The library is not an exascale
 programming system itself, but it manages intra-node resources and schedules
 components within an exascale programming system.
