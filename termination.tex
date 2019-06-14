@@ -1,12 +1,12 @@
 \abschnitt{termination}
 
 There are a few different ways to terminate a given fiber without
-terminating the whole process, or engaging undefined behavior.\\
+terminating the whole process, or engaging undefined behavior.
 
 When a \fiber instance is constructed with an \entryfn, its new stack is
 initialized with the frame of an implicit top-level function that marks the
 end of the stack. \unwindfib unwinds the stack back to
-that top-level function, which returns to the \fiber passed to \unwindfib.\\
+that top-level function, which resumes the \fiber passed to \unwindfib.
 
 Therefore, any of the following will gracefully terminate a fiber:
 
@@ -19,32 +19,33 @@ Therefore, any of the following will gracefully terminate a fiber:
           does. Since\\\unwindfib accepts a \fiber, and since \resumewith
           synthesizes a\\\fiber representing its caller and passes it to the
           subject function, this terminates the fiber referenced by the
-          original \fiber instance and switches back to the caller.
+          original \fiber instance and then resumes the caller.
     \item Engage \dtor: switch to some other fiber, which will
           receive a \fiber instance representing the current fiber. Make that
           other fiber destroy the received \fiber instance.
 \end{itemize}
 
 The above are all equivalent: stack variables are properly destroyed, since
-the stack is unwound. (See \nameref{destruction}.)\\
+the stack is unwound. (See \nameref{unwinding}.)
 
 In an environment that forbids exceptions, every \fiber you launch must
-terminate gracefully, by returning from its top-level function. You may not
+terminate gracefully by returning from its top-level function. You may not
 call \unwindfib. You may not call \dtor, explicitly or implicitly, on a
-non-empty \fiber instance.\\
+non-empty \fiber instance. With these restrictions, it is possible to use
+the \fiber facility without exception support.
 
 When an explicitly-launched fiber's \entryfn returns a non-empty \fiber
 instance, the running fiber is terminated. Control switches to the fiber
 indicated by the returned \fiber instance. The \entryfn may return (switch to)
 any reachable non-empty \fiber instance -- it need not be the instance originally
 passed in, or an instance returned from any of the \resume family of
-methods.\\
+methods.
 
 Returning an empty \fiber instance (\opbool returns \cpp{false}) invokes
-undefined behavior.\\
+undefined behavior.
 
 \emph{Calling} \resume means: ``Please switch to the indicated fiber; I
-am suspending; please resume me later.''\\
+am suspending; please resume me later.''
 
 \emph{Returning} a particular \fiber means: ``Please switch to the indicated
 fiber; and by the way, I am done.''
@@ -56,7 +57,7 @@ Stack unwinding caused by an exception, thread termination or fiber
 destruction exits functions on that stack without executing a \cpp{return} statement. Local variables
 that go out of scope may have destructors that must be called.
 The implementation must walk the stack and call the destructor for each object
-in every such stack frame.\\
+in every such stack frame.
 
 The C++ standard does not define how exception handling is implemented. Stack unwinding differs
 among different systems. The process of stack unwinding is described in the
@@ -76,12 +77,12 @@ Unwinding happens under following circumstances:
 \end{itemize}
 \uwforced takes a \foreignex (non-C++ exception; for instance Java or GO) and walks the stack frame by frame
 inspecting the \emph{unwind tables} for cleanup functions (for instance destructors of
-local variables) and catch blocks.\\
+local variables) and catch blocks.
 
-\uwforced calls a \emph{personality routine} (\cpp{__gxx_personality_v0()} forGCC)\footnote{The
+\uwforced calls a \emph{personality routine} (\cpp{__gxx_personality_v0()} forGCC).\footnote{The
 personality routine passed by a specific runtime serves as interface between system unwinding library
 and language specific exception handling (not only C++; GO and Java are also supported). It is always invoked via pointer (saved
-as a function pointer in \ehframe for each stack frame).}
+as a function pointer in \ehframe\xspace for each stack frame).}
 \uwforced takes a stop function that controls the termination of the unwinding
 (reaching end of stack for fibers).
 The stop function intercepts calls to the personality routine, letting the external
@@ -90,7 +91,8 @@ a consequence the C++ personality routine deals only with C++ exceptions;
 it does not need to know anything specific about unwinding done by an external
 agent such as fiber or pthreads cancellation.}
 When the destination frame (last frame on fiber
-stack) is reached, control jumps back to the caller without literally returning.\\
+stack) is reached, control jumps back to the caller without further popping
+the stack.
 
 The code snippet below is a proof of concept available at \href{https://github.com/boostorg/context/tree/p0876r6}{Boost.Context branch p0876r6}.
 \cppf{unwind}
@@ -104,19 +106,22 @@ to the calling fiber once the last stack frame has been unwound.
 As stated in the \emph{SYS V AMD64 ABI}\cite{SYSVAMD64} standard:
 "A runtime is not allowed to catch an exception if the \cpp{_UA_FORCE_UNWIND} flag was passed to the personality routine."
 and "... since it is not possible to determine if a given catch clause will re-throw or not without executing it ...", the
-\foreignex must not be catchable by C++ \cpp{try-catch} blocks.\\
-As a consequence, \curex can not return a \cpp{std::exception\_ptr} pointing to a \foreignex.\\
+\foreignex must not be catchable by C++ \cpp{try-catch} blocks.
+
+As a consequence, \curex can not return a \cpp{std::exception\_ptr} pointing
+to a \foreignex.
+
 In order to detect if stack unwinding is currently in progress \uncex returns \cpp{true} and\\
-\uncexs counts the \foreignex.\\
+\uncexs counts the \foreignex.
 
 The rationale for moving to an uncatchable exception is further explained in
-the \nameref{history}.\\
+the \nameref{history}.
 
 The specific characteristics of a \foreignex:
 
 \begin{itemize}
     \item Throwing the \foreignex can only be effected by the \fiber
-    facility. The proposed \unwindfib is the only way to cause that
+    facility. The proposed \unwindfib function is the only way to cause that
     explicitly.
     \item The ultimate "catch" -- the point at which stack unwinding stops --
     is likewise determined by the \fiber facility. There is no explicit syntax
@@ -132,8 +137,7 @@ The specific characteristics of a \foreignex:
 %%      exception engages Undefined Behavior
 %%  \end{itemize}
 %%  \item \cpp{catch (}\emph{anything else}\cpp{)}
-    \item \cpp{catch} clauses along the way are ignored. This is
-    what is meant by the shorthand "uncatchable."
+    \item \cpp{catch} clauses along the way are ignored.
 \end{itemize}
 
 Since unwinding a fiber's stack requires destroying objects declared in stack
@@ -142,14 +146,15 @@ frames,
 it is worth pointing out that destroying a non-empty \fiber on a thread other
 than the thread on which it was last resumed will run those object destructors
 %% and \catchall clauses
-on the thread destroying the \fiber instance.\\
+on the thread destroying the \fiber instance.
 
 As a consequence, destroying a \fiber instance representing an implicit fiber
+(see \nameref{fiber-context.implicit})
 from any other thread engages Undefined Behavior.\footnote{One unobvious case
 would be if a fiber running on non-\main thread \cpp{T} stores a \fiber
 representing \cpp{T}'s default fiber in a static variable, whether
 module-scope or function-scope. That variable will be destroyed at program
-termination, probably on a thread other than \cpp{T}.}\\
+termination, probably on a thread other than \cpp{T}.}
 
 Otherwise:
 
@@ -173,7 +178,7 @@ certain point and then simply abandon it, leaving it unreachable.\footnote{A
 higher-level library built on this facility can introduce a scheduler. A
 scheduler could permit abandoning the \main fiber while continuing to run
 other fibers on the same thread; once the last of those fibers terminates, the
-scheduler can finally return from the \main fiber. But \fiber explicitly
+scheduler can finally return from the \main fiber. But \fiber intentionally
 avoids introducing a scheduler.} Destroying the \fiber representing \main must
 end by returning to the runtime.
 
@@ -205,6 +210,6 @@ equivalent to exiting the thread.
 
 The reasoning is the same as for the \fiber representing \main.
 
-\zs{The system's exception handling, i.e. its unwinding framework, is used to cleanup the stack
+\zs{The system's exception handling, i.e. its unwinding framework, is used to clean up the stack
 of a fiber by using a foreign exception that is not catchable by C++ \cpp{try-catch} blocks.}
 

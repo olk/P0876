@@ -3,17 +3,20 @@ undefined behaviour}\label{problem_gpub}
 
 According to \emph{C++ core guidelines}\cite{coreguidlines}, non-const global
 variables should be avoided: they hide dependencies and make the
-dependencies subject to unpredictable changes.\\
+dependencies subject to unpredictable changes.
+
 Global variables can be changed by assigning them indirectly using a pointer or
 by a function call. As a consequence, the compiler can't cache the value of a
 global variable in a register, degrading performance (unnecessary
-loads and stores to global memory especially in performance critical loops).\\
+loads and stores to global memory especially in performance critical loops).
+
 Accessing a register is one to three orders of magnitude faster than accessing
 memory (depending on whether the cache line is in cache and not invalidated by
-another core; and depending on whether the page is in the TLB).\\
+another core; and depending on whether the page is in the TLB).
+
 The order of initialisation (and thus destruction) of static global
 variables is not defined, introducing additional problems with static
-global variables.\\
+global variables.
 
 \zs{A library designed to be used as building block by other higher-level
 frameworks should avoid introducing global variables. If this API were
@@ -28,7 +31,7 @@ restricts the valid use cases.
 For instance the generator pattern is impossible because the only way
 for a fiber to transfer execution control back to \main is to terminate. But
 this means that no way exists to transfer data (sequence of values) back and
-forth between a fiber and \main.\\
+forth between a fiber and \main.
 
 \zs{Switching to \main only by returning is impractical because it limits the
 applicability of fibers and requires an internal global variable pointing to

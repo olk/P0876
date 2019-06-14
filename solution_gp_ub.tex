@@ -14,57 +14,65 @@ fiber is first started, or returned from \resume).
 In the pseudo-code above the fiber \cpp{f} is started by invoking its member
 function \resume at line 7. This operation suspends \cpp{foo}, empties
 instance \cpp{f} and synthesizes a new \fiber\xspace \cpp{m} that is passed as parameter
-to the lambda of \cpp{f} (line 2).\\
+to the lambda of \cpp{f} (line 2).
+
 Invoking \cpp{m.resume()} (line 3) suspends the lambda, empties \cpp{m} and
 synthesizes a \fiber that is returned by \cpp{f.resume()} at line 7. The
 synthesized \fiber is assigned to \cpp{f}. Instance \cpp{f} now represents the
 suspended fiber running the lambda (suspended at line 3). Control is
-transferred from line 3 (lambda) to line 7 (\cpp{foo()}).\\
+transferred from line 3 (lambda) to line 7 (\cpp{foo()}).
+
 Call \cpp{f.resume()} at line 8 empties \cpp{f} and suspends \cpp{foo()}
 again. A \fiber representing the suspended \cpp{foo()} is synthesized, returned
 from \cpp{m.resume()} and assigned to \cpp{m} at line 3. Control
 is transferred back to the lambda and instance \cpp{m} represents the suspended
-\cpp{foo()}.\\
+\cpp{foo()}.
+
 Function \cpp{foo()} is resumed at line 4 by executing \cpp{m.resume()} so that
-control returns at line 8 and so on ...\\
+control returns at line 8 and so on ...
 
 Class \cpp{symmetric_coroutine<>::yield_type} from N3985\cite{N3985} is
-\bfs{not} equivalent to the synthesized \fiber.\\
+\bfs{not} equivalent to the synthesized \fiber.
+
 \cpp{symmetric_coroutine<>::yield_type} does not represent the suspended context,
 instead it is a special representation of the same coroutine. Thus \main or
 the current thread's \entryfn can \bfs{not} be represented by \cpp{yield_type}
-(see next section \nameref{representation}).\\
+(see next section \nameref{representation}).
+
 Because \cpp{symmetric_coroutine<>::yield_type()} yields back to the starting
 point, i.e. invocation of\\
 \cpp{symmetric_coroutine<>::call_type::operator()()},
 both instances (\cpp{call_type} as well as \cpp{yield_type}) must be preserved.
 Additionally the caller must be kept alive until the called coroutine terminates
-or UB happens at resumption.\\
+or UB happens at resumption.
 
 \zs{This API is specified in terms of passing the suspended \fiber. A higher
 level layer can hide that by using private variables.}
 
 \uabschnitt{representing \emph{main()} and thread's \entryfn as fiber}\label{representation}
 As shown in the previous section a synthesized fiber is created and passed
-into the resumed fiber as an instance of \fiber.\\
+into the resumed fiber as an instance of \fiber.
+
 \cppf{synthesized_main}
 
 The mechanism presented in this proposal describes switching between stacks: each
 fiber has its own stack. The stacks of \main and explicitly-launched threads
-are not excluded; these can be used as targets too.\\
+are not excluded; these can be used as targets too.
+
 \bfs{Thus every program can be considered to consist of fibers -- some
 created by the OS (\main stack; each thread's initial stack) and some created
-explicitly by the code.}\\
+explicitly by the code.}
+
 This is a nice feature because it allows (the stacks of) \main and each
 thread's \entryfn to be represented as fibers. A \fiber
 representing \main or a thread's \entryfn can be handled like an
 explicitly created \fiber: it can passed to and returned from functions or
 stored in a container. When called on such an instance, \canxtresume indicates
-whether it is valid to call \xtresumesome on that instance.\\
+whether it is valid to call \xtresumesome on that instance.
 
 In the code snippet above the suspended \main is represented by instance
 \cpp{m} and could be stored in containers or managed just like \cpp{f}
-by a scheduling algorithm.\\
+by a scheduling algorithm.
 
 \zs{The proposed fiber API allows representing and handling \main and the
 current thread's \entryfn by an instance of \fiber in the same way as
@@ -80,7 +88,7 @@ In line 5 the fiber is started by invoking \resume on instance \cpp{f}. \main
 is suspended and an instance of type \cpp{fiber\_context} is synthesized and passed as
 parameter \cpp{m} to the lambda at line 2. The fiber terminates by returning
 \cpp{m}. Control is transferred to \main (returning from \cpp{f.resume()} at
-line 5) while fiber \cpp{f} is destroyed.\\
+line 5) while fiber \cpp{f} is destroyed.
 
 In a more advanced example another \fiber is used as return value instead of the
 passed in synthesized fiber.
@@ -96,7 +104,7 @@ the first time). The synthesized \fiber\xspace \cpp{f} passed into the lambda at
 represents the terminated fiber \cpp{f2} (e.g. the calling fiber). Thus instance
 \cpp{f} is empty as the assert statement verifies at line 5. Fiber \cpp{f1} uses
 the captured \fiber\xspace \cpp{m} as return value (line 6). Control is returned to
-\main, returning from \cpp{f2.resume()} at line 13.\\
+\main, returning from \cpp{f2.resume()} at line 13.
 
 \zs{The function passed to \fiber's constructor must have
 signature `\cpp{fiber\_context(fiber\_context&&)}`. Using \fiber as the return
@@ -106,17 +114,21 @@ value from such a function avoids global variables.}
 An instance of \fiber remains empty after return from \resume, \resumewith,
 \xtresume or\\
 \xtresumewith -- the synthesized fiber is returned, instead of
-implicitly updating the\\\fiber instance on which \resume was called.\\
+implicitly updating the\\\fiber instance on which \resume was called.
+
 If the \fiber object were implicitly updated, the fiber would 
 change its identity because each fiber is associated with a stack. Each stack
 contains a chain of function calls (call stack). If this association were
-implicitly modified, unexpected behaviour happens.\\
+implicitly modified, unexpected behaviour happens.
+
 The example below demonstrates the problem:
 \cppfl{return_from_resume_inplace}
 
-In this pseudo-code the \fiber object is implicitly updated.\\
+In this pseudo-code the \fiber object is implicitly updated.
+
 The example creates a circle of fibers: each fiber prints its name and resumes
-the next fiber (f1 -> f2 -> f3 -> f1 -> ...).\\
+the next fiber (f1 -> f2 -> f3 -> f1 -> ...).
+
 Fiber \cpp{f1} is started at line 26. The synthesized \fiber\xspace \cpp{main} passed 
 to the resumed fiber is not used (control flow cycles through the three
 fibers).\footnote{The operating-system stack provided for \main or the current
@@ -129,7 +141,7 @@ resumes fiber \cpp{f1} at line 7. Inside \cpp{f1} control returns from
 this time fiber \cpp{f3} instead of \cpp{f2} is resumed. This is caused by the
 fact the instance \cpp{f2} gets the synthesized \fiber of \cpp{f3} implicitly
 assigned. Remember that at line 7 fiber \cpp{f3} gets suspended while \cpp{f1}
-is resumed through \cpp{f1.resume()}.\\
+is resumed through \cpp{f1.resume()}.
 
 This problem can be solved by returning the synthesized \fiber from \resume,
 \resumewith, \xtresume or \xtresumewith.
@@ -137,7 +149,7 @@ This problem can be solved by returning the synthesized \fiber from \resume,
 
 In the example above the synthesized \fiber returned by \resume is
 move-assigned to the invoking \fiber instance (that has resumed the current
-fiber).\\
+fiber).
 
 \zs{The synthesized \fiber must be returned from \resume, \resumewith,
 \xtresume and \xtresumewith in order to prevent changing the identity of the
@@ -152,26 +164,26 @@ synthesized \fiber to the correct \fiber instance (the caller).
 Picture a higher-level framework in which every fiber can find its associated
 \cpp{filament} instance, as well as others. Every context switch must be mediated by
 passing \emph{the target} \cpp{filament} instance to \emph{the running fiber's}
-\cpp{resume\_next()}.\\
+\cpp{resume\_next()}.
 
 Running fiber A has an associated \cpp{filament} instance \cpp{filamentA},
-whose \fiber \cpp{f\_} is empty -- because fiber A is running.\\
+whose \fiber \cpp{f\_} is empty -- because fiber A is running.
 
 Desiring to switch to suspended fiber B (with associated
 \cpp{filament} \cpp{filamentB}), running fiber A calls\\
-\cpp{filamentA.resume\_next(filamentB)}.\\
+\cpp{filamentA.resume\_next(filamentB)}.
 
 \cpp{resume\_next()} calls \cpp{filamentB.f\_.resume\_with(<lambda>)}.
-This empties \cpp{filamentB.f\_} -- because fiber B is now running.\\
+This empties \cpp{filamentB.f\_} -- because fiber B is now running.
 
 The lambda binds \cpp{&filamentA} as \cpp{this}. Running on fiber B, it
 receives a \fiber instance representing the newly-suspended fiber A as its
-parameter \cpp{f}. It moves that \fiber instance to \cpp{filamentA.f\_}.\\
+parameter \cpp{f}. It moves that \fiber instance to \cpp{filamentA.f\_}.
 
 The lambda then returns a default-constructed (therefore empty) \fiber
 instance. That empty instance is returned by the previously-suspended
 \resumewith call in \cpp{filamentB.resume\_next()} -- which is fine because
-\cpp{resume\_next()} drops it on the floor anyway.\\
+\cpp{resume\_next()} drops it on the floor anyway.
 
 Thus, the running fiber's associated \cpp{filament::f\_} is always empty,
 whereas the \cpp{filament} associated with each suspended fiber is continually

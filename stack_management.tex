@@ -2,9 +2,10 @@
 
 Each fiber is associated with a stack and is responsible for managing the lifespan
 of its stack (allocation at construction, deallocation when fiber terminates). The
-RAII-pattern\footnote{resource acquisition is initialisation} should apply.\\
+RAII-pattern\footnote{resource acquisition is initialisation} should apply.
 
-Copying a \fiber must not be permitted!\\
+Copying a \fiber must not be permitted!
+
 If a \fiber were copyable, then its stack with all the objects allocated on it
 must be copied too. That presents two implementation choices.
 \begin{itemize}
@@ -31,5 +32,5 @@ A fiber API must:
           deallocated when \fiber goes out of scope
     \item prevent accidentally copying the stack
 \end{itemize}
-Class \fiber must be \emph{moveable-only}.\\
+Class \fiber must be \emph{moveable-only}.
 }
