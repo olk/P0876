@@ -26,7 +26,7 @@ Problems resolved by discarding \unwindex in favor of a non-C++ \foreignex:
 \begin{itemize}
     \item When unwinding a fiber stack, it is essential to know the subsequent
           fiber to resume. \unwindex therefore bound a \fiber. \fiber is
-          move-only. But exceptions must be copyable.
+          move-only. But C++ exceptions must be copyable.
     \item It was possible to catch and discard \unwindex, with problematic
           consequences for its bound \fiber. The new mechanism does not permit
           that.
