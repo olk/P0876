@@ -79,7 +79,7 @@ Unwinding happens under following circumstances:
 inspecting the \emph{unwind tables} for cleanup functions (for instance destructors of
 local variables) and catch blocks.
 
-\uwforced calls a \emph{personality routine} (\cpp{__gxx_personality_v0()} forGCC).\footnote{The
+\uwforced calls a \emph{personality routine} (\cpp{__gxx_personality_v0()} for GCC).\footnote{The
 personality routine passed by a specific runtime serves as interface between system unwinding library
 and language specific exception handling (not only C++; GO and Java are also supported). It is always invoked via pointer (saved
 as a function pointer in \ehframe\xspace for each stack frame).}
