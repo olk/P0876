@@ -12,7 +12,7 @@ constexpr _Unwind_Exception_Class __gxx_fiber_exception_class
 
 class foreign_unwind_ex : public _Unwind_Exception {
 private:
-    static void fiber_unwind_cleanup( _Unwind_Reason_Code code, _Unwind_Exception * exc) {
+    static void fiber_unwind_cleanup(_Unwind_Reason_Code code, _Unwind_Exception *exc) {
         // We only want to be called through _Unwind_DeleteException.
         if ( _URC_FOREIGN_EXCEPTION_CAUGHT != code) {
             std::terminate();

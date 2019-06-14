@@ -8,10 +8,12 @@ provide capabilities for efficient vector processing\footnote{warp on CUDA
 devices, wavefront on AMD GPUs, 512-bit SIMD on Intel Xeon Phi}. Usually the
 host-directed execution uses \bfs{computation offloading} that permits
 executing computationally intensive work on a separate device
-(accelerator)\cite{OpenAcc}.\\
+(accelerator)\cite{OpenAcc}.
+
 For instance CUDA devices use a \bfs{command buffer} to establish communication
 between host and device. The host puts commands (op-codes) into the command
-buffer and the device process them \bfs{asynchronously}\cite{CUDA}.\\
+buffer and the device processes them \bfs{asynchronously}\cite{CUDA}.
+
 It is obvious that a fiber switch does \bfs{not} interact with
 \bfs{host-directed device-offloading}. A fiber switch works like a function
 call (see \nameref{callingconvention}).

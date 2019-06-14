@@ -2,11 +2,11 @@
 
 \zs{This proposal does \so{NOT} seek to standardize any particular implementation or
 impose any specific calling convention!}
-\xspace\\
 
 Modern \bfs{micro-processors} are \bfs{register machines}; the content of
-processor registers represent the execution context of the program at a given
-point in time.\\
+processor registers represents the execution context of the program at a given
+point in time.
+
 \bfs{Operating systems} maintain for each process all relevant data (execution
 context, other hardware registers etc.) in the process table. The operating system's
 \bfs{CPU scheduler} periodically suspends and resumes processes in order to
@@ -14,10 +14,12 @@ share CPU time between multiple processes. When a process is suspended, its
 execution context (processor registers, instruction pointer, stack pointer, ...)
 is stored in the associated process table entry. On resumption, the CPU
 scheduler loads the execution context into the CPU and the process continues
-execution.\\
+execution.
+
 The CPU scheduler does a \bfs{full context switch}. Besides preserving
 the execution context (complete CPU state), the cache must be invalidated and
-the memory map modified.\\
+the memory map modified.
+
 A kernel-level context switch is several orders of magnitude slower than a
 context switch at user-level\cite{Tanenbaum2009}.
 
@@ -25,12 +27,15 @@ context switch at user-level\cite{Tanenbaum2009}.
 preserve the complete CPU state, e.g. all CPU registers. This requires that the
 implementation identifies the concrete micro-processor type and supported processor
 features. For instance the x86-architecture has several flavours of extensions
-such as MMX, SSE1-4, AVX1-2, AVX-512.\\
+such as MMX, SSE1-4, AVX1-2, AVX-512.
+
 Depending on the detected processor features, implementations of certain
 functionality must be switched on or off. The CPU scheduler in the operating system
-uses such information for context switching between processes.\\
+uses such information for context switching between processes.
+
 A fiber implementation using this strategy requires such a detection mechanism
-too (equivalent to swapper/\cpp{system_32()} in the Linux kernel).\\
+too (equivalent to swapper/\cpp{system_32()} in the Linux kernel).
+
 Aside from the complexity of such detection mechanisms, preserving the complete
 CPU state for each fiber switch is expensive.
 
@@ -44,26 +49,25 @@ an operating-system context switch; it only needs to be as transparent as a call
 to any other function. The calling convention -- the part of the ABI that
 specifies how a function's arguments and return values are passed -- determines
 which subset of micro-processor registers must be preserved by the called
-subroutine.\\
+subroutine.
 
 The \bfs{calling convention}\cite{SYSVABI} of \bfs{SYSV ABI} for \bfs{x86\_64}
 architecture determines that general purpose registers R12, R13, R14, R15, RBX
 and RBP must be preserved by the sub-routine - the first arguments are passed
 to functions via RDI, RSI, RDX, RCX, R8 and R9 and return values are stored in
-RAX, RDX.\\
+RAX, RDX.
+
 So on that platform, the \resume implementation preserves the \bfs{general
 purpose registers} (R12-R15, RBX and RBP) specified by the calling convention.
 In addition, the \bfs{stack pointer} and \bfs{instruction pointer} are
 preserved and exchanged too -- thus, from the point of view of calling
-code, \resume behaves like an ordinary function call.\\
+code, \resume behaves like an ordinary function call.
+
 In other words, \resume acts on the level of a simple function invocation --
-with the same performance characteristics (in terms of CPU cycles).\\
+with the same performance characteristics (in terms of CPU cycles).
 
 This technique is used in \bcontext\cite{bcontext} which acts as building block
-for \fbfibers\xspace and \bbquantum. The \fbfibers\xspace framework itself is the basis
-of many critical applications at Facebook, such as \fbmcrouter\cite{fbmcrouter}
-and some other Facebook services/libraries like ServiceRouter (routing framework
-for \fbthrift\cite{fbthrift}), Node API (graph ORM API for graph databases) ...
+for (e.g.) \fbfibers\xspace and \bbquantum; see section \nameref{low_level}.
 
 \uabschnitt{in-place substitution at compile time} During code generation,
 a compiler-based implementation could inject the assembler code responsible
@@ -73,20 +77,22 @@ invoke \resume).
 
 \uabschnitt{CPU state at the stack} Because each fiber must preserve CPU
 registers at suspension and load those registers at resumption, some storage
-is required.\\
+is required.
+
 Instead of allocating extra memory for each fiber, an implementation can use
 the stack by simply advancing the stack pointer at suspension and pushing the
 CPU registers (CPU state) onto the stack owned by the suspending fiber. When
 the fiber is resumed, the values are popped from the stack and loaded into the
-appropriate registers.\\
+appropriate registers.
 
 This strategy works because only a running fiber creates new stack frames
 (moving the stack pointer). While a fiber is suspended, it is safe to keep the
-CPU state on its stack.\\
+CPU state on its stack.
 
 Using the stack as storage for the CPU state has the additional advantage that
 \fiber must only contain a pointer to the stack location: its memory footprint
-can be that of a pointer.\\
+can be that of a pointer.
+
 Section \nameref{synthesizing} describes how global variables are avoided
 by synthesizing a \fiber from the active fiber (execution context) and passing
 this synthesized \fiber (representing the now-suspended fiber) into the resumed
@@ -95,7 +101,7 @@ implement.\footnote{The implementation of \bcontext\cite{bcontext} utilizes this
 technique.}
 Inside \resume the code pushes the relevant CPU registers onto the stack, and
 from the resulting stack address creates a new \fiber. This instance is then
-passed (or returned) into the resumed fiber (see \nameref{synthesizing}).\\
+passed (or returned) into the resumed fiber (see \nameref{synthesizing}).
 
 \zs{Using the active fiber's stack as storage for the CPU state is efficient because no
 additional allocations or deallocations are required.}

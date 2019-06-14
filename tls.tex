@@ -1,6 +1,6 @@
 \abschnitt{multi-threading environment}
 
-Member function \canxtresume returns \cpp{false} if the stack used by the
+Member function \canxtresume returns \cpp{false} if the stack represented by the
 \fiber instance was created by the operating system (main application or thread
 stack), and the caller is running on a different thread. When the stack
 represented by the \fiber instance was created by \fiber's
@@ -9,13 +9,13 @@ implementation could mark the first stack frame by creating a special marker
 (for instance \emph{0xBADCAFFEE} etc.) at a specific offset in the first stack
 frame or use a special function name for the first function and walk the stack
 searching for these markers.} You must not attempt to resume an instance
-representing a stack provided by the operating system on some other thread!\\
+representing a stack provided by the operating system on some other thread!
 
 \canresume can be called to determine whether a given \fiber instance might
-safely be resumed on a particular thread by calling \resume or \resumewith.\\
+safely be resumed on a particular thread by calling \resume or \resumewith.
 
 \fiber is TLS-agnostic - best practices related to TLS apply to fibers too
-(see P0772R0.)\\
+(see P0772R0.)
 
 There could potentially be Undefined Behavior if:
 \begin{itemize}
@@ -28,7 +28,7 @@ There could potentially be Undefined Behavior if:
 
 The cached TLS pointer is now pointing to storage belonging to some other
 thread. If the original thread terminates before the new thread, the cached
-TLS pointer is now dangling.\\
+TLS pointer is now dangling.
 
 For a runtime that caches TLS pointers in such fashion, an implementation
 of \xtresume or\\

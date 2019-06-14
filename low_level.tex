@@ -1,9 +1,9 @@
-\abschnitt{\fiber as building block for higher-level frameworks}
+\abschnitt{\fiber as building block for higher-level frameworks}\label{low_level}
 
 A low-level API enables a rich set of higher-level frameworks that provide
 specific syntaxes/semantics suitable for specific domains. As an example, the
-following four frameworks are based on the low-level fiber switching API of
-\bcontext\cite{bcontext} (implements the API of this proposal).
+following frameworks are based on the low-level fiber switching API of
+\bcontext\cite{bcontext} (which implements the API proposed here).
 
 \uabschnitt{\bcoroutine}\cite{bcoroutine2} implements \bfs{asymmetric coroutines}
 \cpp{coroutine<>::push_type} and\\
@@ -29,8 +29,8 @@ The code itself looks like synchronous invocations while internally it uses
 asynchronous scheduling.
 
 \uabschnitt{\bfiber}\cite{bfiber} implements \bfs{user-land threads} and combines
-fibers with schedulers (scheduler-algorithms are customization points). The API
-is modelled after the \thread-API and contains objects like
+fibers with schedulers (the scheduler algorithm is a customization point). The API
+is modelled after the \thread API and contains objects such as
 \cpp{future}, \cpp{mutex},\\
 \cpp{condition_variable} ...
 \cppf{bfiber_ex}
@@ -44,7 +44,7 @@ event dispatching libraries.
 \fbfibers\xspace is used in many critical applications at Facebook for instance
 in \fbmcrouter\cite{fbmcrouter} and some other Facebook services/libraries like
 ServiceRouter (routing framework for \fbthrift\cite{fbthrift}), Node API (graph
-ORM API for graph databases) ...\\
+ORM API for graph databases) ...
 
 \uabschnitt{Bloomber's \bbquantum}\cite{bbquantum} is a full-featured and
 powerful C++ framework that allows users to dispatch units of work (a.k.a.

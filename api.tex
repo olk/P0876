@@ -36,7 +36,7 @@ particular fiber, and returning from them, is independent of function calls
 and returns on any other fiber.
 
 Context switching can be effected by designating some other fiber's stack as
-current, in a manner appropriate to the implementation of function stacks.
+current, in a manner appropriate to the existing implementation of function stacks.
 
 \rSec3[fiber-context.empty]{Empty vs. Non-Empty}
 
@@ -63,14 +63,18 @@ particular, it is Undefined Behavior to attempt to resume a thread's default
 fiber on some other thread. We use the phrase \emph{explicit fiber}
 or \emph{explicitly-launched fiber} to designate a fiber instantiated by user
 code; conversely, \emph{implicit fiber} designates the default fiber on any
-thread.
+thread. An implicit fiber's \emph{owning thread} is the thread of which that
+fiber is the default fiber.
 
 \rSec3[fiber-context.toplevel]{Implicit Top-Level Stack Frame}
 
 On every explicit fiber, the facility injects an implicit top-level stack
-frame above the \entryfn passed to the constructor. If the fiber is later
+frame above the \entryfn passed to \fiber's constructor. If the fiber is later
 unwound, this implicit top-level stack frame serves as delimiter: this point
 is where unwinding stops.
+
+The top-level function must also catch any C++ exception escaping from the
+fiber's \entryfn and call \cpp{std::terminate}.
 
 Unwinding requires a non-empty \fiber instance indicating the fiber to which
 control should subsequently be passed. Once the terminated fiber's stack has
@@ -79,7 +83,8 @@ been fully unwound, the implicit top-level function resumes the indicated fiber.
 Similarly, on every implicit fiber, the runtime must pass control through an
 implicit top-level function above \main and above the \entryfn for
 each \thread. The stack frame delimits stack unwinding for each of these
-stacks.
+stacks. \tsnote{The implementation may use an existing implicit top-level
+function for this purpose.}
 
 However, the top-level function for an implicit fiber must destroy
 the \fiber instance representing the fiber that triggered stack unwinding.
@@ -93,7 +98,7 @@ the \fiber instance representing the fiber that triggered stack unwinding.
 \cppf{fiber}
 
 \mbrhdr{(constructor)}
-constructs new \cpp{fiber\_context}\\
+constructs new \cpp{fiber\_context}
 
 \begin{tabular}{ l l }
     \midrule
@@ -132,10 +137,10 @@ constructs new \cpp{fiber\_context}\\
 
 \remarks
 \begin{description}
-    \item[---] The entry-function \cpp{fn} is \emph{not} immediately
-              entered. The stack and any other necessary resources are created
-              on construction, but \cpp{fn} is not entered
-              until \allresume is called.
+    \item[---] The entry-function \cpp{fn} is \emph{not} immediately entered.\\
+              The stack and any other necessary resources are created
+              on construction, but \cpp{fn} is entered
+              only when \allresume is called.
     \item[---] A newly constructed but not yet entered fiber may be resumed by
               any thread. For any explicit fiber, the thread that resumes it
               is constrained only by the last thread that previously resumed
@@ -158,7 +163,8 @@ constructs new \cpp{fiber\_context}\\
 \remarks
 \begin{description}
     \item[---] Destroying a suspended fiber causes its stack to be unwound --
-               equivalent to calling \cpp{resume\_with(unwind\_fiber)}.
+               equivalent to calling\\
+               \cpp{resume\_from\_any\_thread\_with(unwind\_fiber)}.
     \item[---] The destructors of the stack variables on the suspended fiber
                represented by \cpp{*this}
 %%, and relevant \catchall clauses,
@@ -169,7 +175,7 @@ constructs new \cpp{fiber\_context}\\
 \end{description}
 
 \subparagraph*{operator=}
-moves the \fiber object\\
+moves the \fiber object
 
 \begin{tabular}{ l l }
     \midrule
@@ -191,7 +197,7 @@ moves the \fiber object\\
 
 \params
 \begin{description}
-    \item[other]   another \fiber to assign to this object\\
+    \item[other]   another \fiber to assign to this object
 \end{description}
 
 \returns
@@ -206,7 +212,7 @@ moves the \fiber object\\
 
 
 \subparagraph*{resume()}
-resumes a fiber\\
+resumes a fiber
 
 \begin{tabular}{ l l }
     \midrule
@@ -220,8 +226,7 @@ resumes a fiber\\
 \requires
 \begin{description}
     \item[---] \cpp{*this} represents a non-empty fiber (\cpp{empty()} returns \cpp{false})
-    \item[---] if \canxtresume would return \cpp{false}, \currthread is
-              the same as \lastthread
+    \item[---] \canxtresume would return \cpp{true}
 \end{description}
 
 \effects
@@ -244,6 +249,7 @@ resumes a fiber\\
     \item[---] Otherwise \cpp{fn} eventually returns a \fiber instance. For
                purposes of exposition, call it \cpp{returned}.
                \tsnote{\cpp{returned} may or may not be the same as \cpp{caller}.}
+               \tsnote{\cpp{returned} may be empty.}
     \item[---] If this is the first entry to the fiber represented
                by \cpp{*this}, \cpp{returned} is passed to its \entryfn.
     \item[---] Otherwise, the fiber represented by \cpp{*this} previously
@@ -368,24 +374,22 @@ Equivalent to:\\
 
 \effects
 query whether \currthread can resume the suspended\\
-\fiber instance by calling \xtresumesome. The implementation must
-return \cpp{false} if the suspended \fiber instance represents an implicit
-fiber, and \currthread is not that thread.\\
+\fiber instance by calling \xtresumesome.
 
 \returns
 \begin{description}
     \item[---] \cpp{fiber\_context::can\_resume\_from\_this\_thread()} returns \cpp{false}
         if \cpp{*this} is empty, or
         if it represents an implicit fiber,
-        and \currthread is not that thread; otherwise \cpp{true}.
+        and \currthread is not that fiber's owning thread; otherwise \cpp{true}.
 \end{description}
 
 \remarks
 \begin{description}
-    \item[---] When an implicit fiber is suspended, a \fiber instance represents that
-        suspended fiber. You may resume that suspended fiber \emph{on the same thread}
-        using any of \allresume. Attempting to
-        resume that suspended fiber from any other thread is Undefined Behavior.
+    \item[---] You may resume a suspended implicit fiber \emph{on the same thread}
+        using any of\\
+        \allresume. Attempting to
+        resume an implicit fiber from any thread other than its owning thread is Undefined Behavior.
     \item[---] \canxtresume returns \cpp{true} if \currthread is the same as \lastthread,
         or if the \fiber instance represents an explicit fiber.
     \item[---] \canxtresume is not marked \cpp{const} because in at least one
@@ -399,22 +403,20 @@ fiber, and \currthread is not that thread.\\
 
 \returns
 \cpp{false} if \cpp{*this} is empty, or if \currthread is not the same
-as \lastthread. \tsnote{When \canresume returns \cpp{true}, the\\ \fiber
-instance may be resumed by \allresume.}\\
+as \lastthread. \tsnote{When \canresume returns \cpp{true}, the \fiber
+instance may be resumed by \allresume.}
 
 \remarks
 \begin{description}
-    \item[---] returns \cpp{false} if \cpp{*this} is empty,
-        or if \currthread is not the same as \lastthread. Otherwise returns \cpp{true}.
     \item[---] \canresume is not marked \cpp{const} because in at least one
         implementation, it requires an internal context switch. However, the
         stack operations are effectively read-only. Nonetheless, if it is
-        possible for more than one thread to call \canxtresume concurrently on
+        possible for more than one thread to call \canresume concurrently on
         the same non-empty \fiber instance, locking is the caller's responsibility.
 \end{description}
 
 \subparagraph*{empty()}
-test whether \fiber is empty\\
+test whether \fiber is empty
 
 \begin{tabular}{ l l }
     \midrule
@@ -432,15 +434,11 @@ test whether \fiber is empty\\
 \begin{description}
     \item[1)] returns \cpp{false} if \cpp{*this} represents a fiber of
               execution, \cpp{true} otherwise.
-    \item[2)] equivalent to \cpp{(! empty())}
+    \item[2)] equivalent to \cpp{(\! empty())}
 \end{description}
 
-\tsnote{The essential points:
-\begin{itemize}
-    \item Regardless of the number of \fiber declarations, exactly one\\
-          \fiber instance represents each suspended fiber.
-    \item No \fiber instance represents the currently-running fiber.
-\end{itemize}}
+\tsnote{Regardless of the number of \fiber declarations, exactly one\\
+\fiber instance represents each suspended fiber.}
 
 \mbrhdr{void swap(fiber\_context& other) noexcept}
 
@@ -459,14 +457,14 @@ terminate the current running fiber.
 \remarks
 \begin{description}
     \item[---] On an explicit fiber, once the running fiber has
-               been fully unwound, \unwindfib resumes the fiber represented
-               by \cpp{other}. \tsnote{This is like returning \cpp{other} from
+               been fully unwound, its implicit top-level function resumes the fiber represented
+               by \cpp{other}. \tsnote{This is equivalent to returning \cpp{other} from
                the \entryfn, but may be called from any function on that
                fiber.}
     \item[---] On an implicit fiber, once the running fiber has been fully
-               unwound, \unwindfib destroys the fiber represented
+               unwound, its implicit top-level function destroys the fiber represented
                by \cpp{other}.
-    \item[---] The underlying Unwinding facility (for instance unwind facility
+    \item[---] The underlying Unwinding facility (for instance the unwind facility
                described in \emph{System V ABI for AMD64}) unwinds the stack
                to the implicit top-level stack frame and terminates the
                current fiber as described above.

@@ -1,6 +1,6 @@
 \abschnitt{Revision History}\label{history}
-This document supersedes P0876R5.\\
-\newline
+This document supersedes P0876R5.
+
 Changes since P0876R5:
 
 \begin{itemize}
@@ -45,11 +45,11 @@ Problems resolved by discarding \unwindex in favor of a non-C++ \foreignex:
 We have also addressed what happens when a \fiber instance representing \main,
 or the default fiber on a \thread, is destroyed.
 
-Not yet addressed:
-
-\begin{itemize}
-    \item During stack unwinding, is an object's destructor allowed to resume
-      some other fiber?
+%%Not yet addressed:
+%%
+%%\begin{itemize}
+%%    \item During stack unwinding, is an object's destructor allowed to resume
+%%      some other fiber?
 %%  \item During stack unwinding, is a \catchall block allowed to
 %%    resume some other fiber?
-\end{itemize}
+%%\end{itemize}
