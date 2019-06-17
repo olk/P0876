@@ -48,9 +48,9 @@ representing a suspended fiber is non-empty.
 
 It is convenient to take the position that every kernel thread in a program,
 including the default thread on which the program runs \main, has an initial
-\emph{default fiber} whose stack is allocated by the host operating system. Thus,
+\emph{default fiber} whose stack is allocated by the host operating system. \tsnote{Thus,
 when \main instantiates a new \fiber, it becomes the second fiber on
-that thread.
+that thread.}
 
 Upon resumption of a fiber, a non-empty \fiber instance is passed in
 representing the newly-suspended previous fiber. This \fiber instance might
@@ -64,30 +64,45 @@ fiber on some other thread. We use the phrase \emph{explicit fiber}
 or \emph{explicitly-launched fiber} to designate a fiber instantiated by user
 code; conversely, \emph{implicit fiber} designates the default fiber on any
 thread. An implicit fiber's \emph{owning thread} is the thread of which that
-fiber is the default fiber.
+fiber is the default fiber. An explicit fiber has no owning thread. Instead,
+when necessary, we speak of the thread on which a fiber was last resumed.
 
-\rSec3[fiber-context.toplevel]{Implicit Top-Level Stack Frame}
+\rSec3[fiber-context.toplevel]{Implicit Top-Level Function}
 
 On every explicit fiber, the facility injects an implicit top-level stack
 frame above the \entryfn passed to \fiber's constructor. If the fiber is later
 unwound, this implicit top-level stack frame serves as delimiter: this point
 is where unwinding stops.
 
-The top-level function must also catch any C++ exception escaping from the
+The top-level function must catch any C++ exception escaping from the
 fiber's \entryfn and call \cpp{std::terminate}.
 
-Unwinding requires a non-empty \fiber instance indicating the fiber to which
-control should subsequently be passed. Once the terminated fiber's stack has
-been fully unwound, the implicit top-level function resumes the indicated fiber.
+Returning a \fiber instance from the explicit fiber's \entryfn returns control
+to the implicit top-level function. Similarly, when \unwindfib unwinds a fiber
+stack, it returns to the implicit top-level function the \fiber instance it
+was passed. Either way, the implicit top-level function is responsible for
+deallocating the explicit fiber's stack memory.
 
 Similarly, on every implicit fiber, the runtime must pass control through an
 implicit top-level function above \main and above the \entryfn for
-each \thread. The stack frame delimits stack unwinding for each of these
-stacks. \tsnote{The implementation may use an existing implicit top-level
-function for this purpose.}
+each \thread. The stack frame for this implicit top-level function delimits
+stack unwinding for each of these stacks. If the fiber stack is unwound,
+control is returned to this implicit top-level function. The top-level
+function for an implicit fiber does not deallocate the fiber's stack memory,
+since the OS will do that.
 
-However, the top-level function for an implicit fiber must destroy
-the \fiber instance representing the fiber that triggered stack unwinding.
+\begin{itemize}
+    \item If a non-empty \fiber instance is returned to the implicit top-level
+    function (for either an explicit or implicit fiber), the fiber represented
+    by that \fiber instance is resumed.
+    \item If an empty \fiber instance is returned to the implicit top-level
+    function for an explicit fiber, the calling thread is terminated.
+    \item If an empty \fiber instance is returned to the implicit top-level
+    function for the default fiber of an explicit thread, that thread is
+    terminated.
+    \item If an empty \fiber instance is returned to the implicit top-level
+    function above \main, the process is terminated.
+\end{itemize}
 
 \rSec3[fiber-context.synopis]{Header <experimental/fiber\_context> synopsis}
 
@@ -456,20 +471,18 @@ terminate the current running fiber.
 
 \remarks
 \begin{description}
-    \item[---] On an explicit fiber, once the running fiber has
-               been fully unwound, its implicit top-level function resumes the fiber represented
-               by \cpp{other}. \tsnote{This is equivalent to returning \cpp{other} from
-               the \entryfn, but may be called from any function on that
-               fiber.}
-    \item[---] On an implicit fiber, once the running fiber has been fully
-               unwound, its implicit top-level function destroys the fiber represented
-               by \cpp{other}.
     \item[---] The underlying Unwinding facility (for instance the unwind facility
                described in \emph{System V ABI for AMD64}) unwinds the stack
                to the implicit top-level stack frame and terminates the
                current fiber as described above.
     \item[---] Unwinding the fiber's stack causes its stack variables to be
                destroyed.
+    \item[---] During this specific stack unwinding, 
+%% only \catchall clauses are executed. No other
+               no \cpp{catch} clauses are executed, not even \catchall.
+    \item[---] Once the running fiber has been fully unwound, \cpp{other} is
+               returned to the fiber's implicit top-level function as
+               described in \nameref{fiber-context.toplevel}.
 %%  \item[---] Unwinding the fiber's stack causes relevant \catchall
 %%             clauses to be executed.
 %%  \item[---] During this specific stack unwinding, a \catchall
@@ -478,19 +491,11 @@ terminate the current running fiber.
 %%  \item[---] During this specific stack unwinding, a \catchall
 %%             clause that attempts to throw any C++ exception engages
 %%             Undefined Behavior.
-    \item[---] During this specific stack unwinding, 
-%% only \catchall clauses are executed. No other
-               no \cpp{catch} clauses are executed, not even \catchall.
 \end{description}
 
 \params
 \begin{description}
     \item[other] the \fiber to which to switch once the current fiber has terminated
-\end{description}
-
-\requires
-\begin{description}
-    \item[---] \cpp{other} must not be empty (\cpp{empty()} returns \cpp{false})
 \end{description}
 
 \returns

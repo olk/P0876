@@ -41,15 +41,17 @@ any reachable non-empty \fiber instance -- it need not be the instance originall
 passed in, or an instance returned from any of the \resume family of
 methods.
 
-Returning an empty \fiber instance (\opbool returns \cpp{false}) invokes
-undefined behavior.
-
 \emph{Calling} \resume means: ``Please switch to the indicated fiber; I
 am suspending; please resume me later.''
 
 \emph{Returning} a particular \fiber means: ``Please switch to the indicated
 fiber; and by the way, I am done.''
 
+The \emph{last} fiber on a particular thread has no non-empty \fiber to
+return. For this reason, returning an empty \fiber instance (\opbool
+returns \cpp{false}) terminates the calling thread. This is true whether or
+not the thread's default fiber (see \nameref{fiber-context.implicit}) has
+terminated.
 
 \uabschnitt{stack unwinding}\label{unwinding}
 
@@ -140,6 +142,9 @@ The specific characteristics of a \foreignex:
     \item \cpp{catch} clauses along the way are ignored.
 \end{itemize}
 
+\zs{The system's exception handling, i.e. its unwinding framework, is used to clean up the stack
+of a fiber by using a foreign exception that is not catchable by C++ \cpp{try-catch} blocks.}
+
 Since unwinding a fiber's stack requires destroying objects declared in stack
 frames,
 %% and may involve executing \catchall clauses,
@@ -148,68 +153,46 @@ than the thread on which it was last resumed will run those object destructors
 %% and \catchall clauses
 on the thread destroying the \fiber instance.
 
-As a consequence, destroying a \fiber instance representing an implicit fiber
-(see \nameref{fiber-context.implicit})
+As a consequence, destroying a \fiber instance representing a thread's default
+fiber (see \nameref{fiber-context.implicit})
 from any other thread engages Undefined Behavior.\footnote{One unobvious case
 would be if a fiber running on non-\main thread \cpp{T} stores a \fiber
 representing \cpp{T}'s default fiber in a static variable, whether
 module-scope or function-scope. That variable will be destroyed at program
 termination, probably on a thread other than \cpp{T}.}
 
-Otherwise:
+\subparagraph{marker frame}
 
-\subparagraph{destroying a \fiber representing \main}\label{destroymain} is equivalent to terminating the application.
+The \fiber facility must inject an implicit top-level function above
+each explicit fiber's \entryfn. (See \nameref{fiber-context.implicit}) This
+top-level function serves to delimit stack unwinding. Once the stack has been
+unwound to that point, control returns to the implicit top-level function. The
+implicit top-level function is responsible for freeing the explicit fiber's
+stack memory and for resuming the \fiber designated as the next fiber.
 
-The C++ runtime must inject a stack frame above \main that serves to stop
-stack unwinding due to the \foreignex. This is similar to, but different than,
-the stack frame above the \entryfn for an explicitly launched fiber.
+\subparagraph{destroying a \fiber representing a thread's default fiber}
 
-\unwindfib must always be called with a non-empty \fiber instance. That \fiber
-value is cached while the terminated fiber's stack is unwound.
+Similarly, the C++ runtime must inject a stack marker at or above \main (and
+each explicitly-launched thread's \entryfn) that serves to delimit stack
+unwinding due to the \foreignex. Unlike an explicit fiber's top-level
+function, though, the top-level function on a thread's default fiber
+does \emph{not} deallocate that fiber's stack: the OS, which provided the
+stack in the first place, will do that.
 
-As its last act, the top-level stack frame on an explicitly launched fiber
-resumes the cached \fiber.
+Unwinding the stack belonging to a thread's default fiber leaves the stack
+allocated but unreachable. That thread may continue to execute explict fibers
+as long as desired.
 
-In contrast, the stack frame injected above \main must finally \emph{destroy}
-the cached \fiber.
+Ultimately, however, it must be possible to exit a fiber in such as way as to
+terminate the calling thread. Returning an empty \fiber instance from
+a fiber's \entryfn terminates the running thread. Consequently, passing an
+empty \fiber instance to \unwindfib also terminates the calling thread.
 
-It is not reasonable to unwind (e.g.) the stack belonging to \main to a
-certain point and then simply abandon it, leaving it unreachable.\footnote{A
-higher-level library built on this facility can introduce a scheduler. A
-scheduler could permit abandoning the \main fiber while continuing to run
-other fibers on the same thread; once the last of those fibers terminates, the
-scheduler can finally return from the \main fiber. But \fiber intentionally
-avoids introducing a scheduler.} Destroying the \fiber representing \main must
-end by returning to the runtime.
+The \fiber facility does not defend against the case in which a thread's
+default fiber suspends (rather than terminating), but the explicit fiber it
+resumes ultimately causes thread termination in either of the ways described
+above. A higher-level library built on \fiber can provide a scheduler.
+The \fiber facility intentionally does not.
 
-Consider fiber F0: the default thread's default fiber, the fiber on
-which \main is called. F0 launches fiber F1, storing F1's \fiber in a
-stack variable, then launches F2. F2 destroys the \fiber instance representing
-F0.
-
-F0's stack is unwound with F2's \fiber instance cached.
-
-At some point along the way, the stack frame containing F1's \fiber is
-destroyed, thus F1's \fiber is destroyed. F0's stack unwinding is temporarily
-suspended and F1's stack is unwound. During this nested unwinding, F0's \fiber
-is cached.
-
-Once F1's stack is unwound -- because F1 was explicitly launched -- its
-implicit top-level function resumes F0's \fiber. This frees F1's stack memory
-and resumes unwinding F0's stack.
-
-Once F0's stack is unwound, as noted above, its top-level function must return
-to the runtime to terminate the process. However, F2 is still suspended at the
-point of destroying F0's (original) \fiber instance! F2's stack still exists!
-
-Therefore, F0's top-level function must destroy F2's cached \fiber instance
-before returning to the runtime.
-
-\subparagraph{destroying a \fiber representing \cpp{std::thread}} is
-equivalent to exiting the thread.
-
-The reasoning is the same as for the \fiber representing \main.
-
-\zs{The system's exception handling, i.e. its unwinding framework, is used to clean up the stack
-of a fiber by using a foreign exception that is not catchable by C++ \cpp{try-catch} blocks.}
-
+The top-level function above \main, given an empty \fiber instance to resume,
+terminates the whole process instead of that one thread.
