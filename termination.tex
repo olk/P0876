@@ -163,19 +163,19 @@ termination, probably on a thread other than \cpp{T}.}
 
 \subparagraph{marker frame}
 
-The \fiber facility must inject an implicit top-level function above
+The \fiber facility behaves as if there is an implicit top-level function above
 each explicit fiber's \entryfn. (See \nameref{fiber-context.implicit}) This
 top-level function serves to delimit stack unwinding. Once the stack has been
-unwound to that point, control returns to the implicit top-level function. The
-implicit top-level function is responsible for freeing the explicit fiber's
+unwound to that point, it is as if control returns to the implicit top-level function. The
+implicit top-level function is conceptually responsible for freeing the explicit fiber's
 stack memory and for resuming the \fiber designated as the next fiber.
 
 \subparagraph{destroying a \fiber representing a thread's default fiber}
 
-Similarly, the C++ runtime must inject a stack marker at or above \main (and
+Similarly, the C++ runtime behaves as if there is a stack marker at or above \main (and
 each explicitly-launched thread's \entryfn) that serves to delimit stack
 unwinding due to the \foreignex. Unlike an explicit fiber's top-level
-function, though, the top-level function on a thread's default fiber
+function, though, the conceptual top-level function on a thread's default fiber
 does \emph{not} deallocate that fiber's stack: the OS, which provided the
 stack in the first place, will do that.
 
@@ -194,5 +194,5 @@ resumes ultimately causes thread termination in either of the ways described
 above. A higher-level library built on \fiber can provide a scheduler.
 The \fiber facility intentionally does not.
 
-The top-level function above \main, given an empty \fiber instance to resume,
+The conceptual top-level function above \main, given an empty \fiber instance to resume,
 terminates the whole process instead of that one thread.

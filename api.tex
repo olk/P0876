@@ -69,38 +69,39 @@ when necessary, we speak of the thread on which a fiber was last resumed.
 
 \rSec3[fiber-context.toplevel]{Implicit Top-Level Function}
 
-On every explicit fiber, the facility injects an implicit top-level stack
+On every explicit fiber, the behavior is equivalent to injecting an implicit top-level stack
 frame above the \entryfn passed to \fiber's constructor. If the fiber is later
-unwound, this implicit top-level stack frame serves as delimiter: this point
+unwound, this conceptual top-level stack frame serves as delimiter: this point
 is where unwinding stops.
 
-The top-level function must catch any C++ exception escaping from the
+The conceptual top-level function must catch any C++ exception escaping from the
 fiber's \entryfn and call \cpp{std::terminate}.
 
-Returning a \fiber instance from the explicit fiber's \entryfn returns control
-to the implicit top-level function. Similarly, when \unwindfib unwinds a fiber
-stack, it returns to the implicit top-level function the \fiber instance it
-was passed. Either way, the implicit top-level function is responsible for
-deallocating the explicit fiber's stack memory.
+Returning a \fiber instance from the explicit fiber's \entryfn is equivalent
+to returning control to the implicit top-level function. Similarly,
+when \unwindfib unwinds a fiber stack, it conceptually returns the \fiber
+instance it was passed to the implicit top-level function. Either way, the
+conceptual implicit top-level function is responsible for deallocating the
+explicit fiber's stack memory.
 
-Similarly, on every implicit fiber, the runtime must pass control through an
+Similarly, on every implicit fiber, the behavior is equivalent to passing control through an
 implicit top-level function above \main and above the \entryfn for
-each \thread. The stack frame for this implicit top-level function delimits
+each \thread. The conceptual stack frame for this implicit top-level function delimits
 stack unwinding for each of these stacks. If the fiber stack is unwound,
-control is returned to this implicit top-level function. The top-level
+control is conceptually returned to this implicit top-level function. The conceptual top-level
 function for an implicit fiber does not deallocate the fiber's stack memory,
 since the OS will do that.
 
 \begin{itemize}
-    \item If a non-empty \fiber instance is returned to the implicit top-level
+    \item If a non-empty \fiber instance is returned to the conceptual top-level
     function (for either an explicit or implicit fiber), the fiber represented
     by that \fiber instance is resumed.
-    \item If an empty \fiber instance is returned to the implicit top-level
+    \item If an empty \fiber instance is returned to the conceptual top-level
     function for an explicit fiber, the calling thread is terminated.
-    \item If an empty \fiber instance is returned to the implicit top-level
+    \item If an empty \fiber instance is returned to the conceptual top-level
     function for the default fiber of an explicit thread, that thread is
     terminated.
-    \item If an empty \fiber instance is returned to the implicit top-level
+    \item If an empty \fiber instance is returned to the conceptual top-level
     function above \main, the process is terminated.
 \end{itemize}
 
@@ -481,7 +482,7 @@ terminate the current running fiber.
 %% only \catchall clauses are executed. No other
                no \cpp{catch} clauses are executed, not even \catchall.
     \item[---] Once the running fiber has been fully unwound, \cpp{other} is
-               returned to the fiber's implicit top-level function as
+               returned to the fiber's conceptual top-level function as
                described in \nameref{fiber-context.toplevel}.
 %%  \item[---] Unwinding the fiber's stack causes relevant \catchall
 %%             clauses to be executed.
