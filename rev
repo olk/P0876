@@ -1,0 +1,76 @@
+#!/bin/bash
+# Usage:
+# rev R7
+# or
+# rev D0876R7
+# Finds the most recent previous [PD]0876R*.tex and updates version references
+# accordingly.
+
+PNUM="0876"
+
+cd "$(dirname "$0")"
+
+# Convert user's specified revision (in any of several forms) to P0876Rx
+pfx="${1:0:1}"
+case "$pfx" in
+    P|D)
+        # user specified the entire P0876Rx
+        newrev="$1"
+        ;;
+    R)
+        # user specified just the Rx
+        newrev="P$PNUM$1"
+        ;;
+    *)
+        if [ $(($1+0)) == "$1" ]
+        then # $1 is an int
+            newrev="P${PNUM}R$1"
+        else
+            echo "Unrecognized revision '$1'" >&2
+            exit 1
+        fi
+        ;;
+esac
+
+# There should be only one master .tex file, but in case we turn up more than
+# one, reverse-sort names, skipping the first character, and take the first.
+oldtex="$(ls [PD]${PNUM}R*.tex | sort -k1.2r | head -n 1)"
+oldrev="${oldtex%.tex}"
+
+# Find the URL for the published oldrev
+oldurl="$(curl --silent --location --head --output /dev/null --write-out '%{url_effective}' -- https://wg21.link/$oldrev)"
+
+# Find the rev previous to oldrev
+prevrev="$(sed -n -E "s/^.*supersedes ([PD]0876R.*)\..*/\1/p" history.tex)"
+
+echo "Updating $oldrev -> $newrev"
+echo "$oldrev URL: $oldurl"
+echo "Previous to $oldrev was $prevrev"
+
+git mv "$oldtex" "$newrev.tex"
+sed -i.tex~ "s/$oldrev/$newrev/" "$newrev.tex"
+sed -i.tex~ "s/$prevrev\\\\cite{$prevrev}/$oldrev\\\\cite{$oldrev}/" abstract.tex
+sed -i.tex~ -E "s/(supersedes |since )$prevrev/\\1$oldrev/" history.tex
+
+# This sed command needs a bit of explanation.
+# We want to inject a new \bibitem{$oldrev} block just like (and just after)
+# the \bibitem{$prevrev} block. Each such block is 4 lines long, including the
+# trailing blank line. So search for \bibitem{$prevrev}, then suck the next 3
+# lines into the pattern space. Immediately print the pattern space BEFORE
+# changing it -- that is, we want to append to the \bibitem{$prevrev} block
+# rather than replacing it. Then substitute $prevrev with $oldrev. Then
+# substitute the old url in \href{...} with \href{$oldurl}. But inside
+# \href{...} we must use [^[:space:]]* rather than simply .* because .*, being
+# greedy, spans lines and will eat through the close } and the subsequent open
+# { and all the way up to the second }. Don't explicitly print the pattern
+# space again because that's implied (since we didn't specify the -n switch).
+sed -i.tex~ -f <(echo \
+"/\bibitem{$prevrev}/{ N
+N
+N
+p
+s/$prevrev/$oldrev/g
+s!\href{[^[:space:]]*}!\href{$oldurl}!
+}") references.tex
+
+git diff
