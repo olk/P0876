@@ -106,7 +106,7 @@ represents the terminated fiber \cpp{f2} (e.g. the calling fiber). Thus instance
 the captured \fiber\xspace \cpp{m} as return value (line 6). Control is returned to
 \main, returning from \cpp{f2.resume()} at line 13.
 
-\zs{The function passed to \fiber's constructor must have
+\zs{The \entryfn passed to \fiber's constructor must have
 signature `\cpp{fiber\_context(fiber\_context&&)}`. Using \fiber as the return
 value from such a function avoids global variables.}
 

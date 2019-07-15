@@ -3,26 +3,36 @@
 On construction of a \fiber a stack is allocated. If the \entryfn returns,
 the stack will be destroyed. If the function has not yet returned and the
 destructor of the \fiber instance representing that context is called,
-the stack will be unwound and destroyed.
+%% the stack will be unwound and destroyed.
+the calling program is responsible for unwinding the stack.
+
+The fiber's \cancelfn is used to trigger cleanup.
 
 Consider a running fiber \cpp{f2} that destroys the \fiber instance
 representing \cpp{f1}.
 
 \cpp{f1}'s destructor, running on \cpp{f2}, implicitly calls member-function
-\resumewith, passing \unwindfib as
-argument. Fiber \cpp{f1} will be temporarily resumed and \unwindfib is
+\resumewith, passing the fiber's \cancelfn as
+argument. Fiber \cpp{f1} will be temporarily resumed and the \cancelfn is
 invoked.
 
-Function \unwindfib caches an instance of \fiber that
-represents \cpp{f2}, then unwinds \cpp{f1}'s stack
-(walking the stack and destroying automatic variables in reverse order of
-construction).
-The first frame on \cpp{f1}'s stack, the one created by \fiber's constructor,
-stops the unwinding. It terminates \cpp{f1} by returning
-\cpp{f2}. Control is returned to \cpp{f2} and \cpp{f1}'s
-stack gets deallocated.
+The \cancelfn must communicate to fiber \cpp{f1} the need to terminate. It
+might throw an exception. It might set a distinguished value in some object
+tested by code on \cpp{f1}. In any case, fiber \cpp{f2} remains suspended
+in \cpp{f1}'s destructor until \cpp{f1}'s \entryfn returns (the \fiber
+instance synthesized for) \cpp{f2} -- or until \cpp{f2} is explicitly resumed
+in some other way.
 
-The stack on which \main is executed, as well as the stack implicitly
-created by \thread's constructor, is allocated by the operating
-system. Such stacks are recognized by \fiber, and are not deallocated by its
-destructor.
+%% Function \unwindfib caches an instance of \fiber that
+%% represents \cpp{f2}, then unwinds \cpp{f1}'s stack
+%% (walking the stack and destroying automatic variables in reverse order of
+%% construction).
+%% The first frame on \cpp{f1}'s stack, the one created by \fiber's constructor,
+%% stops the unwinding. It terminates \cpp{f1} by returning
+%% \cpp{f2}. Control is returned to \cpp{f2} and \cpp{f1}'s
+%% stack gets deallocated.
+
+%% The stack on which \main is executed, as well as the stack implicitly
+%% created by \thread's constructor, is allocated by the operating
+%% system. Such stacks are recognized by \fiber, and are not deallocated by its
+%% destructor.
