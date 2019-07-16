@@ -1,6 +1,7 @@
+// hypothetical API
 fiber_context f4{[]{
     self::suspend();
-};
+}};
 fiber_context f3{[&f4]{
     f4.resume();
     self::suspend();
