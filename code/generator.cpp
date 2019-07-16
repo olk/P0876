@@ -1,5 +1,5 @@
 int a;
-std::fiber_context g{[&a](std::fiber_context&& m){
+std::fiber_context g{launch([&a](std::fiber_context&& m){
     a=0;
     int b=1;
     for(;;){
@@ -9,7 +9,7 @@ std::fiber_context g{[&a](std::fiber_context&& m){
         b=next;
     }
     return std::move(m);
-}};
+})};
 std::vector<int> v(10);
 std::generate(v.begin(), v.end(), [&a,&g]() mutable {
     g=std::move(g).resume();

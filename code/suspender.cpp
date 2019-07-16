@@ -1,8 +1,8 @@
-fiber_context f([](fiber_context&& caller){
+fiber_context f(launch([](fiber_context&& caller){
     // ...
     std::move(caller).resume();
     // ...
-});
+}));
 
 fiber_context fn(fiber_context&&);
 
