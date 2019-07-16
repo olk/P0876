@@ -1,11 +1,43 @@
 \abschnitt{Revision History}\label{history}
-This document supersedes P0876R5.
+This document supersedes P0876R6.
+
+Changes since P0876R6:
+
+\begin{itemize}
+    \item Implicit stack unwinding (by non-C++ exception) removed.
+    \item \unwindfib removed.
+    \item Cancellation function added to \fiber constructor.
+\end{itemize}
+
+In Cologne 2019, SG1 took the position that:
+
+\begin{itemize}
+    \item The \cpp{fiber\_context} facility is not the only C++ feature that
+          requires ``special'' unwinding (special function exit path).
+    \item Such functionality should be decoupled from \fiber. It requires its
+          own proposal that follows its own course through WG21 process.
+    \item Depending on this (yet to be written) proposal would unduly delay
+          the \cpp{fiber\_context} facility.
+    \item For now, the \cpp{fiber\_context} facility should adopt a ``less is
+          more'' approach, removing promises about implicit unwinding, placing
+          the burden on the consumer of the facility instead.
+    \item This leaves the way open for \cpp{fiber\_context} to integrate with
+          a new, improved unwind facility when such becomes available.
+\end{itemize}
+
+The idea of making \fiber's constructor accept a cancellation function was
+suggested to permit consumer opt-in to P0876R5 functionality where
+permissible, or convey to the fiber in question by any suitable means the need
+to clean up and terminate.
+
+Requiring the cancellation function is partly because it remains unclear what
+the default should be, and partly to allow specifying later that the default
+engages the new, imporved unwind facility.
 
 Changes since P0876R5:
 
 \begin{itemize}
-    \item \cpp{std::unwind\_exception} removed: stack unwinding must be
-      performed by platform facilities.
+    \item \cpp{std::unwind\_exception} removed.
     \item \cpp{fiber\_context::can\_resume\_from\_any\_thread()} renamed to
       \canxtresume.
     \item \cpp{fiber\_context::valid()} renamed to \cpp{empty()} with inverted
@@ -14,42 +46,26 @@ Changes since P0876R5:
       logic governing each fiber.
 \end{itemize}
 
-The change to unwinding fiber stacks using an anonymous \foreignex not
-catchable by C++ \cpp{try} / \cpp{catch} blocks is in response to deep
+\unwindex was removed in response to deep
 discussions in Kona 2019 of the surprisingly numerous problems surfaced by
 using an ordinary C++ exception for that purpose.
 
-Further information about the specific mechanism can be found in
-\nameref{unwinding} et ff.
-
-Problems resolved by discarding \unwindex in favor of a non-C++ \foreignex:
+Problems resolved by discarding \unwindex:
 \begin{itemize}
     \item When unwinding a fiber stack, it is essential to know the subsequent
           fiber to resume. \unwindex therefore bound a \fiber. \fiber is
           move-only. But C++ exceptions must be copyable.
     \item It was possible to catch and discard \unwindex, with problematic
-          consequences for its bound \fiber. The new mechanism does not permit
-          that.
-    \item Similarly, it used to be possible to catch \unwindex but not rethrow it.
+          consequences for its bound \fiber.
+    \item Similarly, it was possible to catch \unwindex but not rethrow it.
     \item If we attempted to address the problem above by introducing a
           \unwindex operation to extract the bound \fiber, it became possible
           to rethrow the exception with an empty (moved-from) \fiber instance.
     \item Throwing a C++ exception during C++ exception unwinding terminates
-          the program. But destroying a \fiber no longer causes a C++
-          exception to be thrown.
+          the program. It was possible for an exception implementation based
+          on \cpp{thread\_local} to become confused by exceptions on different
+          fibers on the same thread.
     \item It is no longer possible to capture \unwindex with
           \cpp{std::exception\_ptr} and migrate it to a different fiber -- or
           a different thread.
 \end{itemize}
-
-We have also addressed what happens when a \fiber instance representing \main,
-or the default fiber on a \thread, is destroyed.
-
-%%Not yet addressed:
-%%
-%%\begin{itemize}
-%%    \item During stack unwinding, is an object's destructor allowed to resume
-%%      some other fiber?
-%%  \item During stack unwinding, is a \catchall block allowed to
-%%    resume some other fiber?
-%%\end{itemize}

@@ -70,25 +70,30 @@ when necessary, we speak of the thread on which a fiber was last resumed.
 \rSec3[fiber-context.toplevel]{Implicit Top-Level Function}
 
 On every explicit fiber, the behavior is equivalent to injecting an implicit top-level stack
-frame above the \entryfn passed to \fiber's constructor. If the fiber is later
-unwound, this conceptual top-level stack frame serves as delimiter: this point
-is where unwinding stops.
+frame above the \entryfn passed to \fiber's constructor.
+%% If the fiber is later
+%% unwound, this conceptual top-level stack frame serves as delimiter: this point
+%% is where unwinding stops.
 
 The conceptual top-level function must catch any C++ exception escaping from the
 fiber's \entryfn and call \cpp{std::terminate}.
 
 Returning a \fiber instance from the explicit fiber's \entryfn is equivalent
-to returning control to the implicit top-level function. Similarly,
-when \unwindfib unwinds a fiber stack, it conceptually returns the \fiber
-instance it was passed to the implicit top-level function. Either way, the
+to returning control to the implicit top-level function.
+%% Similarly,
+%% when \unwindfib unwinds a fiber stack, it conceptually returns the \fiber
+%% instance it was passed to the implicit top-level function. Either way, the
+The
 conceptual implicit top-level function is responsible for deallocating the
 explicit fiber's stack memory.
 
 Similarly, on every implicit fiber, the behavior is equivalent to passing control through an
 implicit top-level function above \main and above the \entryfn for
-each \thread. The conceptual stack frame for this implicit top-level function delimits
-stack unwinding for each of these stacks. If the fiber stack is unwound,
-control is conceptually returned to this implicit top-level function. The conceptual top-level
+each \thread.
+%% The conceptual stack frame for this implicit top-level function delimits
+%% stack unwinding for each of these stacks. If the fiber stack is unwound,
+%% control is conceptually returned to this implicit top-level function.
+The conceptual top-level
 function for an implicit fiber does not deallocate the fiber's stack memory,
 since the OS will do that.
 
@@ -123,8 +128,8 @@ constructs new \cpp{fiber\_context}
 
     \midrule
 
-    \cpp{template<typename Fn>}\\
-    \cpp{explicit fiber\_context(Fn&& fn)} & (2)\\
+    \cpp{template<typename Fn0, typename Fn1>}\\
+    \cpp{explicit fiber\_context(Fn0&& entry, Fn1&& cancel)} & (2)\\
 
     \midrule
 
@@ -140,20 +145,20 @@ constructs new \cpp{fiber\_context}
 \begin{description}
     \item[1)] this constructor instantiates an empty \fiber. Its \cpp{empty()} method
               returns \cpp{true}.
-    \item[2)] takes a invocable object [func.def] as
-              argument. The invocable must have signature \cpp{fiber\_context
+    \item[2)] takes invocable objects [func.def] as
+              arguments. The invocables must have signature \cpp{fiber\_context
               fn(fiber\_context&&)}. This constructor template shall not
-              participate in overload resolution unless \cpp{Fn}
-              is \emph{Lvalue-Invocable} [func.wrap.func] for the argument
+              participate in overload resolution unless \cpp{Fn0} and \cpp{Fn1}
+              are \emph{Lvalue-Invocable} [func.wrap.func] for the argument
               type \cpp{std::fiber\_context&&} and the return type \fiber.\\
-              \bfs{SG1:} Needs update to \cpp{Invocable} idiom.
+              \bfs{SG1:} Needs update to \cpp{Invocable} concept.
     \item[3)] moves underlying state to new \fiber
     \item[4)] copy constructor deleted
 \end{description}
 
 \remarks
 \begin{description}
-    \item[---] The entry-function \cpp{fn} is \emph{not} immediately entered.\\
+    \item[---] The entry-function \cpp{entry} is \emph{not} immediately entered.
               The stack and any other necessary resources are created
               on construction, but \cpp{fn} is entered
               only when \allresume is called.
@@ -162,9 +167,11 @@ constructs new \cpp{fiber\_context}
               is constrained only by the last thread that previously resumed
               it -- and that constraint is imposed by operations performed by
               the fiber, rather than by the \fiber facility itself.
-    \item[---] The entry-function \cpp{fn} passed to \fiber
+    \item[---] The entry-function \cpp{entry} passed to \fiber
               will be passed a synthesized \fiber instance representing the
               suspended caller of \allresume.
+    \item[---] The \cancelfn \cpp{cancel} is invoked only when a non-empty
+              \fiber instance is destroyed. See \cpp{\~fiber\_context()}.
 \end{description}
 
 \mbrhdr{\~fiber\_context()}
@@ -178,17 +185,24 @@ constructs new \cpp{fiber\_context}
 
 \remarks
 \begin{description}
-    \item[---] Destroying a suspended fiber causes its stack to be unwound --
-               equivalent to calling\\
-               \cpp{resume\_from\_any\_thread\_with(unwind\_fiber)}.
-    \item[---] The destructors of the stack variables on the suspended fiber
-               represented by \cpp{*this}
-%%, and relevant \catchall clauses,
-               are run on the thread calling \dtor.
-    \item[---] As a consequence, destroying a \fiber instance
-               representing an implicit fiber from some other
-               thread engages Undefined Behavior.
+    \item[---] If \cpp{empty()} returns \cpp{false} at the time a \fiber
+               instance is destroyed, the destructor performs a call
+               equivalent to \cpp{resume\_from\_any\_thread\_with(cancellation-function)}.
+%%    \item[---] Destroying a suspended fiber causes its stack to be unwound --
+%%               equivalent to calling\\
+%%               \cpp{resume\_from\_any\_thread\_with(unwind\_fiber)}.
+%%    \item[---] The destructors of the stack variables on the suspended fiber
+%%               represented by \cpp{*this}
+%%%%, and relevant \catchall clauses,
+%%               are run on the thread calling \dtor.
+%%    \item[---] As a consequence, destroying a \fiber instance
+%%               representing an implicit fiber from some other
+%%               thread engages Undefined Behavior.
 \end{description}
+
+\tsnote{The \cancelfn must communicate to the fiber represented by \cpp{*this}
+the requirement to terminate. It may throw an exception or set some state
+visible to the fiber logic.}
 
 \subparagraph*{operator=}
 moves the \fiber object
@@ -251,7 +265,7 @@ resumes a fiber
                resolution unless \cpp{Fn} is \emph{Lvalue-Invocable} [func.wrap.func]
                for the argument type \cpp{std::fiber\_context&&} and the return
                type \fiber.\\
-               \bfs{SG1:} Needs update to \cpp{Invocable} idiom.
+               \bfs{SG1:} Needs update to \cpp{Invocable} concept.
     \item[---] The execution context of the calling fiber is saved.
     \item[---] The calling fiber is suspended.
     \item[---] A new \fiber instance representing the suspended caller is
@@ -318,8 +332,7 @@ fiber, and the currently-running fiber suspends. These method names mean that
 the fiber represented by \cpp{*this} will be resumed whether or not it was
 last resumed on \currthread.}
 
-\tsnote{A suspended \cpp{fiber\_context} can be destroyed. Its resources will be cleaned
-up at that time.}
+\tsnote{A suspended \cpp{fiber\_context} can be destroyed.}
 
 \tsnote{The returned \cpp{fiber\_context} indicates via \cpp{empty()} whether the previous active
 fiber has terminated (returned from \entryfn).}
@@ -463,48 +476,48 @@ test whether \fiber is empty
     \item[---] Exchanges the state of \cpp{*this} with \cpp{other}.
 \end{description}
 
-\rSec3[fiber-context.unwinding]{Function unwind\_fiber()}
-
-\mbrhdr{[[ noreturn ]] void unwind\_fiber(fiber\_context&& other)}
-
-\effects
-terminate the current running fiber.
-
-\remarks
-\begin{description}
-    \item[---] The underlying Unwinding facility (for instance the unwind facility
-               described in \emph{System V ABI for AMD64}) unwinds the stack
-               to the implicit top-level stack frame and terminates the
-               current fiber as described above.
-    \item[---] Unwinding the fiber's stack causes its stack variables to be
-               destroyed.
-    \item[---] During this specific stack unwinding, 
-%% only \catchall clauses are executed. No other
-               no \cpp{catch} clauses are executed, not even \catchall.
-    \item[---] Once the running fiber has been fully unwound, \cpp{other} is
-               returned to the fiber's conceptual top-level function as
-               described in \nameref{fiber-context.toplevel}.
-%%  \item[---] Unwinding the fiber's stack causes relevant \catchall
-%%             clauses to be executed.
-%%  \item[---] During this specific stack unwinding, a \catchall
-%%             clause that does not execute a \cpp{throw;} statement behaves
-%%             as if it ended with a \cpp{throw;} statement.
-%%  \item[---] During this specific stack unwinding, a \catchall
-%%             clause that attempts to throw any C++ exception engages
-%%             Undefined Behavior.
-\end{description}
-
-\params
-\begin{description}
-    \item[other] the \fiber to which to switch once the current fiber has terminated
-\end{description}
-
-\returns
-\begin{description}
-    \item[---] None: \unwindfib does not return
-\end{description}
-
-\except
-\begin{description}
-    \item[---] None catchable by C++
-\end{description}
+%% \rSec3[fiber-context.unwinding]{Function unwind\_fiber()}
+%% 
+%% \mbrhdr{[[ noreturn ]] void unwind\_fiber(fiber\_context&& other)}
+%% 
+%% \effects
+%% terminate the current running fiber.
+%% 
+%% \remarks
+%% \begin{description}
+%%     \item[---] The underlying Unwinding facility (for instance the unwind facility
+%%                described in \emph{System V ABI for AMD64}) unwinds the stack
+%%                to the implicit top-level stack frame and terminates the
+%%                current fiber as described above.
+%%     \item[---] Unwinding the fiber's stack causes its stack variables to be
+%%                destroyed.
+%%     \item[---] During this specific stack unwinding, 
+%% %% only \catchall clauses are executed. No other
+%%                no \cpp{catch} clauses are executed, not even \catchall.
+%%     \item[---] Once the running fiber has been fully unwound, \cpp{other} is
+%%                returned to the fiber's conceptual top-level function as
+%%                described in \nameref{fiber-context.toplevel}.
+%% %%  \item[---] Unwinding the fiber's stack causes relevant \catchall
+%% %%             clauses to be executed.
+%% %%  \item[---] During this specific stack unwinding, a \catchall
+%% %%             clause that does not execute a \cpp{throw;} statement behaves
+%% %%             as if it ended with a \cpp{throw;} statement.
+%% %%  \item[---] During this specific stack unwinding, a \catchall
+%% %%             clause that attempts to throw any C++ exception engages
+%% %%             Undefined Behavior.
+%% \end{description}
+%% 
+%% \params
+%% \begin{description}
+%%     \item[other] the \fiber to which to switch once the current fiber has terminated
+%% \end{description}
+%% 
+%% \returns
+%% \begin{description}
+%%     \item[---] None: \unwindfib does not return
+%% \end{description}
+%% 
+%% \except
+%% \begin{description}
+%%     \item[---] None catchable by C++
+%% \end{description}
