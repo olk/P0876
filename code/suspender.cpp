@@ -4,7 +4,7 @@ fiber_context f(launch([](fiber_context&& caller){
     // ...
 }));
 
-fiber_context fn(fiber_context&&);
+fiber_context fn{fiber_context&&};
 
 f = std::move(f).resume();
 // ...
