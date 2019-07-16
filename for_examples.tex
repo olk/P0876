@@ -1,0 +1,47 @@
+\abschnitt{code common to examples in this paper}
+
+The \fiber constructor accepts an \entryfn and a \cancelfn (see
+\nameref{constructor}). For purposes of the examples in this paper, assume a
+trivial \cpp{assert\_cancel()} function as shown:
+
+\cppf{assert_cancel}
+
+When \cpp{assert\_cancel} is passed to a \fiber constructor as its \cancelfn,
+if a \fiber instance representing that fiber is destroyed,
+\cpp{assert\_cancel()} fails its \cpp{assert()}.
+
+Sometimes it is desirable to abandon a fiber without letting it run to
+completion. Consider an infinite generator. For such cases, assume a
+\cpp{launch()} factory function that provides both an \entryfn wrapper and a
+\cancelfn, as shown here:
+
+\cppf{launch}
+
+When a fiber is launched by calling \cpp{launch()}, if a \fiber instance
+representing that fiber is destroyed:
+
+\begin{itemize}
+    \item \cpp{\~fiber\_context()} effectively calls \xtresumewith, passing
+          the \cancelfn provided by \cpp{launch()}
+    \item \xtresumewith switches context to the subject fiber, suspending the
+          \cpp{\~fiber\_context()} call
+    \item the \cancelfn is passed a \fiber instance representing the fiber on
+          which \cpp{\~fiber\_context()} is suspended
+    \item that \cancelfn constructs \cpp{unwind\_exception}, passing the
+          synthesized \fiber instance
+    \item \cpp{unwind\_exception}'s constructor move-constructs a heap \fiber
+          instance from the passed \fiber instance
+    \item \cpp{unwind\_exception} stores a \cpp{std::shared\_ptr} to that new
+          heap \fiber instance
+    \item the \cancelfn throws the new \cpp{unwind\_exception}
+    \item the fiber stack is unwound according to normal C++ semantics
+    \item the top-level wrapper provided by \cpp{launch()} catches the
+          \cpp{unwind\_exception}
+    \item the top-level wrapper extracts the \cpp{shared\_ptr}, dereferences
+          it and returns the bound \fiber.
+\end{itemize}
+
+A \cancelfn need not throw an exception -- it can instead, for instance,
+change the state of an object observed by code running on the subject fiber.
+Our examples use \cpp{launch()}, which throws \cpp{unwind\_exception}, so as
+not to clutter the example code.
