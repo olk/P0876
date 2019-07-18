@@ -145,10 +145,10 @@ constructs new \cpp{fiber\_context}
 \begin{description}
     \item[1)] this constructor instantiates an empty \fiber. Its \cpp{empty()} method
               returns \cpp{true}.
-    \item[2)] takes invocable objects [func.def] as
-              arguments. The invocables must have signature \cpp{fiber\_context
-              fn(fiber\_context&&)}. This constructor template shall not
-              participate in overload resolution unless \cpp{Fn0} and \cpp{Fn1}
+    \item[2)] takes invocable objects [func.def] as arguments. Both \cpp{entry}
+              and \cpp{cancel} must have signature 
+              \cpp{fiber\_context fn(fiber\_context&&)}. This constructor template
+              shall not participate in overload resolution unless \cpp{Fn0} and \cpp{Fn1}
               are \emph{Lvalue-Invocable} [func.wrap.func] for the argument
               type \cpp{std::fiber\_context&&} and the return type \fiber.\\
               \bfs{SG1:} Needs update to \cpp{Invocable} concept.
@@ -188,6 +188,9 @@ constructs new \cpp{fiber\_context}
     \item[---] If \cpp{empty()} returns \cpp{false} at the time a \fiber
                instance is destroyed, the destructor performs a call
                equivalent to \cpp{resume\_from\_any\_thread\_with(cancellation-function)}.
+    \item[---] The \cancelfn should communicate to the fiber represented by \cpp{*this}
+               the requirement to terminate. \tsnote{It may, for example, throw an exception
+               or set some state visible to the fiber logic.}
 %%    \item[---] Destroying a suspended fiber causes its stack to be unwound --
 %%               equivalent to calling\\
 %%               \cpp{resume\_from\_any\_thread\_with(unwind\_fiber)}.
@@ -199,10 +202,6 @@ constructs new \cpp{fiber\_context}
 %%               representing an implicit fiber from some other
 %%               thread engages Undefined Behavior.
 \end{description}
-
-\tsnote{The \cancelfn must communicate to the fiber represented by \cpp{*this}
-the requirement to terminate. It may throw an exception or set some state
-visible to the fiber logic.}
 
 \subparagraph*{operator=}
 moves the \fiber object
@@ -218,6 +217,16 @@ moves the \fiber object
 
     \midrule
 \end{tabular}
+
+\remarks
+\begin{description}
+    \item[---] If \cpp{empty()} returns \cpp{false} before move-assignment is
+               called, \cpp{operator=()} performs a call
+               equivalent to \cpp{resume\_from\_any\_thread\_with(cancellation-function)}.
+    \item[---] The \cancelfn should communicate to the fiber represented by \cpp{*this}
+               the requirement to terminate. \tsnote{It may, for example, throw an exception
+               or set some state visible to the fiber logic.}
+\end{description}
 
 \effects
 \begin{description}
