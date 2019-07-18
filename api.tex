@@ -222,7 +222,7 @@ moves the \fiber object
 \begin{description}
     \item[---] If \cpp{empty()} returns \cpp{false} before move-assignment is
                called, \cpp{operator=()} performs a call
-               equivalent to \cpp{resume\_from\_any\_thread\_with(cancellation-function)}.
+               equivalent to\\ \cpp{resume\_from\_any\_thread\_with(cancellation-function)}.
     \item[---] The \cancelfn should communicate to the fiber represented by \cpp{*this}
                the requirement to terminate. \tsnote{It may, for example, throw an exception
                or set some state visible to the fiber logic.}
