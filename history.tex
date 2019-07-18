@@ -31,8 +31,9 @@ permissible, or convey to the fiber in question by any suitable means the need
 to clean up and terminate.
 
 Requiring the cancellation function is partly because it remains unclear what
-the default should be, and partly to allow specifying later that the default
-engages the new, imporved unwind facility.
+the default should be. This could be one of the questions to be answered by a
+TS. Moreover, the absence of a default permits specifying later that the
+default engages the new, improved unwind facility.
 
 Changes since P0876R5:
 
@@ -65,7 +66,6 @@ Problems resolved by discarding \unwindex:
           the program. It was possible for an exception implementation based
           on \cpp{thread\_local} to become confused by exceptions on different
           fibers on the same thread.
-    \item It is no longer possible to capture \unwindex with
-          \cpp{std::exception\_ptr} and migrate it to a different fiber -- or
-          a different thread.
+    \item It was possible to capture \unwindex with \cpp{std::exception\_ptr}
+          and migrate it to a different fiber -- or a different thread.
 \end{itemize}

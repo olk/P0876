@@ -7,7 +7,7 @@ int main(){
             std::move(f1).resume();
         }
         return {};
-    }, assert_cancel};
+    }, assert_on_cancel};
     f2=fiber_context{[&](fiber_context&& f)->fiber_context{
         f1=std::move(f);
         for(;;){
@@ -15,14 +15,14 @@ int main(){
             std::move(f3).resume();
         }
         return {};
-    }, assert_cancel};
+    }, assert_on_cancel};
     f1=fiber_context{[&](fiber_context&& /*main*/)->fiber_context{
         for(;;){
             std::cout << "f1 ";
             std::move(f2).resume();
         }
         return {};
-    }, assert_cancel};
+    }, assert_on_cancel};
     std::move(f1).resume();
     return 0;
 }
