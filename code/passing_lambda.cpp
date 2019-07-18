@@ -4,7 +4,7 @@ std::fiber_context lambda{[&i](fiber_context&& caller){
     i+=1;
     caller=std::move(caller).resume();
     return std::move(caller);
-}, assert_cancel};
+}, assert_on_cancel};
 lambda=std::move(lambda).resume();
 std::cout << "i==" << i << std::endl;
 lambda=std::move(lambda).resume();

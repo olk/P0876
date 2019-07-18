@@ -2,13 +2,13 @@
 
 The \fiber constructor accepts an \entryfn and a \cancelfn (see
 \nameref{constructor}). For purposes of the examples in this paper, assume a
-trivial \cpp{assert\_cancel()} function as shown:
+trivial \cpp{assert\_on\_cancel()} function as shown:
 
 \cppf{assert_cancel}
 
-When \cpp{assert\_cancel} is passed to a \fiber constructor as its \cancelfn,
+When \cpp{assert\_on\_cancel} is passed to a \fiber constructor as its \cancelfn,
 if a \fiber instance representing that fiber is destroyed,
-\cpp{assert\_cancel()} fails its \cpp{assert()}.
+\cpp{assert\_on\_cancel()} fails its \cpp{assert()}.
 
 Sometimes it is desirable to abandon a fiber without letting it run to
 completion. Consider an infinite generator. For such cases, assume a

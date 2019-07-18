@@ -8,7 +8,7 @@ fiber_context f{[&data](fiber_context&& m){
     m=std::move(m).resume();
     std::cout << "f1: entered third time: " << data << std::endl;
     return std::move(m);
-}, assert_cancel};
+}, assert_on_cancel};
 f=std::move(f).resume();
 std::cout << "f1: returned first time: " << data << std::endl;
 data+=1;
