@@ -394,7 +394,7 @@ was previously resumed.}
 
 \effects
 Equivalent to:\\
-\cpp{resume\_from\_any\_thread\_with([](fiber\_context&& caller)\{ return caller; \})}
+\cpp{resume\_from\_any\_thread\_with([](fiber\_context&& caller)\{ return std::move(caller); \})}
 
 \begin{tabular}{ l l }
     \midrule
@@ -406,7 +406,7 @@ Equivalent to:\\
 
 \effects
 Equivalent to:\\
-\cpp{resume\_with([](fiber\_context&& caller)\{ return caller; \})}
+\cpp{resume\_with([](fiber\_context&& caller)\{ return std::move(caller); \})}
 
 \mbrhdr{bool can\_resume\_from\_this\_thread() noexcept}
 

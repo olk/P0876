@@ -5,7 +5,7 @@ class unwind_exception: public std::runtime_error {
 public:
     unwind_exception(std::fiber_context&& previous):
         std::runtime_error("unwinding std::fiber_context"),
-        mPrevious(std::make_shared<std::fiber_context>(previous)) {}
+        mPrevious(std::make_shared<std::fiber_context>(std::move(previous))) {}
 
     std::shared_ptr<std::fiber_context> get_previous() const { return mPrevious; }
 
