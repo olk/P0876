@@ -23,7 +23,7 @@ a particular fiber earlier in the lifespan of the fiber, a struct serves. We
 have added an example to the front matter.
 
 A more compelling reason to avoid constructing an explicit fiber with
-a \cancelfn is that no implicit fiber has any such \cancelfn -- and the
+a \cancelfn is that no implicit fiber has any such \cancelfn\xspace -- and the
 consuming application cannot tell, a priori, whether a given \fiber instance
 represents an explicit or an implicit fiber. If \cpp{*this} represents an
 implicit fiber, what should the proposed \cpp{cancel()} member function do?

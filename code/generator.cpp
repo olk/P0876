@@ -1,5 +1,5 @@
 int a;
-std::fiber_context g{launch([&a](std::fiber_context&& m){
+std::fiber_context g{[&a](std::fiber_context&& m){
     a=0;
     int b=1;
     for(;;){
