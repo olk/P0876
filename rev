@@ -48,11 +48,25 @@ echo "$oldrev URL: $oldurl"
 echo "Previous to $oldrev was $prevrev"
 
 git mv "$oldtex" "$newrev.tex"
-sed -i.tex~ "s/$oldrev/$newrev/" "$newrev.tex"
-sed -i.tex~ "s/$prevrev\\\\cite{$prevrev}/$oldrev\\\\cite{$oldrev}/" abstract.tex
-sed -i.tex~ -E "s/(supersedes |since )$prevrev/\\1$oldrev/" history.tex
+sed -i~ "s/$oldrev/$newrev/" "$newrev.tex"
+sed -i~ "s/$prevrev\\\\cite{$prevrev}/$oldrev\\\\cite{$oldrev}/" abstract.tex
 
-# This sed command needs a bit of explanation.
+# For 'This document supersedes $prevrev', just update to $oldrev.
+# For 'Changes since $prevrev', insert 'Changes since $oldrev' above it, with
+# a blank line separating the two.
+# H appends a newline character followed by the pattern space (the 'Changes
+# since $prevrev' line) to the (previously-empty) hold space.
+# Then update the pattern space to talk about 'Changes since $oldrev'.
+# G appends a newline character followed by the hold space to the pattern
+# space. The combination of those two newlines produces the desired blank
+# line.
+sed -i~ -E -f <(echo \
+"/(supersedes )$prevrev/s//\\1$oldrev/
+/Changes since $prevrev/{ H
+s/$prevrev/$oldrev/
+G
+}") history.tex
+
 # We want to inject a new \bibitem{$oldrev} block just like (and just after)
 # the \bibitem{$prevrev} block. Each such block is 4 lines long, including the
 # trailing blank line. So search for \bibitem{$prevrev}, then suck the next 3
@@ -64,7 +78,7 @@ sed -i.tex~ -E "s/(supersedes |since )$prevrev/\\1$oldrev/" history.tex
 # greedy, spans lines and will eat through the close } and the subsequent open
 # { and all the way up to the second }. Don't explicitly print the pattern
 # space again because that's implied (since we didn't specify the -n switch).
-sed -i.tex~ -f <(echo \
+sed -i~ -f <(echo \
 "/\bibitem{$prevrev}/{ N
 N
 N
