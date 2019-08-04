@@ -64,8 +64,8 @@ private:
 // top-level wrapper will catch it and return the bound fiber_context, thereby
 // resuming the fiber that called ~cancellable().
 template <typename Fn>
-cancellable launch(Fn&& entry_function) {
-    return cancellable{std::fiber_context(
+auto launch(Fn&& entry_function) {
+    return cancellable(std::fiber_context(
         // entry-function passed to std::fiber_context constructor binds
         // entry_function, calls it within try/catch, catches
         // unwind_exception, extracts its shared_ptr<fiber_context>,
