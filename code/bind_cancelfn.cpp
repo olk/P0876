@@ -2,26 +2,34 @@
 // with an associated fiber_context. It uses the tactic seen earlier in the
 // example 'filament' class to continually update the fiber_context
 // representing the fiber of interest.
-template <typename CANCEL>
-class cancellable{
+class cancellable {
 private:
-    fiber_context       f_;
-    CANCEL              cancel_;
+    std::fiber_context                                          f_;
+    std::function<std::fiber_context(std::fiber_context&&)>     cancel_;
 
 public:
-    cancellable(fiber_context&& f, CANCEL cancel):
-        f_(std::move(f)),
-        cancel_(cancel)
-    {}
-
-    ~cancellable() {
-        std::move(f_).resume_with([this](fiber_context&& f)->fiber_context{
-            return cancel_(f);
-        });
+    template <typename CANCEL>
+    cancellable(std::fiber_context&& f, CANCEL&& cancel):
+        f_{std::move(f)},
+        cancel_{std::forward<CANCEL>(cancel)} {
     }
 
-    void resume_next( cancellable& cable){
-        std::move(cable.f_).resume_with([this](fiber_context&& f)->fiber_context{
+    ~cancellable() {
+        if (f_) {
+            std::move(f_).resume_with([this](std::fiber_context&& f)->std::fiber_context{
+                return cancel_(std::move(f));
+            });
+        }
+    }
+
+    cancellable(cancellable const&) = delete;
+    cancellable & operator=(cancellable const&) = delete;
+
+    cancellable(cancellable&&);
+    cancellable & operator=(cancellable&&);
+
+    void resume_next(cancellable& cable){
+        std::move(cable.f_).resume_with([this](std::fiber_context&& f)->std::fiber_context{
             f_=std::move(f);
             return {};
         });
@@ -34,10 +42,13 @@ public:
 class unwind_exception: public std::runtime_error {
 public:
     unwind_exception(std::fiber_context&& previous):
-        std::runtime_error("unwinding std::fiber_context"),
-        previous_(std::make_shared<std::fiber_context>(std::move(previous))) {}
+        std::runtime_error{"unwinding std::fiber_context"},
+        previous_{std::make_shared<std::fiber_context>(std::move(previous))}
+    {}
 
-    std::shared_ptr<std::fiber_context> get_previous() const { return previous_; }
+    std::shared_ptr<std::fiber_context> get_previous() const {
+        return previous_;
+    }
 
 private:
     // Directly storing fiber_context would make unwind_exception move-only.
@@ -54,7 +65,7 @@ private:
 // resuming the fiber that called ~cancellable().
 template <typename Fn>
 cancellable launch(Fn&& entry_function) {
-    return cancellable(std::fiber_context(
+    return cancellable{std::fiber_context(
         // entry-function passed to std::fiber_context constructor binds
         // entry_function, calls it within try/catch, catches
         // unwind_exception, extracts its shared_ptr<fiber_context>,
@@ -65,12 +76,13 @@ cancellable launch(Fn&& entry_function) {
                 return entry(std::move(previous));
             }
             catch (const unwind_exception& unwind) {
-                return *unwind.get_previous();
+                return std::move(*unwind.get_previous());
             }
         }),
         // cancellation-function passed to cancellable constructor
         // throws unwind_exception, binding passed fiber_context instance.
-        [](std::fiber_context&& previous) {
-            throw unwind_exception(std::move(previous));
-        });
+        [](std::fiber_context&& previous)->std::fiber_context{
+            throw unwind_exception{std::move(previous)};
+            return {};
+        }};
 }
