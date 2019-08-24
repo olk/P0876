@@ -8,6 +8,6 @@ public:
         std::move(fila.f_).resume_with([this](fiber_context&& f)->fiber_context{
             f_=std::move(f);
             return {};
-        });
+        }
     }
 };

@@ -36,10 +36,6 @@ terminate gracefully by returning from its top-level function.
 %% non-empty \fiber instance. With these restrictions, it is possible to use
 %% the \fiber facility without exception support.
 
-Alternatively, a running fiber may call \unwindfib, passing a non-empty \fiber
-instance. This is conceptually equivalent to returning that \fiber instance
-from the fiber's \entryfn.
-
 When an explicitly-launched fiber's \entryfn returns a non-empty \fiber
 instance, the running fiber is terminated. Control switches to the fiber
 indicated by the returned \fiber instance. The \entryfn may return (switch to)
@@ -53,17 +49,11 @@ am suspending; please resume me later.''
 \emph{Returning} a particular \fiber means: ``Please switch to the indicated
 fiber; and by the way, I am done.''
 
-The code below illustrates a possible way to aggregate an arbitrary \cancelfn
-with a fiber of interest, along with a factory function providing an
-example \cancelfn.
-
-\cppf{bind_cancelfn}
-
-%% The \emph{last} fiber on a particular thread has no non-empty \fiber to
-%% return. For this reason, returning an empty \fiber instance (\opbool
-%% returns \cpp{false}) terminates the calling thread. This is true whether or
-%% not the thread's default fiber (see \nameref{fiber-context.implicit}) has
-%% terminated.
+The \emph{last} fiber on a particular thread has no non-empty \fiber to
+return. For this reason, returning an empty \fiber instance (\opbool
+returns \cpp{false}) terminates the calling thread. This is true whether or
+not the thread's default fiber (see \nameref{fiber-context.implicit}) has
+terminated.
 
 %% \uabschnitt{stack unwinding}\label{unwinding}
 %% 

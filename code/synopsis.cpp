@@ -8,8 +8,6 @@ inline namespace concurrency_v2 {
 
 class fiber_context;
 
-void unwind_fiber(fiber_context&& other);
-
 } // namespace concurrency_v2
 } // namespace experimental
 } // namespace std

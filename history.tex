@@ -1,43 +1,7 @@
 \abschnitt{Revision History}\label{history}
-This document supersedes D0876R7.
+This document supersedes P0876R6.
 
-\uabschnitt{Changes since D0876R7}
-
-\begin{itemize}
-    \item Cancellation function removed from \fiber constructor.
-    \item \unwindfib re-added, with implementation-defined behavior.
-    \item Added elaboration of \cpp{filament} example to bind cancellation
-          function.
-\end{itemize}
-
-P0876R8 diverges from the recommendations of the second SG1 round in Cologne
-2019. It does not introduce \cpp{cancel()} or \cpp{cancel\_from\_any\_thread()}
-member functions. In fact it removes the \cancelfn constructor argument.
-
-\fiber is intended as the lowest-level stackful context-switching API. Binding
-a \cancelfn on the fiber stack is a flourish rather than a necessity. It adds
-overhead in both space (on the fiber stack) and time (to traverse the stack to
-retrieve the \cancelfn). For this API, it suffices to pass the desired
-\cancelfn to \someresumewith. If it is important to associate a \cancelfn with
-a particular fiber earlier in the lifespan of the fiber, a struct serves. We
-have added an example to the front matter.
-
-A more compelling reason to avoid constructing an explicit fiber with
-a \cancelfn is that no implicit fiber has any such \cancelfn\xspace -- and the
-consuming application cannot tell, a priori, whether a given \fiber instance
-represents an explicit or an implicit fiber. If \cpp{*this} represents an
-implicit fiber, what should the proposed \cpp{cancel()} member function do?
-
-Passing a specific \cancelfn to \someresumewith avoids that problem.
-
-P0876R8 follows SG1 recommendation in making it Undefined Behavior to destroy
-(or assign to) a non-empty \fiber instance.
-
-\unwindfib is reintroduced with implementation-defined behavior to allow fiber
-cleanup leveraging implementation internals. Its use is entirely optional (and
-auditable). 
-
-\uabschnitt{Changes since P0876R6}
+Changes since P0876R6:
 
 \begin{itemize}
     \item Implicit stack unwinding (by non-C++ exception) removed.
@@ -71,7 +35,7 @@ the default should be. This could be one of the questions to be answered by a
 TS. Moreover, the absence of a default permits specifying later that the
 default engages the new, improved unwind facility.
 
-\uabschnitt{Changes since P0876R5}
+Changes since P0876R5:
 
 \begin{itemize}
     \item \cpp{std::unwind\_exception} removed.
