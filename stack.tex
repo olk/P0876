@@ -1,10 +1,12 @@
 \abschnitt{stack destruction}\label{destruction}
 
 On construction of a \fiber a stack is allocated. If the \entryfn returns,
-the stack will be destroyed. If the function has not yet returned and the
-destructor of the \fiber instance representing that context is called,
+the stack will be destroyed. If the function has not yet returned,
+the \fiber instance representing that fiber must not be destroyed.
+%% and the
+%% destructor of the \fiber instance representing that context is called,
 %% the stack will be unwound and destroyed.
-the calling program is responsible for unwinding the stack.
+%% the calling program is responsible for unwinding the stack.
 
 The fiber's \cancelfn is used to trigger cleanup.
 

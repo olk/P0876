@@ -49,11 +49,17 @@ am suspending; please resume me later.''
 \emph{Returning} a particular \fiber means: ``Please switch to the indicated
 fiber; and by the way, I am done.''
 
-The \emph{last} fiber on a particular thread has no non-empty \fiber to
-return. For this reason, returning an empty \fiber instance (\opbool
-returns \cpp{false}) terminates the calling thread. This is true whether or
-not the thread's default fiber (see \nameref{fiber-context.implicit}) has
-terminated.
+The code below illustrates a possible way to aggregate an arbitrary \cancelfn
+with a fiber of interest, along with a factory function providing an
+example \cancelfn.
+
+\cppf{bind_cancelfn}
+
+%% The \emph{last} fiber on a particular thread has no non-empty \fiber to
+%% return. For this reason, returning an empty \fiber instance (\opbool
+%% returns \cpp{false}) terminates the calling thread. This is true whether or
+%% not the thread's default fiber (see \nameref{fiber-context.implicit}) has
+%% terminated.
 
 %% \uabschnitt{stack unwinding}\label{unwinding}
 %% 
