@@ -1,5 +1,17 @@
 \abschnitt{Revision History}\label{history}
-This document supersedes D0876R7.
+This document supersedes P0876R8.
+
+\uabschnitt{Changes since P0876R8}
+
+\begin{itemize}
+    \item Reinstated cancellation function constructor argument.
+    \item Added \cpp{cancel()} and \cpp{cancel\_from\_any\_thread()} member
+          functions.
+    \item Re-removed \unwindfib.
+\end{itemize}
+
+SG1 directed P0876R9 to conform to the Cologne 2019 recommendations, with any
+other changes proposed in a separate paper.
 
 \uabschnitt{Changes since D0876R7}
 
@@ -10,17 +22,16 @@ This document supersedes D0876R7.
           function.
 \end{itemize}
 
-P0876R8 diverges from the recommendations of the second SG1 round in Cologne
-2019. It does not introduce \cpp{cancel()} or \cpp{cancel\_from\_any\_thread()}
-member functions. In fact it removes the \cancelfn constructor argument.
+P0876R8 diverged from the recommendations of the second SG1 round in Cologne
+2019. It did not introduce \cpp{cancel()} or \cpp{cancel\_from\_any\_thread()}
+member functions. In fact it removed the \cancelfn constructor argument.
 
 \fiber is intended as the lowest-level stackful context-switching API. Binding
 a \cancelfn on the fiber stack is a flourish rather than a necessity. It adds
 overhead in both space (on the fiber stack) and time (to traverse the stack to
-retrieve the \cancelfn). For this API, it suffices to pass the desired
+retrieve the \cancelfn). For this API, it should suffice to pass the desired
 \cancelfn to \someresumewith. If it is important to associate a \cancelfn with
-a particular fiber earlier in the lifespan of the fiber, a struct serves. We
-have added an example to the front matter.
+a particular fiber earlier in the lifespan of the fiber, a struct serves.
 
 A more compelling reason to avoid constructing an explicit fiber with
 a \cancelfn is that no implicit fiber has any such \cancelfn\xspace -- and the
@@ -33,8 +44,8 @@ Passing a specific \cancelfn to \someresumewith avoids that problem.
 P0876R8 follows SG1 recommendation in making it Undefined Behavior to destroy
 (or assign to) a non-empty \fiber instance.
 
-\unwindfib is reintroduced with implementation-defined behavior to allow fiber
-cleanup leveraging implementation internals. Its use is entirely optional (and
+\unwindfib was reintroduced with implementation-defined behavior to allow fiber
+cleanup leveraging implementation internals. Its use was entirely optional (and
 auditable). 
 
 \uabschnitt{Changes since P0876R6}
