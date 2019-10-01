@@ -1,7 +1,54 @@
 \abschnitt{Revision History}\label{history}
-This document supersedes P0876R6.
+This document supersedes P0876R8.
 
-Changes since P0876R6:
+\uabschnitt{Changes since P0876R8}
+
+\begin{itemize}
+    \item Reinstated cancellation function constructor argument.
+    \item Added \cpp{cancel()} and \cpp{cancel\_from\_any\_thread()} member
+          functions.
+    \item Re-removed \unwindfib.
+\end{itemize}
+
+SG1 directed P0876R9 to conform to the Cologne 2019 recommendations, with any
+other changes proposed in a separate paper.
+
+\uabschnitt{Changes since D0876R7}
+
+\begin{itemize}
+    \item Cancellation function removed from \fiber constructor.
+    \item \unwindfib re-added, with implementation-defined behavior.
+    \item Added elaboration of \cpp{filament} example to bind cancellation
+          function.
+\end{itemize}
+
+P0876R8 diverged from the recommendations of the second SG1 round in Cologne
+2019. It did not introduce \cpp{cancel()} or \cpp{cancel\_from\_any\_thread()}
+member functions. In fact it removed the \cancelfn constructor argument.
+
+\fiber is intended as the lowest-level stackful context-switching API. Binding
+a \cancelfn on the fiber stack is a flourish rather than a necessity. It adds
+overhead in both space (on the fiber stack) and time (to traverse the stack to
+retrieve the \cancelfn). For this API, it should suffice to pass the desired
+\cancelfn to \someresumewith. If it is important to associate a \cancelfn with
+a particular fiber earlier in the lifespan of the fiber, a struct serves.
+
+A more compelling reason to avoid constructing an explicit fiber with
+a \cancelfn is that no implicit fiber has any such \cancelfn\xspace -- and the
+consuming application cannot tell, a priori, whether a given \fiber instance
+represents an explicit or an implicit fiber. If \cpp{*this} represents an
+implicit fiber, what should the proposed \cpp{cancel()} member function do?
+
+Passing a specific \cancelfn to \someresumewith avoids that problem.
+
+P0876R8 follows SG1 recommendation in making it Undefined Behavior to destroy
+(or assign to) a non-empty \fiber instance.
+
+\unwindfib was reintroduced with implementation-defined behavior to allow fiber
+cleanup leveraging implementation internals. Its use was entirely optional (and
+auditable). 
+
+\uabschnitt{Changes since P0876R6}
 
 \begin{itemize}
     \item Implicit stack unwinding (by non-C++ exception) removed.
@@ -35,7 +82,7 @@ the default should be. This could be one of the questions to be answered by a
 TS. Moreover, the absence of a default permits specifying later that the
 default engages the new, improved unwind facility.
 
-Changes since P0876R5:
+\uabschnitt{Changes since P0876R5}
 
 \begin{itemize}
     \item \cpp{std::unwind\_exception} removed.

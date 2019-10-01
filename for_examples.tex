@@ -1,32 +1,44 @@
-\abschnitt{code common to examples in this paper}
+\abschnitt{code common to examples in this paper}\label{launch}
+
+Destroying a non-empty \fiber instance invokes Undefined Behavior -- you must
+first call \anycancel. To simplify code examples in this paper, we introduce
+an \cpp{autocancel} wrapper class that tracks the sequence of \fiber instances
+representing a particular fiber. When an \cpp{autocancel} instance is
+destroyed, it calls \cancel on the stored \fiber.
+
+\cppf{autocancel}
 
 The \fiber constructor accepts an \entryfn and a \cancelfn (see
-\nameref{constructor}). For purposes of the examples in this paper, assume a
+\nameref{constructor}). Many of the examples in this paper are coded so that
+every explicit fiber terminates by returning a non-empty \fiber instance from
+its \entryfn. In such examples, \cancel never need be called. We pass a
 trivial \cpp{assert\_on\_cancel()} function as shown:
 
 \cppf{assert_cancel}
 
 When \cpp{assert\_on\_cancel} is passed to a \fiber constructor as its \cancelfn,
-if a \fiber instance representing that fiber is destroyed,
-\cpp{assert\_on\_cancel()} fails its \cpp{assert()}.
+if someone were to call \cancel on a \fiber instance representing that fiber,
+\cpp{assert\_on\_cancel()} would fail its \cpp{assert()}.
 
 Sometimes it is desirable to abandon a fiber without letting it run to
-completion. Consider an infinite generator. For such cases, assume a
-\cpp{launch()} factory function that provides both an \entryfn wrapper and a
-\cancelfn, as shown here:
+completion. Consider an infinite generator. For examples in which we abandon a
+fiber, assume a \cpp{launch()} factory function that provides both an \entryfn
+wrapper and a \cancelfn, as shown here:
 
 \cppf{launch}
 
-When a fiber is launched by calling \cpp{launch()}, if a \fiber instance
-representing that fiber is destroyed:
+When a fiber is constructed by calling \cpp{launch()}, if the \cpp{autocancel}
+instance representing that fiber is destroyed:
 
 \begin{itemize}
-    \item \cpp{\~fiber\_context()} effectively calls \xtresumewith, passing
+    \item \cpp{\~autocancel()} calls \cpp{fiber\_context::cancel()} on the
+          instance representing that fiber
+    \item \cancel effectively calls \resumewith, passing
           the \cancelfn provided by \cpp{launch()}
-    \item \xtresumewith switches context to the subject fiber, suspending the
-          \cpp{\~fiber\_context()} call
+    \item \resumewith switches context to the subject fiber, suspending the
+          \cancel call
     \item the \cancelfn is passed a \fiber instance representing the fiber on
-          which \cpp{\~fiber\_context()} is suspended
+          which \cancel is suspended
     \item that \cancelfn constructs \cpp{unwind\_exception}, passing the
           synthesized \fiber instance
     \item \cpp{unwind\_exception}'s constructor move-constructs a heap \fiber
@@ -38,7 +50,10 @@ representing that fiber is destroyed:
     \item the top-level wrapper provided by \cpp{launch()} catches the
           \cpp{unwind\_exception}
     \item the top-level wrapper extracts the \cpp{shared\_ptr}, dereferences
-          it and returns the bound \fiber.
+          it and returns the bound \fiber
+    \item which terminates the fiber represented by the \cpp{autocancel}
+          instance being destroyed
+    \item and resumes the fiber calling \cancel.
 \end{itemize}
 
 A \cancelfn need not throw an exception -- it can instead, for instance,

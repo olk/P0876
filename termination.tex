@@ -49,11 +49,52 @@ am suspending; please resume me later.''
 \emph{Returning} a particular \fiber means: ``Please switch to the indicated
 fiber; and by the way, I am done.''
 
-The \emph{last} fiber on a particular thread has no non-empty \fiber to
-return. For this reason, returning an empty \fiber instance (\opbool
-returns \cpp{false}) terminates the calling thread. This is true whether or
-not the thread's default fiber (see \nameref{fiber-context.implicit}) has
-terminated.
+The \cancelfn / \cancel mechanism is a minor convenience, providing a way for
+consuming code to attempt to communicate to a suspended fiber the desire that
+it should terminate. The intention is that consuming code may call \anycancel
+before destroying a \fiber instance that might not be empty, or is known not
+to be empty. Passing a \cancelfn\xspace \cpp{cancelfn()} to a fiber's constructor,
+and subsequently calling \cancel on a \fiber instance representing that fiber,
+is equivalent to calling \cpp{resume\_with(cancelfn)}.
+
+The interaction between a \cancelfn and any particular fiber is the
+responsibility of consuming code. Use of \cancel does not guarantee that the
+subject fiber has in fact terminated. The \fiber instance returned by \cancel
+is the same that would have been returned by the equivalent \resumewith call.
+
+Suppose we have a \fiber instance \cpp{f1} representing suspended fiber F.
+Running fiber M calls \cpp{f1.cancel()}, which returns another \fiber
+instance \cpp{f2}.
+
+\cpp{f2} has various possible values.
+
+\begin{itemize}
+    \item \cpp{f2} might be empty. This might mean that fiber F did in fact
+          terminate.
+    \item Alternatively, it might mean that fiber F, instead of terminating,
+          resumed fiber G, which terminated by resuming fiber M.
+    \item Or fiber F might have terminated by resuming fiber G, which might
+          have terminated by resuming fiber M.
+    \item In other words, if \cpp{f2} is empty, fiber M cannot know the
+          present state of fiber F.
+    \item \cpp{f2} might not be empty. That might mean that fiber F did not
+          terminate before resuming fiber M. \cpp{f2} would represent fiber F.
+    \item Or it might mean that fiber F terminated by resuming fiber G, which
+          might have resumed fiber M. \cpp{f2} would represent fiber G.
+    \item Or it might mean that fiber F, instead of terminating, resumed fiber
+          G, which resumed fiber M. \cpp{f2} would (again) represent fiber G.
+    \item In other words, if \cpp{f2} is not empty, fiber M cannot know the
+          present state of fiber F.
+\end{itemize}
+
+The \cpp{launch()} function introduced in \nameref{launch} illustrates a
+possible way to use the \cancelfn / \cancel mechanism.
+
+%% The \emph{last} fiber on a particular thread has no non-empty \fiber to
+%% return. For this reason, returning an empty \fiber instance (\opbool
+%% returns \cpp{false}) terminates the calling thread. This is true whether or
+%% not the thread's default fiber (see \nameref{fiber-context.implicit}) has
+%% terminated.
 
 %% \uabschnitt{stack unwinding}\label{unwinding}
 %% 

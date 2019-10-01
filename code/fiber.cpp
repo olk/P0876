@@ -23,6 +23,9 @@ public:
     template<typename Fn>
     fiber_context resume_from_any_thread_with(Fn&& fn) &&;
 
+    fiber_context cancel() &&;
+    fiber_context cancel_from_any_thread() &&;
+
     bool can_resume() noexcept;
     bool can_resume_from_any_thread() noexcept;
 
