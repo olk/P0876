@@ -75,7 +75,7 @@ for the fiber switch directly into each function that calls \resume. That would 
 an extra indirection (JMP + PUSH/MOV of certain registers used to
 invoke \resume).
 
-\uabschnitt{CPU state at the stack} Because each fiber must preserve CPU
+\uabschnitt{CPU state on the stack} Because each fiber must preserve CPU
 registers at suspension and load those registers at resumption, some storage
 is required.
 

@@ -9,8 +9,7 @@ cause undefined behaviour because the stack might already be unwound (objects
 allocated on the stack were destroyed or the memory used as stack was already
 deallocated).
 
-As a consequence each call of \resume will empty the \fiber instance, therefore
-no instance of \fiber represents the currently-running fiber.
+As a consequence each call of \resume will empty the \fiber instance.
 
 Whether or not a \fiber is empty can be tested with member function \opbool.
 
@@ -36,9 +35,8 @@ Section \nameref{solution_gpub} describes how an instance of\\
 A fiber API must:
 \begin{itemize}
     \item prevent accidentally resuming a running fiber
-    \item prevent accidentally resuming a terminated (computation has finished)
-          fiber
+    \item prevent accidentally resuming a terminated fiber
     \item \resume, \resumewith, \xtresume and \xtresumewith are
-          rvalue-reference qualified to bind on rvalues only
+          rvalue-reference qualified
 \end{itemize}
 }

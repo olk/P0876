@@ -50,8 +50,8 @@ or UB happens at resumption.
 level layer can hide that by using private variables.}
 
 \uabschnitt{representing \emph{main()} and thread's \entryfn as fiber}\label{representation}
-As shown in the previous section a synthesized fiber is created and passed
-into the resumed fiber as an instance of \fiber.
+As shown in the previous section a synthesized instance of \fiber is passed
+into the resumed fiber.
 
 \cppf{synthesized_main}
 
@@ -67,7 +67,10 @@ This is a nice feature because it allows (the stacks of) \main and each
 thread's \entryfn to be represented as fibers. A \fiber
 representing \main or a thread's \entryfn can be handled like an
 explicitly created \fiber: it can passed to and returned from functions or
-stored in a container. When called on such an instance, \canxtresume indicates
+stored in a container.
+
+The major restriction on a fiber provided by the operating system for a particular thread (an \emph{implicit fiber}) is that it is Undefined Behavior to attempt to resume that fiber on some other thread (see \nameref{xthread}).
+When called on a \fiber instance representing an implicit fiber, \canxtresume indicates
 whether it is valid to call \xtresumesome on that instance.
 
 In the code snippet above the suspended \main is represented by instance
@@ -130,10 +133,8 @@ The example creates a circle of fibers: each fiber prints its name and resumes
 the next fiber (f1 -> f2 -> f3 -> f1 -> ...).
 
 Fiber \cpp{f1} is started at line 26. The synthesized \fiber\xspace \cpp{main} passed 
-to the resumed fiber is not used (control flow cycles through the three
-fibers).\footnote{The operating-system stack provided for \main or the current
-thread's \entryfn is not destroyed when the corresponding \fiber instance is
-destroyed.}
+to the resumed fiber is stored but not used: control flow cycles through the three
+fibers.
 The for-loop prints the name \emph{f1} and resumes fiber \cpp{f2}. Inside 
 \cpp{f2}'s for-loop the name is printed and \cpp{f3} is resumed. Fiber \cpp{f3}
 resumes fiber \cpp{f1} at line 7. Inside \cpp{f1} control returns from
@@ -147,9 +148,11 @@ This problem can be solved by returning the synthesized \fiber from \resume,
 \resumewith, \xtresume or \xtresumewith.
 \cppf{return_from_resume_invalid}
 
-In the example above the synthesized \fiber returned by \resume is
-move-assigned to the invoking \fiber instance (that has resumed the current
-fiber).
+In the example above the synthesized \fiber returned by each \resume call is
+specifically move-assigned to a \fiber instance other than the one on which \resume
+was called, to properly track the three fibers. (Of course this particular example
+depends on static knowledge of the overall control flow. But the API does not, in
+general, require that.)
 
 \zs{The synthesized \fiber must be returned from \resume, \resumewith,
 \xtresume and \xtresumewith in order to prevent changing the identity of the
@@ -158,7 +161,7 @@ fiber.}
 
 If the overall control flow isn't known, member functions \resumewith
 or \xtresumewith (see section \nameref{resumewith}) can be used to assign the
-synthesized \fiber to the correct \fiber instance (the caller).
+synthesized \fiber to the correct \fiber instance (held by the caller).
 \cppf{assign_resumewith}
 
 Picture a higher-level framework in which every fiber can find its associated
@@ -167,7 +170,7 @@ passing \emph{the target} \cpp{filament} instance to \emph{the running fiber's}
 \cpp{resume\_next()}.
 
 Running fiber A has an associated \cpp{filament} instance \cpp{filamentA},
-whose \fiber\xspace\cpp{f\_} is empty -- because fiber A is running.
+whose \fiber\xspace\cpp{filament::f\_} is empty -- because fiber A is running.
 
 Desiring to switch to suspended fiber B (with associated
 \cpp{filament} \cpp{filamentB}), running fiber A calls\\

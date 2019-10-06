@@ -1,7 +1,7 @@
 \abschnitt{code common to examples in this paper}\label{launch}
 
 Destroying a non-empty \fiber instance invokes Undefined Behavior -- you must
-first call \anycancel. To simplify code examples in this paper, we introduce
+first call \anycancel (see \nameref{termination}). To simplify code examples in this paper, we introduce
 an \cpp{autocancel} wrapper class that tracks the sequence of \fiber instances
 representing a particular fiber. When an \cpp{autocancel} instance is
 destroyed, it calls \cancel on the stored \fiber.

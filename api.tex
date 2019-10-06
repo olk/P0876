@@ -100,7 +100,7 @@ since the OS will do that.
 %% \begin{itemize}
 %%     \item
 If a non-empty \fiber instance is returned to the conceptual top-level
-    function (for either an explicit or implicit fiber), the fiber represented
+    function for an explicit fiber, the fiber represented
     by that \fiber instance is resumed.
 %%     \item If an empty \fiber instance is returned to the conceptual top-level
 %%     function for an explicit fiber, the calling thread is terminated.
@@ -111,7 +111,7 @@ If a non-empty \fiber instance is returned to the conceptual top-level
 %%     function above \main, the process is terminated.
 %% \end{itemize}
 
-\rSec3[fiber-context.synopis]{Header <experimental/fiber\_context> synopsis}
+\rSec3[fiber-context.synopsis]{Header <experimental/fiber\_context> synopsis}
 
 \cppf{synopsis}
 
@@ -147,12 +147,12 @@ constructs new \cpp{fiber\_context}
     \item[1)] this constructor instantiates an empty \fiber. Its \cpp{empty()} method
               returns \cpp{true}.
     \item[2)] takes invocable objects [func.def] as arguments. Both \cpp{entry}
-              and \cpp{cancel} must have signature 
-              \cpp{fiber\_context fn(fiber\_context&&)}. This constructor template
+              and \cpp{cancel} must have signature\\ 
+              \cpp{fiber\_context(fiber\_context&&)}. This constructor template
               shall not participate in overload resolution unless \cpp{Fn0} and \cpp{Fn1}
               are \emph{Lvalue-Invocable} [func.wrap.func] for the argument
               type \cpp{std::fiber\_context&&} and the return type \fiber.\\
-              \bfs{SG1:} Needs update to \cpp{Invocable} concept.
+              \bfs{Needs update to \cpp{Invocable} concept.}
     \item[3)] moves underlying state to new \fiber
     \item[4)] copy constructor deleted
 \end{description}
@@ -161,20 +161,29 @@ constructs new \cpp{fiber\_context}
 \begin{description}
     \item[---] The entry-function \cpp{entry} is \emph{not} immediately entered.
               The stack and any other necessary resources are created
-              on construction, but \cpp{fn} is entered
+              on construction, but \cpp{entry} is entered
               only when \allresume is called.
     \item[---] A newly constructed but not yet entered fiber may be resumed by
-              any thread. For any explicit fiber, the thread that resumes it
+              any thread. \tsnote{For any explicit fiber, the thread that resumes it
               is constrained only by the last thread that previously resumed
-              it -- and that constraint is imposed by operations performed by
-              the fiber, rather than by the \fiber facility itself.
+              it. That constraint is imposed by code running on
+              the fiber, rather than by the \fiber facility itself.}
     \item[---] The entry-function \cpp{entry} passed to \fiber
               will be passed a synthesized \fiber instance representing the
               suspended caller of \allresume.
     \item[---] The \cancelfn\xspace \cpp{cancel} is invoked by \anycancel (q.v.).
 \end{description}
 
-\mbrhdr{\~fiber\_context()}
+\mbrhdr{\cpp{\~fiber\_context()}}
+destructor
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{\~fiber\_context()}\\
+
+    \midrule
+\end{tabular}
 
 \effects
 \begin{description}
@@ -190,7 +199,7 @@ constructs new \cpp{fiber\_context}
 must call \anycancel, or otherwise convey to the suspended fiber the need to
 terminate voluntarily.}
 
-\subparagraph*{operator=}
+\mbrhdr{operator=}
 moves the \fiber object
 
 \begin{tabular}{ l l }
@@ -231,7 +240,7 @@ moves the \fiber object
     \item[---] \cpp{other} is made empty (\cpp{empty()} returns \cpp{true})
 \end{description}
 
-\subparagraph*{resume()}
+\mbrhdr{resume()}
 resumes a fiber
 
 \begin{tabular}{ l l }
@@ -245,8 +254,8 @@ resumes a fiber
 
 \requires
 \begin{description}
-    \item[---] \cpp{*this} represents a non-empty fiber (\cpp{empty()} returns \cpp{false})
-    \item[---] \canxtresume would return \cpp{true}
+    \item[---] \cpp{*this} represents a suspended fiber (\cpp{empty()} returns \cpp{false})
+    \item[---] \canxtresume returns \cpp{true}
 \end{description}
 
 \effects
@@ -255,7 +264,7 @@ resumes a fiber
                resolution unless \cpp{Fn} is \emph{Lvalue-Invocable} [func.wrap.func]
                for the argument type \cpp{std::fiber\_context&&} and the return
                type \fiber.\\
-               \bfs{SG1:} Needs update to \cpp{Invocable} concept.
+               \bfs{Needs update to \cpp{Invocable} concept.}
     \item[---] The execution context of the calling fiber is saved.
     \item[---] The calling fiber is suspended.
     \item[---] A new \fiber instance representing the suspended caller is
@@ -274,7 +283,7 @@ resumes a fiber
                by \cpp{*this}, \cpp{returned} is passed to its \entryfn.
     \item[---] Otherwise, the fiber represented by \cpp{*this} previously
                suspended itself by calling one of \allresume. \cpp{returned}
-               is returned from whichever of the \cpp{resume} functions was
+               is returned from whichever of the resume functions was
                called.
 \end{description}
 
@@ -300,9 +309,10 @@ resumes a fiber
               \begin{itemize}
                   \item some other fiber calls \someresumewith to
                         resume this suspended fiber, and
-                  \item the function \cpp{fn} passed to \someresumewith
+                  \item the function \cpp{otherfn} passed to the other
+                        fiber's call to \someresumewith
                         -- or some function called
-                        by \cpp{fn} -- throws an exception
+                        by \cpp{otherfn} -- throws an exception
               \end{itemize}
     \item[---] Any exception thrown by the function \cpp{fn} passed
               to \xtresumewith, or any function called
@@ -344,15 +354,15 @@ inadvertent attempts to resume the old, empty instance.}
     \midrule
 \end{tabular}
 
-\tsnote{The intent of the distinction between \resume and \xtresume, as
-between \resumewith and \xtresumewith, is both for potential runtime
+\tsnote{The intent of the distinction between \resumewith and \xtresumewith, as
+between \resume and \xtresume, is both for potential runtime
 validation and for code auditing. If an application only ever
 calls \resumesome, no fiber in that application will ever be resumed on a
 thread other than the one on which it was previously resumed.}
 
 \requires
 \begin{description}
-    \item[---] \cpp{*this} represents a non-empty fiber (\cpp{empty()} returns \cpp{false})
+    \item[---] \cpp{*this} represents a suspended fiber (\cpp{empty()} returns \cpp{false})
     \item[---] \currthread is the same as \lastthread
 \end{description}
 
@@ -385,7 +395,7 @@ Equivalent to:\\
 Equivalent to:\\
 \cpp{resume\_with([](fiber\_context&& caller)\{ return std::move(caller); \})}
 
-\subparagraph*{cancel()}
+\mbrhdr{cancel()}
 cancels a suspended fiber by calling the \cancelfn passed to its constructor.
 
 \begin{tabular}{ l l }
@@ -398,9 +408,9 @@ cancels a suspended fiber by calling the \cancelfn passed to its constructor.
 
 \requires
 \begin{description}
-    \item[---] \cpp{empty()} would return \cpp{true}, or
+    \item[---] \cpp{empty()} returns \cpp{true}, or
     \item[---] the fiber referenced by \cpp{*this} is explicit,
-               and \canxtresume would return \cpp{true}
+               and \canxtresume returns \cpp{true}
 \end{description}
 
 \effects
@@ -463,9 +473,9 @@ for code auditing.}
 
 \requires
 \begin{description}
-    \item[---] \cpp{empty()} would return \cpp{true}, or
+    \item[---] \cpp{empty()} returns \cpp{true}, or
     \item[---] the fiber referenced by \cpp{*this} is explicit,
-               and \canresume would return \cpp{true}
+               and \canresume returns \cpp{true}
 \end{description}
 
 \effects
@@ -473,17 +483,24 @@ for code auditing.}
     \item[---] \cancel has the same semantics as \xtcancel.
 \end{description}
 
-\mbrhdr{bool can\_resume\_from\_this\_thread() noexcept}
+\mbrhdr{can\_resume\_from\_this\_thread()}
+query method
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{bool can\_resume\_from\_this\_thread() noexcept}\\
+
+    \midrule
+\end{tabular}
 
 \effects
-query whether \currthread can resume the suspended\\
+query whether \currthread is forbidden to resume the suspended
 \fiber instance by calling \xtresumesome.
 
 \returns
 \begin{description}
-    \item[---] \cpp{fiber\_context::can\_resume\_from\_this\_thread()} returns \cpp{false}
-        if \cpp{*this} is empty, or
-        if it represents an implicit fiber,
+    \item[---] \cpp{false} if \cpp{*this} is empty, or if it represents an implicit fiber
         and \currthread is not that fiber's owning thread; otherwise \cpp{true}.
 \end{description}
 
@@ -496,27 +513,49 @@ query whether \currthread can resume the suspended\\
     \item[---] \canxtresume returns \cpp{true} if \currthread is the same as \lastthread,
         or if the \fiber instance represents an explicit fiber.
     \item[---] \canxtresume must not be called concurrently from multiple threads.
-        \tsnote{\canxtresume is not marked \cpp{const} because in at least one
-        implementation, it requires an internal context switch. However, the
-        stack operations are effectively read-only.}
 \end{description}
 
-\mbrhdr{bool can\_resume() noexcept}
+\tsnote{\canxtresume is not marked \cpp{const} because in at least one
+implementation, it requires an internal context switch. However, the
+stack operations are effectively read-only.}
+
+\tsnote{A \cpp{true} return from \canxtresume does not guarantee that the
+code on the suspended fiber represented by \cpp{*this} uses no resources that
+would be problematic if resumed on another thread. That guarantee is the
+responsibility of the application. The only guarantee associated
+with \canxtresume is that if it returns \cpp{false}, it is Undefined Behavior
+to call \xtresumesome on \cpp{*this}.}
+
+\mbrhdr{can\_resume()}
+query method
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{bool can\_resume() noexcept}\\
+
+    \midrule
+\end{tabular}
 
 \returns
-\cpp{false} if \cpp{*this} is empty, or if \currthread is not the same
-as \lastthread. \tsnote{When \canresume returns \cpp{true}, the \fiber
-instance may be resumed by \allresume.}
+\begin{description}
+    \item[---] \cpp{false} if \cpp{*this} is empty, or if \currthread is not the same
+        as \lastthread.
+\end{description}
+
+\tsnote{When \canresume returns \cpp{true}, the \fiber instance may be resumed
+by \allresume.}
 
 \remarks
 \begin{description}
-    \item[---] \canxtresume must not be called concurrently from multiple threads.
-        \tsnote{\canxtresume is not marked \cpp{const} because in at least one
-        implementation, it requires an internal context switch. However, the
-        stack operations are effectively read-only.}
+    \item[---] \canresume must not be called concurrently from multiple threads.
 \end{description}
 
-\subparagraph*{empty()}
+\tsnote{\canresume is not marked \cpp{const} because in at least one
+implementation, it requires an internal context switch. However, the
+stack operations are effectively read-only.}
+
+\mbrhdr{empty()}
 test whether \fiber is empty
 
 \begin{tabular}{ l l }
@@ -541,7 +580,16 @@ test whether \fiber is empty
 \tsnote{Regardless of the number of \fiber declarations, exactly one\\
 \fiber instance represents each suspended fiber.}
 
-\mbrhdr{void swap(fiber\_context& other) noexcept}
+\mbrhdr{swap(fiber\_context\& other)}
+standard exchange method
+
+\begin{tabular}{ l l }
+    \midrule
+
+    \cpp{void swap(fiber\_context\& other) noexcept}\\
+
+    \midrule
+\end{tabular}
 
 \effects
 \begin{description}
