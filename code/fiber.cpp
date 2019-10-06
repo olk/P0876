@@ -27,10 +27,10 @@ public:
     fiber_context cancel_from_any_thread() &&;
 
     bool can_resume() noexcept;
-    bool can_resume_from_any_thread() noexcept;
+    bool can_resume_from_this_thread() noexcept;
 
     explicit operator bool() const noexcept;
-    bool valid() const noexcept;
+    bool empty() const noexcept;
     void swap(fiber_context& other) noexcept;
 };
 

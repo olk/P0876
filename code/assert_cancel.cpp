@@ -5,4 +5,5 @@
 // fiber_context representing this fiber is a programming error.
 std::fiber_context assert_on_cancel(std::fiber_context&&) {
     assert(false);
+    return {};
 }
