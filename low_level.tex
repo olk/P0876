@@ -19,7 +19,8 @@ pulls strings provided by \cpp{coroutine<>::push_type}'s output iterator support
 \cppf{bcoroutine_ex}
 
 \uabschnitt{\synca}\cite{synca} (by Grigory Demchenko) is a small, efficient
-library to perform asynchronous operations in synchronous manner. The main
+library to perform asynchronous operations using source code that resembles synchronous
+operations. The main
 features are a \bfs{GO-like} syntax, support for transferring execution context
 explicitly between different thread pools or schedulers (portals/teleports) and
 asynchronous network support.
@@ -46,7 +47,7 @@ in \fbmcrouter\cite{fbmcrouter} and some other Facebook services/libraries like
 ServiceRouter (routing framework for \fbthrift\cite{fbthrift}), Node API (graph
 ORM API for graph databases) ...
 
-\uabschnitt{Bloomber's \bbquantum}\cite{bbquantum} is a full-featured and
+\uabschnitt{Bloomberg's \bbquantum}\cite{bbquantum} is a full-featured and
 powerful C++ framework that allows users to dispatch units of work (a.k.a.
 tasks) as coroutines and execute them concurrently using the 'reactor' pattern.
 Its main features are support for streaming futures which allows faster processing

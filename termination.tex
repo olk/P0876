@@ -1,4 +1,4 @@
-\abschnitt{termination}
+\abschnitt{termination}\label{termination}
 
 %% There are a few different ways to terminate a given fiber without
 %% terminating the whole process, or engaging undefined behavior.
@@ -49,7 +49,7 @@ am suspending; please resume me later.''
 \emph{Returning} a particular \fiber means: ``Please switch to the indicated
 fiber; and by the way, I am done.''
 
-The \cancelfn / \cancel mechanism is a minor convenience, providing a way for
+The \cancelfn\xspace / \cancel mechanism provides a way for
 consuming code to attempt to communicate to a suspended fiber the desire that
 it should terminate. The intention is that consuming code may call \anycancel
 before destroying a \fiber instance that might not be empty, or is known not
@@ -63,7 +63,7 @@ subject fiber has in fact terminated. The \fiber instance returned by \cancel
 is the same that would have been returned by the equivalent \resumewith call.
 
 Suppose we have a \fiber instance \cpp{f1} representing suspended fiber F.
-Running fiber M calls \cpp{f1.cancel()}, which returns another \fiber
+The running fiber M calls \cpp{f1.cancel()}, which returns another \fiber
 instance \cpp{f2}.
 
 \cpp{f2} has various possible values.
