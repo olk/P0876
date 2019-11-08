@@ -102,8 +102,8 @@
 
 \newcommand{\sym}{\emph{symmetric}\xspace}
 \newcommand{\asym}{\emph{asymmetric}\xspace}
-\newcommand{\entryfn}{\emph{entry-function}\xspace}
-\newcommand{\cancelfn}{\emph{cancellation-function}\xspace}
+\newcommand{\entryfn}{entry-function}
+\newcommand{\cancelfn}{cancellation-function}
 \newcommand{\dbframe}{\emph{.debug\_frame}}
 \newcommand{\ehframe}{\emph{.eh\_frame}}
 \newcommand{\foreignex}{\emph{foreign exception}\xspace}
@@ -167,14 +167,14 @@
 \newcommand{\exitnote}{\ExitBlock{note}}
 
 \newcommand{\tsnote}[1]{\enternote {#1} \exitnote}
-\newcommand{\mbrhdr}[1]{\subparagraph*{#1}}
+\newcommand{\mbrhdr}[1]{\subparagraph*{#1};\\}
 
 %% The point of these macros is that we might need to adjust the formatting
 %% for all such subheadings.
-\newcommand{\params}{\textit{Parameters:}\xspace}
+\newcommand{\constraints}{\textit{Constraints:}\xspace}
 \newcommand{\requires}{\textit{Requires:}\xspace}
 \newcommand{\remarks}{\textit{Remarks:}\xspace}
 \newcommand{\effects}{\textit{Effects:}\xspace}
 \newcommand{\returns}{\textit{Returns:}\xspace}
-\newcommand{\postcond}{\textit{Postconditions:}\xspace}
-\newcommand{\except}{\textit{Exceptions:}\xspace}
+\newcommand{\postcond}{\textit{Ensures:}\xspace}
+\newcommand{\except}{\textit{Throws:}\xspace}
