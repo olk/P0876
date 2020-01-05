@@ -69,10 +69,6 @@ representing \main or a thread's \entryfn can be handled like an
 explicitly created \fiber: it can passed to and returned from functions or
 stored in a container.
 
-The major restriction on a fiber provided by the operating system for a particular thread (an \emph{implicit fiber}) is that it is Undefined Behavior to attempt to resume that fiber on some other thread (see \nameref{xthread}).
-When called on a \fiber instance representing an implicit fiber, \canxtresume indicates
-whether it is valid to call \xtresumesome on that instance.
-
 In the code snippet above the suspended \main is represented by instance
 \cpp{m} and could be stored in containers or managed just like \cpp{f}
 by a scheduling algorithm.
