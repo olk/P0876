@@ -1,5 +1,26 @@
 \abschnitt{Revision History}\label{history}
-This document supersedes P0876R8.
+This document supersedes P0876R9.
+
+\uabschnitt{Changes since P0876R9}
+
+\begin{itemize}
+    \item Removed \xtresume, \xtresumewith, \xtcancel and \canxtresume, along
+          with stated support for resuming a suspended fiber on some thread
+          other than the one on which it was launched. Added words forbidding
+          that.
+\end{itemize}
+
+In Belfast, EWG came down strongly against cross-thread fiber resumption. The
+most emphatic objection was that for a function referencing TLS, multiple
+compilers cache TLS pointers on the function's stack frame. Resuming a fiber
+containing that stack frame on some other thread would cause problems. In the
+best case, the resumed function would merely reference TLS belonging to the
+wrong thread -- but at some point the original thread will terminate, its TLS
+will be destroyed, and the cached pointers will be left dangling.
+
+With \fiber, any opaque function call might possibly suspend -- but
+invalidating cached TLS pointers across every opaque function call is deemed
+unacceptable overhead.
 
 \uabschnitt{Changes since P0876R8}
 
