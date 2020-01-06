@@ -1,27 +1,16 @@
 \abschnitt{multi-threading environment}\label{xthread}
 
-Member function \canxtresume returns \cpp{false} if the stack represented by the
-\fiber instance was created by the operating system (main application or thread
-stack), and the caller is running on a different thread. When the stack
-represented by the \fiber instance was created by \fiber's
-constructor, \canxtresume returns \cpp{true}.\footnote{A possible
-implementation could mark the first stack frame by creating a special marker
-(for instance \emph{0xBADCAFFEE} etc.) at a specific offset in the first stack
-frame or use a special function name for the first function and walk the stack
-searching for these markers.} You must not attempt to resume an instance
-representing a stack provided by the operating system on some other thread!
+Any thread in a program may be shared by multiple fibers.
 
-\canresume can be called to determine whether a given \fiber instance might
-safely be resumed on a particular thread by calling \resume or \resumewith.
-
-\fiber is TLS-agnostic - best practices related to TLS apply to fibers too
-(see P0772R0.)
+A newly-instantiated fiber is not yet associated with any thread. However,
+once a fiber has been resumed the first time by some thread, it must
+thereafter be resumed only by that same thread.
 
 There could potentially be Undefined Behavior if:
 \begin{itemize}
-    \item code running on a fiber references \cpp{thread\_local} variables
+    \item a function running on a fiber references \cpp{thread\_local} variables
     \item the compiler/runtime implementation caches a pointer
-          to \cpp{thread\_local} storage on the stack
+          to \cpp{thread\_local} storage in that function's stack frame
     \item that fiber is suspended, and
     \item the suspended fiber is resumed on a different thread.
 \end{itemize}
@@ -30,7 +19,5 @@ The cached TLS pointer is now pointing to storage belonging to some other
 thread. If the original thread terminates before the new thread, the cached
 TLS pointer is now dangling.
 
-For a runtime that caches TLS pointers in such fashion, an implementation
-of \xtresume or\\
-\xtresumewith could conceivably walk the suspended stack,
-patching cached pointers.
+For this reason, it is forbidden to resume a fiber on any thread other than
+the one on which it was first resumed.
