@@ -77,21 +77,21 @@
 \newcommand{\resumewith}{\cpp{resume\_with()}}
 \newcommand{\xtresume}{\cpp{resume\_from\_any\_thread()}}
 \newcommand{\xtresumewith}{\cpp{resume\_from\_any\_thread\_with()}}
-\newcommand{\someresume}{\resume or \xtresume}
-\newcommand{\someresumewith}{\resumewith or \xtresumewith}
+\newcommand{\someresume}{\resume}
+\newcommand{\someresumewith}{\resumewith}
 \newcommand{\resumesome}{\resume or \resumewith}
 \newcommand{\xtresumesome}{\xtresume or \xtresumewith}
-\newcommand{\allresume}{\resume, \resumewith, \xtresume or \xtresumewith}
+\newcommand{\allresume}{\resume or \resumewith}
 \newcommand{\cancel}{\cpp{cancel()}}
 \newcommand{\xtcancel}{\cpp{cancel\_from\_any\_thread()}}
-\newcommand{\anycancel}{\cancel or \xtcancel}
+\newcommand{\anycancel}{\cancel}
 \newcommand{\canresume}{\cpp{can\_resume()}}
 \newcommand{\canxtresume}{\cpp{can\_resume\_from\_this\_thread()}}
-\newcommand{\canresumesome}{\canresume or \canxtresume}
+\newcommand{\canresumesome}{\canresume}
 \newcommand{\thread}{\cpp{std::thread}}
 \newcommand{\Currthread}{The calling thread\xspace}
 \newcommand{\currthread}{the calling thread\xspace}
-\newcommand{\lastthread}{the thread on which the fiber represented by \cpp{*this} was most recently resumed}
+\newcommand{\lastthread}{the thread on which the fiber represented by \cpp{*this} was first resumed}
 \newcommand{\unwindex}{\cpp{std::unwind\_exception}}
 \newcommand{\unwindfib}{\cpp{std::unwind\_fiber()}}
 \newcommand{\uwforced}{\cpp{_Unwind_ForcedUnwind()}}

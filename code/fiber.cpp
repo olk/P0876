@@ -19,15 +19,10 @@ public:
     fiber_context resume() &&;
     template<typename Fn>
     fiber_context resume_with(Fn&& fn) &&;
-    fiber_context resume_from_any_thread() &&;
-    template<typename Fn>
-    fiber_context resume_from_any_thread_with(Fn&& fn) &&;
 
     fiber_context cancel() &&;
-    fiber_context cancel_from_any_thread() &&;
 
     bool can_resume() noexcept;
-    bool can_resume_from_this_thread() noexcept;
 
     explicit operator bool() const noexcept;
     bool empty() const noexcept;

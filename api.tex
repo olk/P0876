@@ -59,7 +59,7 @@ designate a fiber instantiated by user code; conversely, \emph{implicit fiber}
 designates the default fiber on any thread. An implicit fiber's \emph{owning
 thread} is the thread of which that fiber is the default fiber. An explicit
 fiber has no owning thread. Instead, when necessary, we speak of the thread on
-which a fiber was last resumed.
+which a fiber was launched.
 
 A fiber is explicitly instantiated by passing an \emph{\entryfn} to \fiber's
 constructor. This function is not entered until the first call to one of
@@ -220,7 +220,7 @@ terminate voluntarily.}
     \item[---] \cpp{other.empty()} returns \cpp{true}
 \end{description}
 
-\mbrhdr{template<typename Fn> fiber\_context resume\_from\_any\_thread\_with(Fn\&\& fn) \&\&}
+\mbrhdr{template<typename Fn> fiber\_context resume\_with(Fn\&\& fn) \&\&}
 
 \constraints
 \begin{description}
@@ -234,7 +234,7 @@ terminate voluntarily.}
 \requires
 \begin{description}
     \item[---] \cpp{empty()} returns \cpp{false}
-    \item[---] \canxtresume returns \cpp{true}
+    \item[---] \currthread is the same as \lastthread
 \end{description}
 
 \effects
@@ -259,16 +259,13 @@ terminate voluntarily.}
 
 \remarks
 \begin{description}
-    \item[---] A newly constructed but not yet entered fiber may be resumed by
-              any thread. \tsnote{For any explicit fiber, the thread that resumes it
-              is constrained only by the last thread that previously resumed
-              it. That constraint is imposed by code running on
-              the fiber, rather than by the \fiber facility itself.}
+    \item[---] A newly constructed but not yet resumed fiber may be resumed by
+              any thread.
 \end{description}
 
 \returns
 \begin{description}
-    \item[fiber\_context] on resumption, \xtresumewith returns a \fiber
+    \item[fiber\_context] on resumption, \resumewith returns a \fiber
                representing the immediately preceding fiber: the fiber that
                resumed this one, thereby suspending itself
 \end{description}
@@ -279,19 +276,15 @@ terminate voluntarily.}
 %             \unwindex when, while suspended, the \fiber instance representing
 %             the suspended fiber is destroyed
     \item[---] Any exception thrown by evaluating the \cpp{fn} parameter
-               passed to some other fiber's future call to\\
-               \xtresumewith on a \fiber instance representing this suspended
-               call to \xtresumewith.
+               passed to some other fiber's future call to
+               \resumewith on a \fiber instance representing this suspended
+               call to \resumewith.
 \end{description}
 
 \postcond
 \begin{description}
     \item[---] \cpp{empty()} returns \cpp{true}
 \end{description}
-
-\tsnote{The intent of the names \xtresume and \xtresumewith is to clarify the
-operation of cross-thread resumption. The fiber represented by \cpp{*this}
-will be resumed whether or not it was last resumed on \currthread.}
 
 \tsnote{The returned \cpp{fiber\_context} indicates via \cpp{empty()} whether the previous active
 fiber has terminated (returned from \entryfn).}
@@ -301,50 +294,26 @@ express the state change explicitly, these methods are rvalue-reference
 qualified. For this reason, no non-empty \fiber instance ever represents the
 currently-running fiber.}
 
-\mbrhdr{template<typename Fn> fiber\_context resume\_with(Fn\&\& fn) \&\&}
-
-\tsnote{The intent of the distinction between \resumewith and \xtresumewith, as
-between \resume and \xtresume, is both for potential runtime
-validation and for code auditing. If an application only ever
-calls \resumesome, no fiber in that application will ever be resumed on a
-thread other than the one on which it was previously resumed.}
-
-\requires
-\begin{description}
-    \item[---] \currthread is the same as \lastthread
-\end{description}
-
-\effects
-\begin{description}
-    \item[---] Equivalent to \xtresumewith.
-\end{description}
-
-\mbrhdr{fiber\_context resume\_from\_any\_thread() \&\&}
-
-\effects
-Equivalent to:\\
-\cpp{resume\_from\_any\_thread\_with([](fiber\_context&& caller)\{ return std::move(caller); \})}
-
 \mbrhdr{fiber\_context resume() \&\&}
 
 \effects
 Equivalent to:\\
 \cpp{resume\_with([](fiber\_context&& caller)\{ return std::move(caller); \})}
 
-\mbrhdr{fiber\_context cancel\_from\_any\_thread() \&\&}
+\mbrhdr{fiber\_context cancel() \&\&}
 
 \requires
 \begin{description}
     \item[---] \cpp{empty()} returns \cpp{true}, or
-    \item[---] the fiber referenced by \cpp{*this} is explicit,
-               and \canxtresume returns \cpp{true}
+    \item[---] the fiber represented by \cpp{*this} is explicit
+    \item[---] \currthread is the same as \lastthread
 \end{description}
 
 \effects
 \begin{description}
     \item[---] If \cpp{empty()} returns \cpp{true}, returns an empty \fiber instance.
     \item[---] Otherwise, equivalent to:\\
-               \cpp{return resume\_from\_any\_thread\_with(cancelfn);}\\
+               \cpp{return resume\_with(cancelfn);}\\
                where \cpp{cancelfn} is the \cancelfn passed to the constructor
                of \cpp{*this}. \tsnote{If the immediately preceding fiber
                resumed this one by terminating itself, the returned \fiber will
@@ -361,60 +330,8 @@ visible to the functions on that fiber.}
 \cpp{*this} must be explicit is due to the fact that an implicit fiber was
 not constructed using the \fiber constructor and thus has no \cancelfn. For
 an implicit fiber, one must instead call
-\cpp{resume\_from\_any\_thread\_with(cancelfn)}, where \cpp{cancelfn} is
+\cpp{resume\_with(cancelfn)}, where \cpp{cancelfn} is
 the desired \cancelfn.}
-
-\mbrhdr{fiber\_context cancel() \&\&}
-
-\tsnote{The intent of the distinction between \cancel and \xtcancel, as
-between \resume and \xtresume, is both for potential runtime validation and
-for code auditing.}
-
-\requires
-\begin{description}
-    \item[---] \cpp{empty()} returns \cpp{true}, or
-    \item[---] the fiber referenced by \cpp{*this} is explicit,
-               and \canresume returns \cpp{true}
-\end{description}
-
-\effects
-\begin{description}
-    \item[---] Equivalent to \xtcancel.
-\end{description}
-
-\mbrhdr{bool can\_resume\_from\_this\_thread() noexcept}
-
-\effects
-query whether \currthread is forbidden to resume the suspended
-\fiber instance by calling \xtresumesome.
-
-\returns
-\begin{description}
-    \item[---] \cpp{false} if \cpp{*this} is empty, or if it represents an implicit fiber
-        and \currthread is not that fiber's owning thread; otherwise \cpp{true}.
-\end{description}
-
-\remarks
-\begin{description}
-    \item[---] You may resume a suspended implicit fiber \emph{on the same thread}
-        using any of\\
-        \allresume. Attempting to
-        resume an implicit fiber from any thread other than its owning thread is Undefined Behavior.
-    \item[---] \canxtresume returns \cpp{true} if \currthread is the same as \lastthread,
-        or if the \fiber instance represents an explicit fiber.
-    \item[---] \canxtresume must not be called concurrently from multiple threads.
-\end{description}
-
-\tsnote{\canxtresume is not marked \cpp{const} because in at least one
-implementation, it requires an internal context switch. However, the
-stack operations are effectively read-only.}
-
-\tsnote{A \cpp{true} return from \canxtresume does not guarantee that the
-code on the suspended fiber represented by \cpp{*this} uses no resources that
-would be problematic if resumed on another thread. That guarantee is the
-responsibility of the application. The only guarantee associated
-with \canxtresume is that if it returns \cpp{false}, it is Undefined Behavior
-to call \xtresumesome on \cpp{*this}.}
 
 \mbrhdr{bool can\_resume() noexcept}
 
