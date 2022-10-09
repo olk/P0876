@@ -1,7 +1,7 @@
 \abschnitt{termination}\label{termination}
 
 %% There are a few different ways to terminate a given fiber without
-%% terminating the whole process, or engaging undefined behavior.
+%% terminating the whole process, or engaging undefined behaviour.
 %% 
 %% When a \fiber instance is constructed with an \entryfn, its new stack is
 %% initialized with the frame of an implicit top-level function that marks the
@@ -179,7 +179,7 @@ possible way to use the \cancelfn\xspace / \cancel mechanism.
 %%      \item a \catchall clause that does not execute a \cpp{throw;}
 %%      statement behaves as if it ends with a \cpp{throw;} statement
 %%      \item a \catchall clause that attempts to throw a normal C++
-%%      exception engages Undefined Behavior
+%%      exception engages Undefined Behaviour
 %%  \end{itemize}
 %%  \item \cpp{catch (}\emph{anything else}\cpp{)}
 %%     \item \cpp{catch} clauses along the way are ignored.
@@ -198,7 +198,7 @@ possible way to use the \cancelfn\xspace / \cancel mechanism.
 %% 
 %% As a consequence, destroying a \fiber instance representing a thread's default
 %% fiber (see \nameref{fiber-context.implicit})
-%% from any other thread engages Undefined Behavior.\footnote{One unobvious case
+%% from any other thread engages Undefined Behaviour.\footnote{One unobvious case
 %% would be if a fiber running on non-\main thread \cpp{T} stores a \fiber
 %% representing \cpp{T}'s default fiber in a static variable, whether
 %% module-scope or function-scope. That variable will be destroyed at program

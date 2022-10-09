@@ -1,7 +1,7 @@
 \newpage
 \abschnitt{Appendix A: support code for examples}\label{launch}\label{appendixa}
 
-Destroying a non-empty \fiber instance invokes Undefined Behavior -- you must
+Destroying a non-empty \fiber instance invokes Undefined Behaviour -- you must
 first call \anycancel (see \nameref{termination}). To simplify code examples in this paper, we introduce
 an \cpp{autocancel} wrapper class that tracks the sequence of \fiber instances
 representing a particular fiber. When an \cpp{autocancel} instance is

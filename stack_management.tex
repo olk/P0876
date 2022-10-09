@@ -21,7 +21,7 @@ must be copied too. That presents two implementation choices.
           of the fiber copies terminates (unwinds its stack), the RAII class destructors
           will release their managed resources. When the second copy terminates, the same
           destructors will try to doubly-release the same resources, leading to undefined
-          behavior.
+          behaviour.
 \end{itemize}
 
 \zs{

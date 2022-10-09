@@ -81,7 +81,7 @@ instance is resumed.
 
 %% \rSec3[fiber-context.toplevel]{Implicit Top-Level Function}
 
-%% On every explicit fiber, the behavior is equivalent to calling the \entryfn
+%% On every explicit fiber, the behaviour is equivalent to calling the \entryfn
 %% passed to \fiber's constructor from an implicit top-level function.
 %% If the fiber is later
 %% unwound, this conceptual top-level stack frame serves as delimiter: this point
@@ -98,7 +98,7 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 %% conceptual implicit top-level function is responsible for deallocating the
 %% explicit fiber's stack memory on return from the \entryfn.
 %% 
-%% Similarly, on every implicit fiber, the behavior is equivalent to passing control through an
+%% Similarly, on every implicit fiber, the behaviour is equivalent to passing control through an
 %% implicit top-level function above \main and above the \entryfn for
 %% each \thread.
 %% The conceptual stack frame for this implicit top-level function delimits
@@ -405,7 +405,7 @@ stack operations are effectively read-only.}
 %% %%             as if it ended with a \cpp{throw;} statement.
 %% %%  \item[---] During this specific stack unwinding, a \catchall
 %% %%             clause that attempts to throw any C++ exception engages
-%% %%             Undefined Behavior.
+%% %%             Undefined Behaviour.
 %% \end{description}
 %% 
 %% \returns

@@ -39,7 +39,7 @@ other changes proposed in a separate paper.
 
 \begin{itemize}
     \item Cancellation function removed from \fiber constructor.
-    \item \unwindfib re-added, with implementation-defined behavior.
+    \item \unwindfib re-added, with implementation-defined behaviour.
     \item Added elaboration of \cpp{filament} example to bind cancellation
           function.
 \end{itemize}
@@ -63,10 +63,10 @@ implicit fiber, what should the proposed \cpp{cancel()} member function do?
 
 Passing a specific \cancelfn to \someresumewith avoids that problem.
 
-P0876R8 follows SG1 recommendation in making it Undefined Behavior to destroy
+P0876R8 follows SG1 recommendation in making it Undefined Behaviour to destroy
 (or assign to) a non-empty \fiber instance.
 
-\unwindfib was reintroduced with implementation-defined behavior to allow fiber
+\unwindfib was reintroduced with implementation-defined behaviour to allow fiber
 cleanup leveraging implementation internals. Its use was entirely optional (and
 auditable). 
 

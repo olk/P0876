@@ -6,7 +6,7 @@ A newly-instantiated fiber is not yet associated with any thread. However,
 once a fiber has been resumed the first time by some thread, it must
 thereafter be resumed only by that same thread.
 
-There could potentially be Undefined Behavior if:
+There could potentially be Undefined Behaviour if:
 \begin{itemize}
     \item a function running on a fiber references \cpp{thread\_local} variables
     \item the compiler/runtime implementation caches a pointer
