@@ -11,6 +11,8 @@ returning the active fiber can be avoided by \bfs{synthesizing} the
 fiber is first started, or returned from \resume).
 \cppfl{synthesized_foo}
 
+\seeappaassert
+
 In the pseudo-code above the fiber \cpp{f} is started by invoking its member
 function \resume at line 7. This operation suspends \cpp{foo}, empties
 instance \cpp{f} and synthesizes a new \fiber\xspace \cpp{m} that is passed as parameter
@@ -55,6 +57,8 @@ into the resumed fiber.
 
 \cppf{synthesized_main}
 
+\seeappaassert
+
 The mechanism presented in this proposal describes switching between stacks: each
 fiber has its own stack. The stacks of \main and explicitly-launched threads
 are not excluded; these can be used as targets too.
@@ -83,6 +87,8 @@ internal global variables that point to \main is to explicitly return a non-empt
 \fiber instance that will be resumed after the active fiber terminates.
 \cppfl{terminating_fiber}
 
+\seeappaassert
+
 In line 5 the fiber is started by invoking \resume on instance \cpp{f}. \main
 is suspended and an instance of type \cpp{fiber\_context} is synthesized and passed as
 parameter \cpp{m} to the lambda at line 2. The fiber terminates by returning
@@ -92,6 +98,8 @@ line 5) while fiber \cpp{f} is destroyed.
 In a more advanced example another \fiber is used as return value instead of the
 passed in synthesized fiber.
 \cppfl{terminating_fiber_complex}
+
+\seeappaassert
 
 At line 13 fiber \cpp{f2} is resumed and the lambda is entered at line 8. The
 synthesized \fiber\xspace \cpp{f} (representing suspended \main) is passed as a
@@ -123,6 +131,8 @@ implicitly modified, unexpected behaviour happens.
 The example below demonstrates the problem:
 \cppfl{return_from_resume_inplace}
 
+\seeappaassert
+
 In this pseudo-code the \fiber object is implicitly updated.
 
 The example creates a circle of fibers: each fiber prints its name and resumes
@@ -143,6 +153,8 @@ is resumed through \cpp{f1.resume()}.
 This problem can be solved by returning the synthesized \fiber from \resume,
 \resumewith, \xtresume or \xtresumewith.
 \cppf{return_from_resume_invalid}
+
+\seeappaassert
 
 In the example above the synthesized \fiber returned by each \resume call is
 specifically move-assigned to a \fiber instance other than the one on which \resume
