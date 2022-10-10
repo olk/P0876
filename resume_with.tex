@@ -7,8 +7,6 @@ function \cpp{fn()} to execute.
 
 \cppfl{suspender}
 
-\seeappaassert
-
 The \resumewith call at line 11 injects function \cpp{fn()} into
 fiber \cpp{f} as if the \resume call at line 3 had directly
 called \cpp{fn()}.
@@ -48,8 +46,6 @@ matters when control leaves it in either of two ways:
 
 \cppfl{ontop}
 
-\seeappaassert
-
 The \cpp{f.resume\_with(<lambda>)} call at line 18 passes control to the second
 lambda on the fiber of the first lambda.
 
@@ -65,8 +61,6 @@ One case worth pointing out is when you call \resumewith (or \xtresumewith) on
 a\\
 \fiber that has not yet been resumed for the first time:
 \cppfl{initial_resume_with}
-
-\seeappaassert
 
 In this situation, \cpp{injected()} is called with a \fiber instance
 representing the caller of \resumewith. When \cpp{injected()} eventually
