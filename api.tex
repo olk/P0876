@@ -139,15 +139,14 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
     \item[---] \cpp{empty()} returns \cpp{true}.
 \end{description}
 
-\mbrhdr{template<typename Fn0, typename Fn1> explicit fiber\_context(Fn0\&\& entry, Fn1\&\& cancel)}
+\mbrhdr{template<typename Fn> explicit fiber\_context(Fn\&\& entry)}
 
 \constraints
 \begin{description}
     \item[---] This constructor template shall not participate in overload
-              resolution unless \cpp{Fn0} and \cpp{Fn1}
-              are \emph{Lvalue-Invocable} [func.wrap.func] for the argument
-              type \cpp{std::fiber\_context&&} and the return type \fiber.\\
-              \bfs{Needs update to \cpp{Invocable} concept.}
+              resolution unless \cpp{Fn}
+              is \emph{Lvalue-Invocable} [func.wrap.func] for the argument
+              type \cpp{std::fiber\_context&&} and the return type \fiber.
 \end{description}
 
 \effects
@@ -156,10 +155,6 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
               entry to \cpp{entry}.
               \tsnote{\cpp{entry} is entered only when \allresume is called.}
     \item[---] The stack and any other necessary resources are created.
-    \item[---] The \emph{\cancelfn}\xspace\cpp{cancel} is cached for possible
-              later use.
-              \tsnote{\cpp{cancel} is invoked by\\
-              \anycancel (q.v.).}
 \end{description}
 
 \except
@@ -194,8 +189,8 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 \end{description}
 
 \tsnote{If a \fiber instance to be destroyed is not yet empty, an application
-must call \anycancel, or otherwise convey to the suspended fiber the need to
-terminate voluntarily.}
+must call \cpp{get\_stop\_source().request\_stop()}, or otherwise convey to
+the suspended fiber the need to terminate voluntarily.}
 
 \mbrhdr{fiber\_context\& operator=(fiber\_context\&\& other) noexcept}
 
@@ -300,38 +295,17 @@ currently-running fiber.}
 Equivalent to:\\
 \cpp{resume\_with([](fiber\_context&& caller)\{ return std::move(caller); \})}
 
-\mbrhdr{fiber\_context cancel() \&\&}
+\mbrhdr{[[nodiscard]] stop\_source get\_stop\_source() noexcept;}
 
-\requires
-\begin{description}
-    \item[---] \cpp{empty()} returns \cpp{true}, or
-    \item[---] the fiber represented by \cpp{*this} is explicit
-    \item[---] \currthread is the same as \lastthread
-\end{description}
+\effects Equivalent to: \cpp{return ssource;}
 
-\effects
-\begin{description}
-    \item[---] If \cpp{empty()} returns \cpp{true}, returns an empty \fiber instance.
-    \item[---] Otherwise, equivalent to:\\
-               \cpp{return resume\_with(cancelfn);}\\
-               where \cpp{cancelfn} is the \cancelfn passed to the constructor
-               of \cpp{*this}. \tsnote{If the immediately preceding fiber
-               resumed this one by terminating itself, the returned \fiber will
-               be empty. Otherwise, depending on the interaction of
-               the \cancelfn and the code on the fiber represented
-               by \cpp{*this}, it may or may not represent the fiber originally
-               represented by \cpp{*this} at entry to \xtcancel.}
-\end{description}
+\mbrhdr{[[nodiscard]] stop\_token get\_stop\_token() const noexcept;}
 
-\tsnote{The \cancelfn\xspace \cpp{cancelfn} may throw an exception, or set some state
-visible to the functions on that fiber.}
+\effects Equivalent to: \cpp{return ssource.get\_token();}
 
-\tsnote{The requirement that, if non-empty, the fiber represented by
-\cpp{*this} must be explicit is due to the fact that an implicit fiber was
-not constructed using the \fiber constructor and thus has no \cancelfn. For
-an implicit fiber, one must instead call
-\cpp{resume\_with(cancelfn)}, where \cpp{cancelfn} is
-the desired \cancelfn.}
+\mbrhdr{bool request\_stop() noexcept;}
+
+\effects Equivalent to: \cpp{return ssource.request\_stop();}
 
 \mbrhdr{bool can\_resume() noexcept}
 

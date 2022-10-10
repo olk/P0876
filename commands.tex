@@ -85,6 +85,9 @@
 \newcommand{\cancel}{\cpp{cancel()}}
 \newcommand{\xtcancel}{\cpp{cancel\_from\_any\_thread()}}
 \newcommand{\anycancel}{\cancel}
+\newcommand{\getsource}{\cpp{get\_stop\_source()}}
+\newcommand{\gettoken}{\cpp{get\_stop\_token()}}
+\newcommand{\reqstop}{\cpp{request\_stop()}}
 \newcommand{\canresume}{\cpp{can\_resume()}}
 \newcommand{\canxtresume}{\cpp{can\_resume\_from\_this\_thread()}}
 \newcommand{\canresumesome}{\canresume}
@@ -100,8 +103,8 @@
 \newcommand{\uncexs}{\cpp{std::uncaught_exceptions()}}
 \newcommand{\catchall}{\cpp{catch (...)}}
 \newcommand{\swapcontext}{\cpp{swapcontext()}}
-\newcommand{\seeappalaunch}{(See \nameref{appendixa} for the definitions of \cpp{launch()} and \cpp{autocancel}.)}
-\newcommand{\seeappaassert}{(See \nameref{appendixa} for the definition of \cpp{assert_on_cancel}.)}
+\newcommand{\seeappalaunch}{(See \nameref{appendixa} for the definition of \cpp{autocancel}.)}
+\newcommand{\seeappaassert}{(See \nameref{appendixa} for the definition of \cpp{assert\_on\_cancel}.)}
 
 \newcommand{\sym}{\emph{symmetric}\xspace}
 \newcommand{\asym}{\emph{asymmetric}\xspace}
