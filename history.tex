@@ -4,6 +4,12 @@ This document supersedes P0876R10.
 \uabschnitt{Changes since P0876R10}
 
 \begin{itemize}
+    \item Removed \cpp{cancel()} method and the \cancelfn constructor
+          argument. Replaced with the \cpp{std::jthread} stop token handling
+          API: \getsource, \gettoken and \reqstop. This simplifies examples by
+          eliminating \cpp{launch()} and \cpp{assert\_on\_cancel}.
+    \item Added a section exploring the relationship of \fiber to the larger
+          C++ ecosystem.
     \item Reordered some sections to make the paper more accessible for new readers.
 \end{itemize}
 

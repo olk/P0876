@@ -189,8 +189,8 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 \end{description}
 
 \tsnote{If a \fiber instance to be destroyed is not yet empty, an application
-must call \cpp{get\_stop\_source().request\_stop()}, or otherwise convey to
-the suspended fiber the need to terminate voluntarily.}
+must call \reqstop, or otherwise convey to the suspended fiber the need to
+terminate voluntarily.}
 
 \mbrhdr{fiber\_context\& operator=(fiber\_context\&\& other) noexcept}
 
@@ -295,17 +295,17 @@ currently-running fiber.}
 Equivalent to:\\
 \cpp{resume\_with([](fiber\_context&& caller)\{ return std::move(caller); \})}
 
-\mbrhdr{[[nodiscard]] stop\_source get\_stop\_source() noexcept;}
+\mbrhdr{[[nodiscard]] stop\_source get\_stop\_source() noexcept}
 
 \effects Equivalent to: \cpp{return ssource;}
 
-\mbrhdr{[[nodiscard]] stop\_token get\_stop\_token() const noexcept;}
+\mbrhdr{[[nodiscard]] stop\_token get\_stop\_token() const noexcept}
 
 \effects Equivalent to: \cpp{return ssource.get\_token();}
 
 \mbrhdr{bool request\_stop() noexcept;}
 
-\effects Equivalent to: \cpp{return ssource.request\_stop();}
+\effects Equivalent to: \cpp{return ssource.request\_stop()}
 
 \mbrhdr{bool can\_resume() noexcept}
 

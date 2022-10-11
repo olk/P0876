@@ -1,0 +1,153 @@
+\abschnitt{\fiber and the larger C++ ecosystem}
+
+\uabschnitt{higher-level libraries}
+
+\nameref{low_level} enumerates a number of higher-level abstraction libraries
+built upon the \bcontext\xspace implementation of the API proposed in this paper.
+This is not an exhaustive list, but it suffices to illustrate that there is
+widespread interest in this functionality.
+
+The most significant point about this proposal is that, given \fiber, all
+those libraries can be written in standard C++. They need not themselves be
+integrated into the Standard.
+
+Because it creates and switches between different function call stacks,
+though, the \fiber facility cannot be written in portable C++. There is real
+value to integrating this library into the Standard.
+
+\emph{Boost.Context} is maintained by one individual to support the specific
+set of processors and operating systems to which he has access. The \fiber
+facility will ensure support in every implementation of the C++ runtime,
+extending into the future.
+
+Given the lively ecosystem of open-source libraries, it's possible that
+standardizing \cpp{fiber\_context} could suffice. It is not essential that
+WG21 must standardize additional higher-level libraries before the facility
+would become useful. The uptake of \emph{Boost.Context} illustrates that the
+community can make good use of \cpp{fiber\_context}.
+
+However, the evolution of this proposal and the WG21 discussions thereof have
+surfaced a number of interesting adjacencies.
+
+\uabschnitt{cancellation}
+
+Given C++ support for concurrency, in various forms, within a process,
+cancellation of an asynchronous task remains a topic of widespread interest.
+It has been much discussed, e.g. in P1677R2\cite{P1677R2},
+P1820R0\cite{P1820R0} and P2175R0\cite{P2175R0}.
+
+Previous revisions of this paper have proposed canceling a suspended fiber by
+injecting an exception, e.g. using \fiber\cpp{::}\resumewith. A comparable
+approach was rejected for \cpp{std::jthread}, although it's worth noting that
+cooperative fibers differ in a very significant respect: every fiber suspends
+at a well-defined point, namely a call to \resumewith.\footnote{Although
+exception-based cancellation is not implicitly supported, a consumer of \fiber
+may still explicitly pass to \resumewith an invocable that raises an exception
+in the suspended fiber.}
+
+Evolution of the exception mechanism itself\cite{P0709R4} may affect the
+viability of using exceptions for cancellation.
+
+That said, this paper proposes that \fiber
+adopt \cpp{std::stop\_source}, \cpp{std::stop\_token} from the
+Standard\cite{Standard}, section 33.3.
+
+\uabschnitt{modules and optimizations}
+
+Before modules, the only information the compiler could know about a function
+in an external translation unit was what a human coder stated in the relevant
+header file. But since the information in a module is prepared by the compiler
+itself, a subsequent compile of a translation unit that imports that module
+can know as much about each module function as it would if the function's
+source code was found within the current translation unit.
+
+This permits the compiler to infer and propagate attributes. If a function
+neither contains a throw statement nor calls other functions, the compiler can
+conclude that it doesn't throw. It can encode this information in the module
+produced for that translation unit, so that subsequent compiles can make use
+of the knowledge. If another function contains no throw statement and calls
+only functions known not to throw, it too can be implicitly marked nothrow.
+
+Similarly, when compiling a function that can never return, the compiler can
+so indicate in the output module. Any caller whose code path leads
+unconditionally to any such function can also be known never to return.
+
+In much the same way, the module describing the
+library's \fiber\cpp{::}\resumewith method can mark it as \emph{can-suspend}.
+Then any caller of \resumewith will also be marked \emph{can-suspend}, and so
+forth. The compiler can use this to improve its optimization tactics around
+any call to a \emph{can-suspend} function.
+
+(The \emph{can-suspend} characteristic of a \cpp{co\_await} coroutine function
+is just as pervasive, but in that case the coder must manually propagate it.)
+
+\uabschnitt{synchronization primitives}
+
+The Standard\cite{Standard} provides an assortment of primitives for
+synchronizing work between threads, e.g. sections 33.6, 33.7, 33.8, 33.9,
+33.10. An essential behaviour of many such synchronization primitives is to
+pause, or suspend, execution of the current thread until some external
+condition is satisfied.
+
+Such suspension is very different from fiber suspension as proposed in this
+paper. This proposal neither requires nor implies a scheduler. A fiber
+suspends by explicitly designating the next fiber to resume, either by passing
+its \fiber to \resumewith or by returning that \fiber from its \entryfn.
+
+C++ threads, in contrast, assume a thread scheduler, usually provided by the
+operating system. Suspending a thread means passing control to the scheduler,
+which reallocates CPU resources to other pending threads. At some future time,
+the scheduler is responsible for directing some CPU core to resume the suspended
+thread.
+
+Fiber suspension as implemented by \fiber is independent of thread suspension.
+Suspending the running fiber simply means directing the thread to run a
+different fiber; the thread continues running. Conversely, suspending the host
+thread (e.g. by invoking a synchronization primitive) means that \emph{no}
+fiber is running on that thread.
+
+A higher-level fiber-based library that emulates the \cpp{std::thread} API,
+such as \bfiber\cite{bfiber}, necessarily implements a fiber scheduler,
+permitting implicit fiber suspension. Standardizing such a library would raise
+the interesting question of how to present fiber-aware synchronization
+primitives.
+
+A straightforward approach is to present a suite of fiber-aware
+synchronization primitives distinct from, but analogous to, the thread-based
+synchronization primitives.\footnote{This is the approach taken
+by \emph{Boost.Fiber}.} An application using multiple fibers within a thread
+would use fiber-aware synchronization primitives rather than thread-based
+synchronization primitives. Evaluating a thread-based synchronization
+primitive would suspend the entire thread, as usual, halting all fibers within
+that thread.
+
+It is tempting to contemplate modifying the semantics of the present suite of
+synchronization primitives to make them fiber-aware. Naturally this is a
+matter of some concern.
+
+For purposes of this \fiber proposal, though, it is entirely moot.
+
+\uabschnitt{Execution Agent Local Storage}
+
+A similar question arises concerning variable storage duration. Should the
+Standard introduce a fiber-specific storage duration, e.g. \cpp{fiber\_local},
+analogous to \cpp{thread\_local}\cite{Standard}? (section 6.7.5.3 \bfs{Thread
+storage duration})
+
+The Standard defines the general term \emph{execution agent} (section
+33.2.5.1) to allow for multiple kinds of parallelism. It seems reasonable to
+assume that over time, new types of execution agents will be defined. Will we
+want the Standard to present a new \cpp{xyz\_local} storage duration for each
+new ``xyz'' execution agent type?
+
+P0772R1\cite{P0772R1} notes that library code should not have to care what
+kind of execution agent is running it. Already it's important to ensure that
+library code avoids \cpp{static} variables because any such variable prohibits
+calling that library from more than one thread. P0772R1 suggests a generalized
+variable storage duration dynamically local to the innermost current execution
+agent.
+
+(The same consideration about library code impacts the above question about
+presenting fiber-aware synchronization primitives.)
+\newpage
+
