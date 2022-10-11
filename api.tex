@@ -137,24 +137,39 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 \postcond
 \begin{description}
     \item[---] \cpp{empty()} returns \cpp{true}.
+    \item[---] \cpp{ssource.stop\_possible()} returns \cpp{false}.
 \end{description}
 
-\mbrhdr{template<typename Fn> explicit fiber\_context(Fn\&\& entry)}
+\mbrhdr{template<typename F> explicit fiber\_context(F\&\& entry)}
 
 \constraints
 \begin{description}
-    \item[---] This constructor template shall not participate in overload
-              resolution unless \cpp{Fn}
-              is \emph{Lvalue-Invocable} [func.wrap.func] for the argument
-              type \cpp{std::fiber\_context&&} and the return type \fiber.
+    \item[---] \cpp{remove\_cvref\_t<F>} is not the same type as \cpp{fiber\_context}.
+%%  \item[---] This constructor template shall not participate in overload
+%%            resolution unless \cpp{Fn}
+%%            is \emph{Lvalue-Invocable} [func.wrap.func] for the argument
+%%            type \cpp{std::fiber\_context&&} and the return type \fiber.
+\end{description}
+
+\mandates
+\begin{description}
+    \item[---] \cpp{is\_invocable\_v<decay\_t<F>, fiber\_context&&> ||}\\
+               \cpp{is\_invocable\_v<decay\_t<F>, stop\_token, fiber\_context&&>}
 \end{description}
 
 \effects
 \begin{description}
+    \item[---] Initializes \cpp{ssource}.
     \item[---] instantiates a \fiber representing a fiber suspended before
               entry to \cpp{entry}.
               \tsnote{\cpp{entry} is entered only when \allresume is called.}
     \item[---] The stack and any other necessary resources are created.
+\end{description}
+
+\postcond
+\begin{description}
+    \item[---] \cpp{ssource.stop\_possible()} returns \cpp{true}.
+    \item[---] \cpp{empty()} returns \cpp{false}.
 \end{description}
 
 \except
@@ -217,17 +232,9 @@ terminate voluntarily.}
 
 \mbrhdr{template<typename Fn> fiber\_context resume\_with(Fn\&\& fn) \&\&}
 
-\constraints
+\mandates
 \begin{description}
-    \item[---] This member function template shall not participate in overload
-               resolution unless \cpp{Fn} is \emph{Lvalue-Invocable} [func.wrap.func]
-               for the argument type \cpp{std::fiber\_context&&} and the return
-               type \fiber.\\
-               \bfs{Needs update to \cpp{Invocable} concept.}
-\end{description}
-
-\requires
-\begin{description}
+    \item[---] \cpp{is\_invocable\_v<decay\_t<Fn>, fiber\_context&&>}
     \item[---] \cpp{empty()} returns \cpp{false}
     \item[---] \currthread is the same as \lastthread
 \end{description}
@@ -240,12 +247,16 @@ terminate voluntarily.}
                the suspended caller.
     \item[---] Resumes the fiber represented by \cpp{*this}.
     \item[---] Restores the execution context of the resumed fiber.
-    \item[---] Evaluates \cpp{fn(caller)} on the newly-resumed fiber.
+    \item[---] Evaluates \cpp{invoke(std::forward<Fn>(fn), std::move(caller))}
+               on the newly-resumed fiber.
                Let \cpp{returned} be the \fiber instance returned by \cpp{fn}.
                \tsnote{\cpp{returned} may or may not be the same as \cpp{caller}.}
                \tsnote{\cpp{returned} may be empty.}
     \item[---] If the fiber represented by \cpp{*this} has not previously been
-               entered, passes \cpp{returned} to its \entryfn.
+               entered, passes \cpp{returned} to its \entryfn: executes\\
+               \cpp{invoke(std::forward<F>(entry), get\_stop\_token(), std::move(returned))}\\
+               if that expression is well-formed, otherwise\\
+               \cpp{invoke(std::forward<F>(entry), std::move(returned))}
     \item[---] Otherwise, the fiber represented by \cpp{*this} previously
                suspended itself by calling one of \allresume.
                Returns \cpp{returned} from whichever of the resume functions

@@ -57,10 +57,8 @@ to be empty.
 
 The interaction between \reqstop and any particular \entryfn is the
 responsibility of consuming code. Use of \reqstop does not terminate the
-subject fiber, or guarantee that the fiber will terminate. An \entryfn must
-somehow arrange for access to its fiber's own \cpp{stop\_token}
-or \cpp{stop\_source} to be able to query \cpp{stop\_requested()}. Moreover,
-the fiber must be resumed \emph{after} the \reqstop call before it could
+subject fiber, or guarantee that the fiber will terminate.
+The fiber must be resumed \emph{after} the \reqstop call before it could
 observe \cpp{stop\_requested()}. Even then, the \entryfn might not immediately
 return.
 

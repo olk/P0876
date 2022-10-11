@@ -6,8 +6,8 @@ class fiber_context {
 public:
     fiber_context() noexcept;
 
-    template<typename Fn>
-    explicit fiber_context(Fn&& entry);
+    template<typename F>
+    explicit fiber_context(F&& entry);
 
     ~fiber_context();
 
