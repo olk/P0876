@@ -149,5 +149,40 @@ agent.
 
 (The same consideration about library code impacts the above question about
 presenting fiber-aware synchronization primitives.)
-\newpage
 
+It's true that if:
+
+\begin{itemize}
+    \item a particular function relies on a \cpp{thread\_local} variable
+    \item the function calls a function that resumes a different fiber
+    \item the other fiber makes a different call to that same function, or to
+          another function that modifies the same \cpp{thread\_local} variable
+\end{itemize}
+
+then on resumption of the original fiber, the function will observe the new
+value for the \cpp{thread\_local} variable.
+
+This is analogous to use of a \cpp{static} variable by multiple threads in the
+same program -- though not as bad, since it doesn't produce race-related
+Undefined Behaviour on top of correctness problems.
+
+\cpp{std::thread} was introduced despite this problem because it's \emph{useful.}
+
+Multiple C++ implementations cache a pointer to thread-local storage in the
+stack frame of a function referencing TLS. If a suspended fiber were resumed
+by a thread other than the one on which it previously ran, such cached TLS
+pointers would point to TLS for the wrong thread. This is why such
+cross-thread resumption is forbidden.
+
+(This is the only optimization that has yet been surfaced by implementers as a
+potentially problematic interaction with fibers.)
+
+\uabschnitt{tooling} One particularly valuable consequence of adding \fiber to
+the Standard will be to add fiber awareness to debuggers, performance
+analyzers and other tools that inspect a running C++ program.
+
+Such tools need only be aware of \fiber. They would \emph{not} need to be
+further adapted to support higher-level libraries built on
+the \cpp{fiber\_context} facility.
+
+\newpage
