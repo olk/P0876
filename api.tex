@@ -1,7 +1,7 @@
 \newpage
 
 \setcounter{section}{33}
-\setcounter{subsection}{6}
+\setcounter{subsection}{10}
 
 \abschnitt{API}\label{api}
 
@@ -11,6 +11,9 @@
 
 The extensions proposed here support creation and activation of cooperative
 user-mode threads, here called \emph{fibers}.
+
+A fiber is a thread of execution ([intro.multithread.general]) with
+weakly parallel forward progress guarantees ([intro.progress] paragraph 11).
 
 The term ``user-mode'' means that control can be passed from one fiber to
 another without entering the operating-system kernel.
@@ -24,11 +27,8 @@ action \emph{launches} a new fiber, or \emph{resumes} a previously-suspended
 fiber.
 
 Suspending the running fiber in order to resume (or launch) another is
-called \emph{context switching}.
-
-The term ``thread'' in ``cooperative user-mode thread'' means that even
-though a given fiber may suspend and later be resumed, it is logically a
-thread of execution as defined in [intro.multithread].
+called \emph{context switching}. This is an explicit variant of blocking with
+forward progress guarantee delegation ([intro.progress] paragraph 14).
 
 Launching a fiber logically creates a new function stack, which remains
 associated with that fiber throughout its lifetime. Calling functions on a
