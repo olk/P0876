@@ -30,13 +30,13 @@ Suspending the running fiber in order to resume (or launch) another is
 called \emph{context switching}. This is an explicit variant of blocking with
 forward progress guarantee delegation ([intro.progress] paragraph 14).
 
-Launching a fiber logically creates a new function stack, which remains
+Launching a fiber logically creates a new function call stack, which remains
 associated with that fiber throughout its lifetime. Calling functions on a
 particular fiber, and returning from them, is independent of function calls
 and returns on any other fiber.
 
 Context switching can be effected by designating some other fiber's stack as
-current, in a manner appropriate to the existing implementation of function stacks.
+current, in a manner appropriate to the existing implementation of function call stacks.
 
 \rSec3[fiber-context.empty]{Empty vs. Non-Empty}
 
@@ -59,7 +59,7 @@ designate a fiber instantiated by user code; conversely, \emph{implicit fiber}
 designates the default fiber on any thread. An implicit fiber's \emph{owning
 thread} is the thread of which that fiber is the default fiber. An explicit
 fiber has no owning thread. Instead, when necessary, we speak of the thread on
-which a fiber was launched.
+which a fiber was first resumed.
 
 A fiber is explicitly instantiated by passing an \emph{\entryfn} to \fiber's
 constructor. This function is not entered until the first call to one of
@@ -160,9 +160,9 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 \effects
 \begin{description}
     \item[---] Initializes \cpp{ssource}.
-    \item[---] instantiates a \fiber representing a fiber suspended before
+    \item[---] Instantiates a \fiber representing a fiber suspended before
               entry to \cpp{entry}.
-              \tsnote{\cpp{entry} is entered only when \allresume is called.}
+              \tsnote{\cpp{entry} is entered only when \anyresume is called.}
     \item[---] The stack and any other necessary resources are created.
 \end{description}
 
@@ -258,7 +258,7 @@ terminate voluntarily.}
                if that expression is well-formed, otherwise\\
                \cpp{invoke(std::forward<F>(entry), std::move(returned))}
     \item[---] Otherwise, the fiber represented by \cpp{*this} previously
-               suspended itself by calling one of \allresume.
+               suspended itself by calling one of \anyresume.
                Returns \cpp{returned} from whichever of the resume functions
                was called.
 \end{description}
@@ -271,20 +271,34 @@ terminate voluntarily.}
 
 \returns
 \begin{description}
-    \item[fiber\_context] on resumption, \resumewith returns a \fiber
-               representing the immediately preceding fiber: the fiber that
-               resumed this one, thereby suspending itself
+    \item[---] If the previous fiber resumed this one by returning \fiber,
+               an empty \fiber.
+    \item[---] If the previous fiber resumed this one by calling \someresume,
+               a \fiber representing that previous fiber.
+    \item[---] If the previous fiber resumed this one by passing some \cpp{fn}
+               to \anyresumewith, the \fiber returned by that \cpp{fn}.
 \end{description}
 
 \except
 \begin{description}
-%   \item[---] \allresume throws
+%   \item[---] \anyresume throws
 %             \unwindex when, while suspended, the \fiber instance representing
 %             the suspended fiber is destroyed
-    \item[---] Any exception thrown by evaluating the \cpp{fn} parameter
-               passed to some other fiber's future call to
-               \resumewith on a \fiber instance representing this suspended
-               call to \resumewith.
+    \item[---] Nothing before suspending the calling fiber.
+    \item[---] On resuming:
+    \begin{itemize}
+        \item If the previous fiber resumed this one by returning \fiber,
+              nothing.
+        \item If the previous fiber resumed this one by calling \someresume,
+              nothing.
+        \item If the previous fiber resumed this one by calling \anyresumewith:
+        \begin{itemize}
+            \item If the \cpp{fn} passed by the previous fiber
+                  to \anyresumewith returned \fiber, nothing.
+            \item If the \cpp{fn} passed by the previous fiber
+                  to \anyresumewith threw an exception, that exception.
+        \end{itemize}
+    \end{itemize}
 \end{description}
 
 \postcond
@@ -295,7 +309,7 @@ terminate voluntarily.}
 \tsnote{The returned \cpp{fiber\_context} indicates via \cpp{empty()} whether the previous active
 fiber has terminated (returned from \entryfn).}
 
-\tsnote{\allresume empties the instance on which it is called. In order to
+\tsnote{\anyresume empties the instance on which it is called. In order to
 express the state change explicitly, these methods are rvalue-reference
 qualified. For this reason, no non-empty \fiber instance ever represents the
 currently-running fiber.}
@@ -327,7 +341,7 @@ Equivalent to:\\
 \end{description}
 
 \tsnote{When \canresume returns \cpp{true}, the \fiber instance may be resumed
-by \allresume.}
+by \anyresume.}
 
 \remarks
 \begin{description}

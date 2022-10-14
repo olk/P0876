@@ -31,7 +31,7 @@ surfaced a number of interesting adjacencies.
 
 \uabschnitt{cancellation}
 
-Given C++ support for concurrency, in various forms, within a process,
+Given C++ support for concurrency, in various forms, within a program,
 cancellation of an asynchronous task remains a topic of widespread interest.
 It has been much discussed, e.g. in P1677R2\cite{P1677R2},
 P1820R0\cite{P1820R0} and P2175R0\cite{P2175R0}.
@@ -115,7 +115,7 @@ primitives.
 A straightforward approach is to present a suite of fiber-aware
 synchronization primitives distinct from, but analogous to, the thread-based
 synchronization primitives.\footnote{This is the approach taken
-by \emph{Boost.Fiber}.} An application using multiple fibers within a thread
+by \emph{Boost.Fiber}.} A program running multiple fibers within a thread
 would use fiber-aware synchronization primitives rather than thread-based
 synchronization primitives. Evaluating a thread-based synchronization
 primitive would suspend the entire thread, as usual, halting all fibers within

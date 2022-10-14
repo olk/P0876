@@ -17,7 +17,7 @@ public:
 
     ~autocancel() {
         f_.request_stop();
-        while (_f) {
+        while (f_) {
             resume(*this);
         }
     }
@@ -27,8 +27,8 @@ public:
     }
 
     // for initial entry from a plain fiber rather than an autocancel instance
-    void resume(){
-        std::move(f_).resume();
+    std::fiber_context resume(){
+        return std::move(f_).resume();
     }
     
     void resume( autocancel& ac){

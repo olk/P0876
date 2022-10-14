@@ -62,7 +62,7 @@ member functions. In fact it removed the \cancelfn constructor argument.
 a \cancelfn on the fiber stack is a flourish rather than a necessity. It adds
 overhead in both space (on the fiber stack) and time (to traverse the stack to
 retrieve the \cancelfn). For this API, it should suffice to pass the desired
-\cancelfn to \someresumewith. If it is important to associate a \cancelfn with
+\cancelfn to \anyresumewith. If it is important to associate a \cancelfn with
 a particular fiber earlier in the lifespan of the fiber, a struct serves.
 
 A more compelling reason to avoid constructing an explicit fiber with
@@ -71,7 +71,7 @@ consuming application cannot tell, a priori, whether a given \fiber instance
 represents an explicit or an implicit fiber. If \cpp{*this} represents an
 implicit fiber, what should the proposed \cpp{cancel()} member function do?
 
-Passing a specific \cancelfn to \someresumewith avoids that problem.
+Passing a specific \cancelfn to \anyresumewith avoids that problem.
 
 P0876R8 follows SG1 recommendation in making it Undefined Behaviour to destroy
 (or assign to) a non-empty \fiber instance.

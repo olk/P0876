@@ -30,7 +30,7 @@
 %% 
 %% In an environment that forbids exceptions, 
 Every \fiber you launch must
-terminate gracefully by returning from its top-level function.
+terminate gracefully by returning from its \entryfn.
 %% You may not
 %% call \unwindfib. You may not call \dtor, explicitly or implicitly, on a
 %% non-empty \fiber instance. With these restrictions, it is possible to use
@@ -40,8 +40,7 @@ When an explicitly-launched fiber's \entryfn returns a non-empty \fiber
 instance, the running fiber is terminated. Control switches to the fiber
 indicated by the returned \fiber instance. The \entryfn may return (switch to)
 any reachable non-empty \fiber instance -- it need not be the instance originally
-passed in, or an instance returned from any of the \resume family of
-methods.
+passed in, or an instance returned from the \resume family of methods.
 
 \emph{Calling} \resume means: ``Please switch to the indicated fiber; I
 am suspending; please resume me later.''
@@ -51,18 +50,18 @@ fiber; and by the way, I am done.''
 
 The \getsource\xspace / \gettoken\xspace / \reqstop mechanism provides a way for
 consuming code to attempt to communicate to a suspended fiber the desire that
-it should terminate. The intention is that consuming code may call \reqstop
+it should terminate. The intention is that the program may call \reqstop
 before destroying a \fiber instance that might not be empty, or is known not
 to be empty.
 
 The interaction between \reqstop and any particular \entryfn is the
-responsibility of consuming code. Use of \reqstop does not terminate the
+responsibility of the program. Use of \reqstop does not terminate the
 subject fiber, or guarantee that the fiber will terminate.
 The fiber must be resumed \emph{after} the \reqstop call before it could
 observe \cpp{stop\_requested()}. Even then, the \entryfn might not immediately
 return.
 
-One tactic would be to call \reqstop, then loop over \allresume calls until
+One tactic would be to call \reqstop, then loop over \anyresume calls until
 the returned \fiber is \cpp{empty()}. However, that information is ambiguous.
 
 Suppose we have a \fiber instance \cpp{f1} representing suspended fiber F. The
