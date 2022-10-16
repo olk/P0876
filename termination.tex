@@ -1,7 +1,7 @@
 \abschnitt{termination}\label{termination}
 
 %% There are a few different ways to terminate a given fiber without
-%% terminating the whole process, or engaging undefined behavior.
+%% terminating the whole process, or engaging undefined behaviour.
 %% 
 %% When a \fiber instance is constructed with an \entryfn, its new stack is
 %% initialized with the frame of an implicit top-level function that marks the
@@ -30,7 +30,7 @@
 %% 
 %% In an environment that forbids exceptions, 
 Every \fiber you launch must
-terminate gracefully by returning from its top-level function.
+terminate gracefully by returning from its \entryfn.
 %% You may not
 %% call \unwindfib. You may not call \dtor, explicitly or implicitly, on a
 %% non-empty \fiber instance. With these restrictions, it is possible to use
@@ -40,8 +40,7 @@ When an explicitly-launched fiber's \entryfn returns a non-empty \fiber
 instance, the running fiber is terminated. Control switches to the fiber
 indicated by the returned \fiber instance. The \entryfn may return (switch to)
 any reachable non-empty \fiber instance -- it need not be the instance originally
-passed in, or an instance returned from any of the \resume family of
-methods.
+passed in, or an instance returned from the \resume family of methods.
 
 \emph{Calling} \resume means: ``Please switch to the indicated fiber; I
 am suspending; please resume me later.''
@@ -49,22 +48,25 @@ am suspending; please resume me later.''
 \emph{Returning} a particular \fiber means: ``Please switch to the indicated
 fiber; and by the way, I am done.''
 
-The \cancelfn\xspace / \cancel mechanism provides a way for
+The \getsource\xspace / \gettoken\xspace / \reqstop mechanism provides a way for
 consuming code to attempt to communicate to a suspended fiber the desire that
-it should terminate. The intention is that consuming code may call \anycancel
+it should terminate. The intention is that the program may call \reqstop
 before destroying a \fiber instance that might not be empty, or is known not
-to be empty. Passing a \cancelfn\xspace \cpp{cancelfn()} to a fiber's constructor,
-and subsequently calling \cancel on a \fiber instance representing that fiber,
-is equivalent to calling \cpp{resume\_with(cancelfn)}.
+to be empty.
 
-The interaction between a \cancelfn and any particular fiber is the
-responsibility of consuming code. Use of \cancel does not guarantee that the
-subject fiber has in fact terminated. The \fiber instance returned by \cancel
-is the same that would have been returned by the equivalent \resumewith call.
+The interaction between \reqstop and any particular \entryfn is the
+responsibility of the program. Use of \reqstop does not terminate the
+subject fiber, or guarantee that the fiber will terminate.
+The fiber must be resumed \emph{after} the \reqstop call before it could
+observe \cpp{stop\_requested()}. Even then, the \entryfn might not immediately
+return.
 
-Suppose we have a \fiber instance \cpp{f1} representing suspended fiber F.
-The running fiber M calls \cpp{f1.cancel()}, which returns another \fiber
-instance \cpp{f2}.
+One tactic would be to call \reqstop, then loop over \anyresume calls until
+the returned \fiber is \cpp{empty()}. However, that information is ambiguous.
+
+Suppose we have a \fiber instance \cpp{f1} representing suspended fiber F. The
+running fiber M calls \cpp{f1.request\_stop()}, then \cpp{f1.resume()}, which
+returns another \fiber instance \cpp{f2}.
 
 \cpp{f2} has various possible values.
 
@@ -87,8 +89,9 @@ instance \cpp{f2}.
           present state of fiber F.
 \end{itemize}
 
-The \cpp{launch()} function introduced in \nameref{launch} illustrates a
-possible way to use the \cancelfn\xspace / \cancel mechanism.
+The \cpp{autocancel} class introduced in \nameref{launch} illustrates a
+possible way to use the \reqstop mechanism, subject to the limitations
+described above.
 
 %% The \emph{last} fiber on a particular thread has no non-empty \fiber to
 %% return. For this reason, returning an empty \fiber instance (\opbool
@@ -179,7 +182,7 @@ possible way to use the \cancelfn\xspace / \cancel mechanism.
 %%      \item a \catchall clause that does not execute a \cpp{throw;}
 %%      statement behaves as if it ends with a \cpp{throw;} statement
 %%      \item a \catchall clause that attempts to throw a normal C++
-%%      exception engages Undefined Behavior
+%%      exception engages Undefined Behaviour
 %%  \end{itemize}
 %%  \item \cpp{catch (}\emph{anything else}\cpp{)}
 %%     \item \cpp{catch} clauses along the way are ignored.
@@ -198,7 +201,7 @@ possible way to use the \cancelfn\xspace / \cancel mechanism.
 %% 
 %% As a consequence, destroying a \fiber instance representing a thread's default
 %% fiber (see \nameref{fiber-context.implicit})
-%% from any other thread engages Undefined Behavior.\footnote{One unobvious case
+%% from any other thread engages Undefined Behaviour.\footnote{One unobvious case
 %% would be if a fiber running on non-\main thread \cpp{T} stores a \fiber
 %% representing \cpp{T}'s default fiber in a static variable, whether
 %% module-scope or function-scope. That variable will be destroyed at program

@@ -1,6 +1,6 @@
 #include <fiber_context>
 
-#define __cpp_lib_experimental_fiber_context 202002
+#define __cpp_lib_experimental_fiber_context 202302
 
 namespace std {
 namespace experimental {

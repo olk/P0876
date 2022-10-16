@@ -1,20 +1,21 @@
 \abschnitt{abstract}\label{abstract}
 
-This paper addresses concerns, questions and suggestions from the past meetings.
-The proposed API supersedes the former proposals N3985\cite{N3985},
-P0099R1\cite{P0099R1}, P0534R3\cite{P0534R3} and P0876R9\cite{P0876R9}.
+This paper proposes a
+minimal API that enables stackful context switching \bfs{without} the need for a
+\bfs{scheduler}. The API is suitable to act as building-block for high-level
+constructs such as stackful coroutines as well as cooperative multitasking
+(aka user-land/green threads that incorporate a \bfs{scheduling facility}).
 
-Because of name clashes with \emph{coroutine} from coroutine TS,
+This revision addresses concerns, questions and suggestions from the past meetings.
+The proposed API supersedes the former proposals N3985\cite{N3985},
+P0099R1\cite{P0099R1}, P0534R3\cite{P0534R3} and P0876R10\cite{P0876R10}.
+
+Because of name clashes with \emph{coroutine} from C++20,
 \emph{execution context} from executor proposals and \emph{continuation} used
 in the context of \cpp{future::then()}, the committee has indicated
 that \emph{fiber} is preferable. However, given the foundational, low-level
 nature of this proposal, we choose \emph{fiber\_context}, leaving the
 term \emph{fiber} for a higher-level facility built on top of this one.
-
-The minimal API enables stackful context switching \bfs{without} the need for a
-\bfs{scheduler}. The API is suitable to act as building-block for high-level
-constructs such as stackful coroutines as well as cooperative multitasking
-(aka user-land/green threads that incorporate a \bfs{scheduling facility}).
 
 Informally within this proposal, the term \emph{fiber} is used to denote the
 lightweight thread of execution launched and represented by the first-class

@@ -106,7 +106,8 @@ the captured \fiber\xspace \cpp{m} as return value (line 6). Control is returned
 \main, returning from \cpp{f2.resume()} at line 13.
 
 \zs{The \entryfn passed to \fiber's constructor must have
-signature `\cpp{fiber\_context(fiber\_context&&)}`. Using \fiber as the return
+signature `\cpp{fiber\_context(fiber\_context&&)}` or
+`\cpp{fiber\_context(stop\_token, fiber\_context&&)}`. Using \fiber as the return
 value from such a function avoids global variables.}
 
 \uabschnitt{returning synthesized \fiber instance from \cpp{resume()}}\label{fiberreturn}
@@ -128,7 +129,7 @@ In this pseudo-code the \fiber object is implicitly updated.
 The example creates a circle of fibers: each fiber prints its name and resumes
 the next fiber (f1 -> f2 -> f3 -> f1 -> ...).
 
-Fiber \cpp{f1} is started at line 26. The synthesized \fiber\xspace \cpp{main} passed 
+Fiber \cpp{f1} is started at line 27. The synthesized \fiber\xspace \cpp{main} passed 
 to the resumed fiber is stored but not used: control flow cycles through the three
 fibers.
 The for-loop prints the name \emph{f1} and resumes fiber \cpp{f2}. Inside 
@@ -140,8 +141,7 @@ fact the instance \cpp{f2} gets the synthesized \fiber of \cpp{f3} implicitly
 assigned. Remember that at line 7 fiber \cpp{f3} gets suspended while \cpp{f1}
 is resumed through \cpp{f1.resume()}.
 
-This problem can be solved by returning the synthesized \fiber from \resume,
-\resumewith, \xtresume or \xtresumewith.
+This problem can be solved by returning the synthesized \fiber from \anyresume.
 \cppf{return_from_resume_invalid}
 
 In the example above the synthesized \fiber returned by each \resume call is
@@ -150,13 +150,12 @@ was called, to properly track the three fibers. (Of course this particular examp
 depends on static knowledge of the overall control flow. But the API does not, in
 general, require that.)
 
-\zs{The synthesized \fiber must be returned from \resume, \resumewith,
-\xtresume and \xtresumewith in order to prevent changing the identity of the
-fiber.}
+\zs{The synthesized \fiber must be returned from \allresume
+in order to prevent changing the identity of the fiber.}
 \xspace\newline
 
-If the overall control flow isn't known, member functions \resumewith
-or \xtresumewith (see section \nameref{resumewith}) can be used to assign the
+If the overall control flow isn't known, member function \anyresumewith
+(see section \nameref{resumewith}) can be used to assign the
 synthesized \fiber to the correct \fiber instance (held by the caller).
 \cppf{assign_resumewith}
 

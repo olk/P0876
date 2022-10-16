@@ -2,10 +2,10 @@
 Sometimes it is useful to inject a new function (for instance, to throw an
 exception or assign the synthesized fiber to the caller as described in
 \nameref{fiberreturn}) into a suspended fiber. For this purpose
-\cpp{resume\_with(Fn&& fn)} (or \xtresumewith) may be called, passing the
-function \cpp{fn()} to execute.
+\anyresumewith may be called, passing the function \cpp{fn()} to execute.
 
 \cppfl{suspender}
+
 The \resumewith call at line 11 injects function \cpp{fn()} into
 fiber \cpp{f} as if the \resume call at line 3 had directly
 called \cpp{fn()}.
@@ -15,9 +15,9 @@ Like an \entryfn passed to \fiber, \cpp{fn()} must accept
 \fiber. The \fiber instance returned by \cpp{fn()} will, in turn, be returned
 to \cpp{f}'s lambda by the \resume at line 3.
 
-Suppose that code running on the program's main fiber calls \resume (line 12 below), thereby
-entering the first lambda shown below. This is the point at which \cpp{m} is
-synthesized and passed into the lambda at line 2.
+In the example below, suppose that code running on the program's main fiber
+calls \resume (line 12), thereby entering the first lambda. This is the point
+at which \cpp{m} is synthesized and passed into the lambda at line 2.
 
 Suppose further that after doing some work (line 4), the lambda calls
 \cpp{m.resume()}, thereby switching back to the main fiber. The lambda remains
@@ -39,8 +39,7 @@ matters when control leaves it in either of two ways:
         in \nameref{exceptions}, if there is no matching \cpp{catch}
         clause in that fiber, \cpp{std::terminate()} is called.}
   \item If the function returns, the returned \fiber instance is returned by
-        the suspended \cpp{m.resume()} (or \resumewith, or \xtresume, or
-        \xtresumewith) call.
+        the suspended \anyresume call.
 \end{enumerate}
 
 \cppfl{ontop}
@@ -56,8 +55,7 @@ at line 8.
 Finally, the first lambda returns at line 10 the \cpp{m} variable updated at
 line 8, switching back to the main fiber.
 
-One case worth pointing out is when you call \resumewith (or \xtresumewith) on
-a\\
+One case worth pointing out is when you call \anyresumewith on a
 \fiber that has not yet been resumed for the first time:
 \cppfl{initial_resume_with}
 
@@ -66,5 +64,5 @@ representing the caller of \resumewith. When \cpp{injected()} eventually
 returns that (or some other) \fiber instance, the returned\\
 \fiber instance is passed into \cpp{topfunc()} as its \cpp{prev} parameter.
 
-\zs{Member functions \resumewith and \xtresumewith allow you to inject a
+\zs{Member function \anyresumewith allows you to inject a
 function into a suspended fiber.}

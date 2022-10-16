@@ -13,9 +13,7 @@ As a consequence each call of \resume will empty the \fiber instance.
 
 Whether or not a \fiber is empty can be tested with member function \opbool.
 
-To make this more explicit, functions \resume, \resumewith, \xtresume
-and\\
-\xtresumewith are rvalue-reference qualified.
+To make this more explicit, functions \allresume are rvalue-reference qualified.
 %If a fiber calls \cpp{f.resume()} then the  fiber is suspended and \cpp{f} is
 %invalidated. When the fiber is resumed later, it returns from \cpp{f.resume()}
 %and instance \cpp{f} references the calling fiber (the fiber that has resumed
@@ -36,7 +34,6 @@ A fiber API must:
 \begin{itemize}
     \item prevent accidentally resuming a running fiber
     \item prevent accidentally resuming a terminated fiber
-    \item \resume, \resumewith, \xtresume and \xtresumewith are
-          rvalue-reference qualified
+    \item \allresume are rvalue-reference qualified
 \end{itemize}
 }

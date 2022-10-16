@@ -20,7 +20,7 @@ context.
 Since the updated \cpp{caller} represents the fiber suspended by the call at
 line 10, control returns to \main.
 
-However, since context \cpp{lambda} has now terminated, the updated \cpp{lambda}
+However, since fiber \cpp{lambda} has now terminated, the updated \cpp{lambda}
 is empty. Its \opbool returns \cpp{false}.
 
 \zs{Using lambda capture is the preferred way to transfer data between two

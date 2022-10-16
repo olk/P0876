@@ -6,8 +6,8 @@ class fiber_context {
 public:
     fiber_context() noexcept;
 
-    template<typename Fn0, typename Fn1>
-    explicit fiber_context(Fn0&& entry, Fn1&& cancel);
+    template<typename F>
+    explicit fiber_context(F&& entry);
 
     ~fiber_context();
 
@@ -20,13 +20,19 @@ public:
     template<typename Fn>
     fiber_context resume_with(Fn&& fn) &&;
 
-    fiber_context cancel() &&;
+    // stop token handling
+    [[nodiscard]] stop_source get_stop_source() noexcept;
+    [[nodiscard]] stop_token get_stop_token() const noexcept;
+    bool request_stop() noexcept;
 
     bool can_resume() noexcept;
 
     explicit operator bool() const noexcept;
     bool empty() const noexcept;
     void swap(fiber_context& other) noexcept;
+
+private:
+    stop_source ssource;            // exposition only
 };
 
 } // namespace concurrency_v2

@@ -41,7 +41,7 @@ applicability of fibers and requires an internal global variable pointing to
 P0099R0\cite{P0099R0} introduced a static member function\\
 (\cpp{execution_context::current()}) that returned an instance of the active
 fiber. This allows passing the active fiber \cpp{m} (for instance representing
-\main) into the fiber \cpp{l} via lambda capture. This mechanism enables
+\main) into the fiber \cpp{f} via lambda capture. This mechanism enables
 switching back and forth between the fiber and \main, enabling a rich set of
 applications (for instance generators).
 \cppf{static_current}

@@ -89,9 +89,9 @@ This strategy works because only a running fiber creates new stack frames
 (moving the stack pointer). While a fiber is suspended, it is safe to keep the
 CPU state on its stack.
 
-Using the stack as storage for the CPU state has the additional advantage that
-\fiber must only contain a pointer to the stack location: its memory footprint
-can be that of a pointer.
+Using the stack as storage for the CPU state has the additional advantage
+that \fiber need not itself contain the stored CPU state: it need only contain
+a pointer to the stack location.
 
 Section \nameref{synthesizing} describes how global variables are avoided
 by synthesizing a \fiber from the active fiber (execution context) and passing
