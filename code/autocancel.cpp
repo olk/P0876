@@ -5,36 +5,38 @@
 // from resume()")
 class autocancel{
 private:
-    std::fiber_context       f_;
+    std::pair<std::fiber_context, std::stop_source> fiber_;
 
 public:
     autocancel() = default;
     template <typename Fn>
     autocancel(Fn&& entry_function):
-        f_{std::forward<Fn>(entry_function)}
+        fiber_{std::make_fiber_context(std::forward<Fn>(entry_function))}
     {}
     autocancel& operator=(autocancel&& other) = default;
 
     ~autocancel() {
-        f_.request_stop();
-        while (f_) {
+        fiber_.second.request_stop();
+        while (fiber_.first) {
             resume(*this);
         }
     }
 
     bool stop_requested() const noexcept {
-        return f_.get_stop_source().stop_requested();
+        return fiber_.second.stop_requested();
     }
 
     // for initial entry from a plain fiber rather than an autocancel instance
     std::fiber_context resume(){
-        return std::move(f_).resume();
+        return std::move(fiber_.first).resume();
     }
     
     void resume( autocancel& ac){
-        std::move(ac.f_).resume_with([this](std::fiber_context&& f)->std::fiber_context{
-            f_=std::move(f);
-            return {};
-        });
+        std::move(ac.fiber_.first).resume_with(
+            [this](std::fiber_context&& f)->std::fiber_context
+            {
+                fiber_.first = std::move(f);
+                return {};
+            });
     }
 };

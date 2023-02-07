@@ -24,7 +24,7 @@ private:
 // resuming the fiber that called ~autocancel().
 template <typename Fn>
 auto launch(Fn&& entry_function) {
-    return autocancel{std::fiber_context(
+    return autocancel{
         // entry-function passed to fiber_context constructor binds
         // entry_function, calls it within try/catch, catches
         // unwind_exception, extracts its shared_ptr<fiber_context>,
@@ -43,5 +43,5 @@ auto launch(Fn&& entry_function) {
         [](std::fiber_context&& previous)->std::fiber_context {
             throw unwind_exception{std::move(previous)};
             return {};
-        })};
+        }};
 }

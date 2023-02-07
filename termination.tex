@@ -48,7 +48,7 @@ am suspending; please resume me later.''
 \emph{Returning} a particular \fiber means: ``Please switch to the indicated
 fiber; and by the way, I am done.''
 
-The \getsource\xspace / \gettoken\xspace / \reqstop mechanism provides a way for
+The \source returned by \factory provides a way for
 consuming code to attempt to communicate to a suspended fiber the desire that
 it should terminate. The intention is that the program may call \reqstop
 before destroying a \fiber instance that might not be empty, or is known not
@@ -64,8 +64,9 @@ return.
 One tactic would be to call \reqstop, then loop over \anyresume calls until
 the returned \fiber is \cpp{empty()}. However, that information is ambiguous.
 
-Suppose we have a \fiber instance \cpp{f1} representing suspended fiber F. The
-running fiber M calls \cpp{f1.request\_stop()}, then \cpp{f1.resume()}, which
+Suppose we have a \fiber instance \cpp{f1} representing suspended fiber F,
+with associated \source\xspace \cpp{ssource}. The
+running fiber M calls \cpp{ssource.request\_stop()}, then \cpp{f1.resume()}, which
 returns another \fiber instance \cpp{f2}.
 
 \cpp{f2} has various possible values.

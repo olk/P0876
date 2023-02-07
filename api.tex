@@ -61,9 +61,9 @@ thread} is the thread of which that fiber is the default fiber. An explicit
 fiber has no owning thread. Instead, when necessary, we speak of the thread on
 which a fiber was first resumed.
 
-A fiber is explicitly instantiated by passing an \emph{\entryfn} to \fiber's
-constructor. This function is not entered until the first call to one of
-the \cpp{fiber\_context::resume()} family of methods.
+A fiber is constructed by passing an \emph{\entryfn} to \factory. This
+function is not entered until the first call to one of the
+\cpp{fiber\_context::resume()} family of methods.
 
 When a fiber is first entered, a synthesized non-empty \fiber instance
 representing the newly-suspended previous fiber is passed as a parameter to
@@ -137,45 +137,6 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 \postcond
 \begin{description}
     \item[---] \cpp{empty()} returns \cpp{true}.
-    \item[---] \cpp{ssource.stop\_possible()} returns \cpp{false}.
-\end{description}
-
-\mbrhdr{template<typename F> explicit fiber\_context(F\&\& entry)}
-
-\constraints
-\begin{description}
-    \item[---] \cpp{remove\_cvref\_t<F>} is not the same type as \cpp{fiber\_context}.
-%%  \item[---] This constructor template shall not participate in overload
-%%            resolution unless \cpp{Fn}
-%%            is \emph{Lvalue-Invocable} [func.wrap.func] for the argument
-%%            type \cpp{std::fiber\_context&&} and the return type \fiber.
-\end{description}
-
-\mandates
-\begin{description}
-    \item[---] \cpp{is\_invocable\_v<decay\_t<F>, fiber\_context&&> ||}\\
-               \cpp{is\_invocable\_v<decay\_t<F>, stop\_token, fiber\_context&&>}
-\end{description}
-
-\effects
-\begin{description}
-    \item[---] Initializes \cpp{ssource}.
-    \item[---] Instantiates a \fiber representing a fiber suspended before
-              entry to \cpp{entry}.
-              \tsnote{\cpp{entry} is entered only when \anyresume is called.}
-    \item[---] The stack and any other necessary resources are created.
-\end{description}
-
-\postcond
-\begin{description}
-    \item[---] \cpp{ssource.stop\_possible()} returns \cpp{true}.
-    \item[---] \cpp{empty()} returns \cpp{false}.
-\end{description}
-
-\except
-\begin{description}
-    \item[---] Any exception resulting from failure to acquire necessary
-               system resources.
 \end{description}
 
 \mbrhdr{fiber\_context(fiber\_context\&\& other) noexcept}
@@ -204,8 +165,8 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 \end{description}
 
 \tsnote{If a \fiber instance to be destroyed is not yet empty, an application
-must call \reqstop, or otherwise convey to the suspended fiber the need to
-terminate voluntarily.}
+must call \reqstop on the \source returned by \factory, or otherwise convey to
+the suspended fiber the need to terminate voluntarily.}
 
 \mbrhdr{fiber\_context\& operator=(fiber\_context\&\& other) noexcept}
 
@@ -252,9 +213,10 @@ terminate voluntarily.}
                Let \cpp{returned} be the \fiber instance returned by \cpp{fn}.
                \tsnote{\cpp{returned} may or may not be the same as \cpp{caller}.}
                \tsnote{\cpp{returned} may be empty.}
-    \item[---] If the fiber represented by \cpp{*this} has not previously been
+    \item[---] Let \cpp{source} be the \source returned by \factory.
+               If the fiber represented by \cpp{*this} has not previously been
                entered, passes \cpp{returned} to its \entryfn: executes\\
-               \cpp{invoke(std::forward<F>(entry), get\_stop\_token(), std::move(returned))}\\
+               \cpp{invoke(std::forward<F>(entry), source.get\_token(), std::move(returned))}\\
                if that expression is well-formed, otherwise\\
                \cpp{invoke(std::forward<F>(entry), std::move(returned))}
     \item[---] Otherwise, the fiber represented by \cpp{*this} previously
@@ -311,7 +273,7 @@ fiber has terminated (returned from \entryfn).}
 
 \tsnote{\anyresume empties the instance on which it is called. In order to
 express the state change explicitly, these methods are rvalue-reference
-qualified. For this reason, no non-empty \fiber instance ever represents the
+qualified. For this reason, no \fiber instance ever represents the
 currently-running fiber.}
 
 \mbrhdr{fiber\_context resume() \&\&}
@@ -319,18 +281,6 @@ currently-running fiber.}
 \effects
 Equivalent to:\\
 \cpp{resume\_with([](fiber\_context&& caller)\{ return std::move(caller); \})}
-
-\mbrhdr{[[nodiscard]] stop\_source get\_stop\_source() noexcept}
-
-\effects Equivalent to: \cpp{return ssource;}
-
-\mbrhdr{[[nodiscard]] stop\_token get\_stop\_token() const noexcept}
-
-\effects Equivalent to: \cpp{return ssource.get\_token();}
-
-\mbrhdr{bool request\_stop() noexcept;}
-
-\effects Equivalent to: \cpp{return ssource.request\_stop()}
 
 \mbrhdr{bool can\_resume() noexcept}
 
@@ -374,6 +324,44 @@ stack operations are effectively read-only.}
 \effects
 \begin{description}
     \item[---] Exchanges the state of \cpp{*this} with \cpp{other}.
+\end{description}
+
+\mbrhdr{template <typename F>
+        std::pair<fiber\_context, stop\_source> make\_fiber\_context(F\&\& entry)}
+
+\mandates
+\begin{description}
+    \item[---] \cpp{is\_invocable\_v<decay\_t<F>, fiber\_context&&> ||}\\
+               \cpp{is\_invocable\_v<decay\_t<F>, stop\_token, fiber\_context&&>}
+\end{description}
+
+\effects
+\begin{description}
+    \item[---] Initializes shared state for a \source.
+    \item[---] Instantiates a \fiber representing a fiber suspended before
+              entry to \cpp{entry}.
+              \tsnote{\cpp{entry} is entered only when \anyresume is called.}
+    \item[---] The stack and any other necessary resources are created.
+\end{description}
+
+\returns
+\begin{description}
+    \item[---] \cpp{std::pair} whose \cpp{first} is the \fiber representing
+               the new suspended fiber, and whose \cpp{second} is a \source
+               referencing the new shared state.
+    \item[---] The returned \cpp{second.stop\_possible()}
+               returns \cpp{is\_invocable\_v<decay\_t<F>, stop\_token, fiber\_context&&>}.
+\end{description}
+
+\postcond
+\begin{description}
+    \item[---] \cpp{empty()} returns \cpp{false}.
+\end{description}
+
+\except
+\begin{description}
+    \item[---] Any exception resulting from failure to acquire necessary
+               system resources.
 \end{description}
 
 %% \rSec3[fiber-context.unwinding]{Function unwind\_fiber()}
