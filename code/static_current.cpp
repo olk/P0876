@@ -1,7 +1,7 @@
 int main(){
     int a;
     fiber_context m=fiber_context::current(); // get active fiber
-    fiber_context f{[&]{
+    fiber_context f{make_fiber_context([&]{
         a=0;
         int b=1;
         for(;;){
@@ -10,7 +10,7 @@ int main(){
             a=b;
             b=next;
         }
-    }};
+    }).first};
     for(int j=0; j<10; ++j) {
         f=f.resume(); // resume `f`
         std::cout << a << " ";

@@ -8,6 +8,9 @@ inline namespace concurrency_v2 {
 
 class fiber_context;
 
+template <typename F>
+std::pair<fiber_context, stop_source> make_fiber_context(F&& entry);
+
 } // namespace concurrency_v2
 } // namespace experimental
 } // namespace std
