@@ -1,10 +1,13 @@
 namespace std {
-namespace experimental {
 inline namespace concurrency_v2 {
 
 class fiber_context {
 public:
     fiber_context() noexcept;
+
+    template<typename F>
+    explicit fiber_context(F&& entry);
+
     ~fiber_context();
 
     fiber_context(fiber_context&& other) noexcept;
@@ -23,9 +26,5 @@ public:
     void swap(fiber_context& other) noexcept;
 };
 
-template <typename Fn>
-std::pair<fiber_context, stop_source> make_fiber_context(Fn&& f);
-
 } // namespace concurrency_v2
-} // namespace experimental
 } // namespace std

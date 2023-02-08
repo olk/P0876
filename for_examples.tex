@@ -2,10 +2,10 @@
 \abschnitt{Appendix A: support code for examples}\label{launch}\label{appendixa}
 
 Destroying a non-empty \fiber instance invokes Undefined Behaviour
-(see \nameref{termination}). To simplify code examples in
-this paper, we introduce an \cpp{autocancel} wrapper class that tracks the
-sequence of \fiber instances representing a particular fiber. When
-an \cpp{autocancel} instance is destroyed, it calls \reqstop on the
-captured \source and loops until the fiber voluntarily terminates.
+(see \nameref{termination}). To simplify code examples in this paper, we
+introduce an \cpp{autocancel} wrapper class that launches a fiber and tracks
+the sequence of \fiber instances representing that fiber. When
+an \cpp{autocancel} instance is destroyed, it sets a stop flag and loops until
+the fiber voluntarily terminates.
 
 \cppf{autocancel}

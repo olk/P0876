@@ -48,25 +48,22 @@ am suspending; please resume me later.''
 \emph{Returning} a particular \fiber means: ``Please switch to the indicated
 fiber; and by the way, I am done.''
 
-The \source returned by \factory provides a way for
-consuming code to attempt to communicate to a suspended fiber the desire that
-it should terminate. The intention is that the program may call \reqstop
-before destroying a \fiber instance that might not be empty, or is known not
-to be empty.
+Cancellation of another fiber is not explicitly supported
+by \cpp{fiber\_context}. If it is important for consuming code to communicate
+to a suspended fiber the desire that it should terminate, lambda binding may
+be used to pass some relevant object, e.g. a \cpp{stop\_token}.
 
-The interaction between \reqstop and any particular \entryfn is the
-responsibility of the program. Use of \reqstop does not terminate the
-subject fiber, or guarantee that the fiber will terminate.
-The fiber must be resumed \emph{after} the \reqstop call before it could
-observe \cpp{stop\_requested()}. Even then, the \entryfn might not immediately
-return.
+It is up to the code running on the fiber in question to observe and respond
+to any such termination request. The fiber must be resumed \emph{after} the
+request before it could possibly observe the change. Even then, the \entryfn
+might not immediately return.
 
-One tactic would be to call \reqstop, then loop over \anyresume calls until
+One tactic would be to request termination, then loop over \anyresume calls until
 the returned \fiber is \cpp{empty()}. However, that information is ambiguous.
 
 Suppose we have a \fiber instance \cpp{f1} representing suspended fiber F,
-with associated \source\xspace \cpp{ssource}. The
-running fiber M calls \cpp{ssource.request\_stop()}, then \cpp{f1.resume()}, which
+with an application-specific termination request mechanism. The running fiber
+M requests F to terminate, then calls \cpp{f1.resume()}, which in due course
 returns another \fiber instance \cpp{f2}.
 
 \cpp{f2} has various possible values.
@@ -91,8 +88,8 @@ returns another \fiber instance \cpp{f2}.
 \end{itemize}
 
 The \cpp{autocancel} class introduced in \nameref{launch} illustrates a
-possible way to use the \reqstop mechanism, subject to the limitations
-described above.
+possible cancellation implementation, subject to the limitations described
+above.
 
 %% The \emph{last} fiber on a particular thread has no non-empty \fiber to
 %% return. For this reason, returning an empty \fiber instance (\opbool
