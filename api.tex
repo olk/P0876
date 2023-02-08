@@ -288,8 +288,6 @@ must convey to the suspended fiber the need to terminate voluntarily.}
                \tsnote{\cpp{returned} may be empty.}
     \item[---] If the fiber represented by \cpp{*this} has not previously been
                entered, passes \cpp{returned} to its \entryfn: executes\\
-               \cpp{invoke(std::forward<F>(entry), source.get\_token(), std::move(returned))}\\
-               if that expression is well-formed, otherwise\\
                \cpp{invoke(std::forward<F>(entry), std::move(returned))}
     \item[---] Otherwise, the fiber represented by \cpp{*this} previously
                suspended itself by calling one of \anyresume.
