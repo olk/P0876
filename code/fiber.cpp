@@ -8,6 +8,9 @@ public:
     template<typename F>
     explicit fiber_context(F&& entry);
 
+    template<typename F>
+    explicit fiber_context(F&& entry, void* stack);
+
     ~fiber_context();
 
     fiber_context(fiber_context&& other) noexcept;

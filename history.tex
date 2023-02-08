@@ -6,6 +6,8 @@ This document supersedes P0876R11.
 \begin{itemize}
     \item Removed \getsource, \gettoken, \reqstop and
           exposition-only \cpp{ssource} members.
+    \item Added a \cpp{fiber\_context} constructor accepting a caller-provided
+          uninitialized memory area for the new fiber's function call stack.
 \end{itemize}
 
 Bundling a \cpp{stop\_source} into \fiber presented implementability concerns.

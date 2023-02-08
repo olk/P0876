@@ -160,7 +160,46 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
     \item[---] Instantiates a \fiber representing a fiber suspended before
               entry to \cpp{entry}.
               \tsnote{\cpp{entry} is entered only when \anyresume is called.}
-    \item[---] The stack and any other necessary resources are created.
+    \item[---] The new fiber's function call stack and any other necessary
+              resources are created.
+              \tsnote{The stack and all associated resources will be
+              destroyed on return from \cpp{entry}.}
+\end{description}
+
+\postcond
+\begin{description}
+    \item[---] \cpp{empty()} returns \cpp{false}.
+\end{description}
+
+\except
+\begin{description}
+    \item[---] Any exception resulting from failure to acquire necessary
+               system resources.
+\end{description}
+
+\mbrhdr{template<typename F> explicit fiber\_context(F\&\& entry, void* stack)}
+
+\mandates
+\begin{description}
+    \item[---] \cpp{is\_invocable\_v<decay\_t<F>, fiber\_context&&>}
+\end{description}
+
+\effects
+\begin{description}
+    \item[---] Instantiates a \fiber representing a fiber suspended before
+              entry to \cpp{entry}.
+              \tsnote{\cpp{entry} is entered only when \anyresume is called.}
+    \item[---] The contiguous block of uninitialized memory referenced
+              by \cpp{stack} is set up as the new fiber's function call stack.
+              \tsnote{It is the caller's responsibility to provide a block of
+              sufficient size for the most deeply nested function calls that
+              will be performed by the new fiber. It may be advantageous to
+              obtain from the operating system a memory block with a read-only
+              guard page to trap stack overflow.}
+              \tsnote{\cpp{stack} will not be implicitly freed on return
+              from \cpp{entry}.}
+              Any other necessary resources are created.
+              \tsnote{These resources will be destroyed on return from \cpp{entry}.}
 \end{description}
 
 \postcond
