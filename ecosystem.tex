@@ -48,9 +48,9 @@ in the suspended fiber.}
 Evolution of the exception mechanism itself\cite{P0709R4} may affect the
 viability of using exceptions for cancellation.
 
-That said, this paper proposes that \fiber
-adopt \cpp{std::stop\_source}, \cpp{std::stop\_token} from the
-Standard\cite{Standard}, section 33.3.
+This paper simply notes that an invoker can use lambda binding to pass (e.g.)
+a \cpp{std::stop\_token} from the Standard\cite{Standard}, section 33.3, to a
+fiber at launch time.
 
 \uabschnitt{modules and optimizations}
 

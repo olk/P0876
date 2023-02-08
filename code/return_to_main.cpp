@@ -1,8 +1,8 @@
 int main() {
-    fiber_context f{make_fiber_context([]{
+    fiber_context f{[]{
         ...
         // switch to `main()` only by returning
-    }).first};
+    }};
     f.resume(); // resume `f`
     return 0;
 }

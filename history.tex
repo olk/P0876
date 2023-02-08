@@ -4,9 +4,10 @@ This document supersedes P0876R11.
 \uabschnitt{Changes since P0876R11}
 
 \begin{itemize}
-    \item Removed \cpp{get\_stop\_source()}, \cpp{get\_stop\_token()}, \cpp{request\_stop()}
-          and exposition-only \cpp{ssource} members.
-    \item Replaced with \cpp{make\_fiber\_context()} factory function.
+    \item Removed \getsource, \gettoken, \reqstop and
+          exposition-only \cpp{ssource} members.
+    \item Added a \cpp{fiber\_context} constructor accepting a caller-provided
+          uninitialized memory area for the new fiber's function call stack.
 \end{itemize}
 
 Bundling a \cpp{stop\_source} into \fiber presented implementability concerns.
@@ -16,11 +17,10 @@ new \cpp{fiber\_context} object is synthesized on every suspension. This
 presents a problem: how does the code that suspends a fiber find its
 associated \cpp{stop\_source} shared state?
 
-This problem is addressed by removing the exposition-only \cpp{stop\_source}
-and its accessors from \cpp{fiber\_context}. The new factory function
-instantiates the \cpp{stop\_source} shared state and returns
-the \cpp{stop\_source} along with the new \cpp{fiber\_context}. Keeping track
-of the \cpp{stop\_source} is the caller's responsibility.
+A consumer wishing to pass a \cpp{std::stop\_token} to a new fiber can itself
+instantiate \cpp{std::stop\_source}, obtain from it a \cpp{stop\_token} and
+bind that \cpp{stop\_token} in a lambda passed to the \cpp{fiber\_context}
+constructor. Accordingly, the \fiber API need not explicitly support that.
 
 \uabschnitt{Changes since P0876R10}
 
