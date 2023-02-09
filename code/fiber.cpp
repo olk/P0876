@@ -8,8 +8,8 @@ public:
     template<typename F>
     explicit fiber_context(F&& entry);
 
-    template<typename F>
-    explicit fiber_context(F&& entry, void* stack);
+    template<typename F, size_t N>
+    explicit fiber_context(F&& entry, span<byte, N> stack);
 
     ~fiber_context();
 
