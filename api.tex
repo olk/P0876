@@ -177,7 +177,7 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
                system resources.
 \end{description}
 
-\mbrhdr{template<typename F> explicit fiber\_context(F\&\& entry, void* stack)}
+\mbrhdr{template<typename F, size\_t N> explicit fiber\_context(F\&\& entry, span<byte, N> stack)}
 
 \mandates
 \begin{description}
