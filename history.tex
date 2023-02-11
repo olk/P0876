@@ -1,5 +1,24 @@
 \abschnitt{Revision History}\label{history}
-This document supersedes P0876R11.
+This document supersedes P0876R12.
+
+\uabschnitt{Changes since P0876R12}
+
+\begin{itemize}
+    \item Specified that constructors \emph{decay-copy} the \entryfn.
+    \item Changed \cpp{span<byte, N>} constructor param to
+          simply \cpp{span<byte>}; also accepted deleter function, which it
+          must \emph{decay-copy}.
+    \item Specified constructor exceptions.
+    \item Specified that destroying a non-empty \cpp{fiber\_context}
+          calls \cpp{terminate()}.
+    \item Clarified that when \resumewith is called, \cpp{empty()} becomes
+          true immediately.
+    \item Introduced exposition-only \cpp{fiber\_context::state} member to
+          streamline wording.
+    \item Removed \cpp{concurrency\_v2} namespace.
+    \item Changed ``Equivalent to'' to ``As-if''.
+    \item Clarified Preconditions vs. Mandates.
+\end{itemize}
 
 \uabschnitt{Changes since P0876R11}
 

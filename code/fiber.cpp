@@ -1,5 +1,4 @@
 namespace std {
-inline namespace concurrency_v2 {
 
 class fiber_context {
 public:
@@ -8,8 +7,8 @@ public:
     template<typename F>
     explicit fiber_context(F&& entry);
 
-    template<typename F, size_t N>
-    explicit fiber_context(F&& entry, span<byte, N> stack);
+    template<typename F, typename D>
+    explicit fiber_context(F&& entry, span<byte> stack, D&& deleter);
 
     ~fiber_context();
 
@@ -27,7 +26,9 @@ public:
     explicit operator bool() const noexcept;
     bool empty() const noexcept;
     void swap(fiber_context& other) noexcept;
+
+private:
+    unspecified-type state;         // exposition only
 };
 
-} // namespace concurrency_v2
 } // namespace std

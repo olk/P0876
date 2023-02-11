@@ -89,6 +89,10 @@ instance is resumed.
 
 If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 
+\rSec3[fiber-context.currexc]{fiber\_context, uncaught\_exceptions and current\_exception}
+
+\zs{????}
+
 %% Returning a \fiber instance from the explicit fiber's \entryfn is equivalent
 %% to returning control to the implicit top-level function.
 %% Similarly,
@@ -144,26 +148,23 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 \constraints
 \begin{description}
     \item[---] \cpp{remove\_cvref\_t<F>} is not the same type as \cpp{fiber\_context}.
-%%  \item[---] This constructor template shall not participate in overload
-%%            resolution unless \cpp{Fn}
-%%            is \emph{Lvalue-Invocable} [func.wrap.func] for the argument
-%%            type \cpp{std::fiber\_context&&} and the return type \fiber.
 \end{description}
 
 \mandates
 \begin{description}
-    \item[---] \cpp{is\_invocable\_v<decay\_t<F>, fiber\_context&&>}
+    \item[---] \cpp{is\_invocable\_r\_v<fiber\_context, decay\_t<F>, fiber\_context&&>}
 \end{description}
 
 \effects
 \begin{description}
+    \item[---] Let \cpp{Entry} be saved as-if by \emph{decay-copy}\cpp{(std::forward<F>(entry))}.
     \item[---] Instantiates a \fiber representing a fiber suspended before
-              entry to \cpp{entry}.
-              \tsnote{\cpp{entry} is entered only when \anyresume is called.}
+              entry to \cpp{Entry}.
+              \tsnote{\cpp{Entry} is entered only when \anyresume is called.}
     \item[---] The new fiber's function call stack and any other necessary
               resources are created.
               \tsnote{The stack and all associated resources will be
-              destroyed on return from \cpp{entry}.}
+              destroyed on return from \cpp{Entry}.}
 \end{description}
 
 \postcond
@@ -173,33 +174,46 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 
 \except
 \begin{description}
-    \item[---] Any exception resulting from failure to acquire necessary
-               system resources.
+    \item[---] \cpp{bad\_alloc} on failure to acquire necessary system resources.
 \end{description}
 
-\mbrhdr{template<typename F, size\_t N> explicit fiber\_context(F\&\& entry, span<byte, N> stack)}
+\mbrhdr{template<typename F, typename D> explicit fiber\_context(F\&\& entry, span<byte> stack, D\&\& deleter)}
 
 \mandates
 \begin{description}
-    \item[---] \cpp{is\_invocable\_v<decay\_t<F>, fiber\_context&&>}
+    \item[---] \cpp{is\_invocable\_r\_v<fiber\_context, decay\_t<F>, fiber\_context&&>}
+    \item[---] \cpp{is\_invocable\_v<decay\_t<D>, span<byte>>}
+\end{description}
+
+\precond
+\begin{description}
+    \item[---] \cpp{stack} must have implementation-defined alignment and minimum size.
 \end{description}
 
 \effects
 \begin{description}
+    \item[---] Let \cpp{Entry} be saved as-if by \emph{decay-copy}\cpp{(std::forward<F>(entry))}.
     \item[---] Instantiates a \fiber representing a fiber suspended before
-              entry to \cpp{entry}.
-              \tsnote{\cpp{entry} is entered only when \anyresume is called.}
+              entry to \cpp{Entry}.
+              \tsnote{\cpp{Entry} is entered only when \anyresume is called.}
     \item[---] The contiguous block of uninitialized memory referenced
               by \cpp{stack} is set up as the new fiber's function call stack.
-              \tsnote{It is the caller's responsibility to provide a block of
+              \tsnote{It is the caller's responsibility to provide a span of
               sufficient size for the most deeply nested function calls that
               will be performed by the new fiber. It may be advantageous to
               obtain from the operating system a memory block with a read-only
               guard page to trap stack overflow.}
-              \tsnote{\cpp{stack} will not be implicitly freed on return
-              from \cpp{entry}.}
               Any other necessary resources are created.
-              \tsnote{These resources will be destroyed on return from \cpp{entry}.}
+              \tsnote{These resources will be destroyed on return from \cpp{Entry}.}
+    \item[---] Let \cpp{Stack} be saved as-if by \emph{decay-copy}\cpp{(stack)}.
+    \item[---] Let \cpp{Deleter} be saved as-if by \emph{decay-copy}\cpp{(std::forward<D>(deleter))}.
+\end{description}
+
+\remarks
+\begin{description}
+    \item[---] On return from \cpp{Entry}, evaluates \cpp{invoke(Deleter,
+               Stack)} on the fiber represented by the \cpp{fiber\_context}
+               returned by \cpp{Entry}.
 \end{description}
 
 \postcond
@@ -209,21 +223,24 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 
 \except
 \begin{description}
-    \item[---] Any exception resulting from failure to acquire necessary
-               system resources.
+    \item[---] \cpp{invalid\_argument} if \cpp{stack} fails to meet
+               implementation-defined alignment requirements.
+    \item[---] \cpp{length\_error} if \cpp{stack} is less than the
+               implementation-defined minimum length.
+\end{description}
+
+\remarks
+\begin{description}
+    \item[---] If the function call stack depth exceeds the size
+               of \cpp{stack}, Undefined Behaviour results. This condition
+               does \emph{not} throw a well-defined exception.
 \end{description}
 
 \mbrhdr{fiber\_context(fiber\_context\&\& other) noexcept}
 
 \effects
 \begin{description}
-    \item[---] moves underlying state from \cpp{other} to new \fiber
-\end{description}
-
-\postcond
-\begin{description}
-    \item[---] \cpp{empty()} returns the value previously returned by \cpp{other.empty()}
-    \item[---] \cpp{other.empty()} returns \cpp{true}
+    \item[---] As-if \cpp{this->state = move(other.state);}
 \end{description}
 
 \mbrhdr{\cpp{\~fiber\_context()}}
@@ -233,9 +250,14 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
     \item[---] destroys a \fiber instance.
 \end{description}
 
-\requires
+\precond
 \begin{description}
     \item[---] \cpp{empty()} returns \cpp{true}.
+\end{description}
+
+\effects
+\begin{description}
+    \item[---] If \cpp{empty()} returns \cpp{false}, evaluates \cpp{invoke(terminate)}.
 \end{description}
 
 \tsnote{If a \fiber instance to be destroyed is not yet empty, an application
@@ -243,14 +265,14 @@ must convey to the suspended fiber the need to terminate voluntarily.}
 
 \mbrhdr{fiber\_context\& operator=(fiber\_context\&\& other) noexcept}
 
-\requires
+\precond
 \begin{description}
     \item[---] \cpp{empty()} returns \cpp{true}.
 \end{description}
 
 \effects
 \begin{description}
-    \item[---] assigns the state of \cpp{other} to \cpp{*this}
+    \item[---] As-if \cpp{this->state = move(other.state);}
 \end{description}
 
 \returns
@@ -258,41 +280,41 @@ must convey to the suspended fiber the need to terminate voluntarily.}
     \item[---] \cpp{*this}
 \end{description}
 
-\postcond
-\begin{description}
-    \item[---] \cpp{empty()} returns the value previously returned by \cpp{other.empty()}
-    \item[---] \cpp{other.empty()} returns \cpp{true}
-\end{description}
-
 \mbrhdr{template<typename Fn> fiber\_context resume\_with(Fn\&\& fn) \&\&}
 
 \mandates
 \begin{description}
-    \item[---] \cpp{is\_invocable\_v<decay\_t<Fn>, fiber\_context&&>}
+    \item[---] \cpp{is\_invocable\_r\_v<fiber\_context, decay\_t<Fn>, fiber\_context&&>}
+\end{description}
+
+\precond
+\begin{description}
     \item[---] \cpp{empty()} returns \cpp{false}
     \item[---] \currthread is the same as \lastthread
 \end{description}
 
 \effects
 \begin{description}
-    \item[---] Saves the execution context of the calling fiber.
+    \item[---] Saves the execution context of the calling fiber in a manner
+               appropriate to the host ABI.
     \item[---] Suspends the calling fiber.
+    \item[---] Let \cpp{target} be the fiber represented by \cpp{state}.
+    \item[---] Resets \cpp{state} so that \cpp{empty()} returns \cpp{true}.
+    \item[---] Resumes \cpp{target}.
+    \item[---] Restores the execution context of \cpp{target}.
     \item[---] Let \cpp{caller} be a synthesized \fiber instance representing
                the suspended caller.
-    \item[---] Resumes the fiber represented by \cpp{*this}.
-    \item[---] Restores the execution context of the resumed fiber.
     \item[---] Evaluates \cpp{invoke(std::forward<Fn>(fn), std::move(caller))}
-               on the newly-resumed fiber.
+               on fiber \cpp{target}.
                Let \cpp{returned} be the \fiber instance returned by \cpp{fn}.
                \tsnote{\cpp{returned} may or may not be the same as \cpp{caller}.}
                \tsnote{\cpp{returned} may be empty.}
-    \item[---] If the fiber represented by \cpp{*this} has not previously been
+    \item[---] If \cpp{target} has not previously been
                entered, passes \cpp{returned} to its \entryfn: executes\\
-               \cpp{invoke(std::forward<F>(entry), std::move(returned))}
-    \item[---] Otherwise, the fiber represented by \cpp{*this} previously
+               \cpp{invoke(Entry, std::move(returned))}
+    \item[---] Otherwise, \cpp{target} previously
                suspended itself by calling one of \anyresume.
-               Returns \cpp{returned} from whichever of the resume functions
-               was called.
+               Returns \cpp{returned} from that resume function.
 \end{description}
 
 \remarks
@@ -349,14 +371,14 @@ currently-running fiber.}
 \mbrhdr{fiber\_context resume() \&\&}
 
 \effects
-Equivalent to:\\
+As-if:\\
 \cpp{resume\_with([](fiber\_context&& caller)\{ return std::move(caller); \})}
 
 \mbrhdr{bool can\_resume() noexcept}
 
 \returns
 \begin{description}
-    \item[---] \cpp{false} if \cpp{*this} is empty, or if \currthread is not the same
+    \item[---] \cpp{false} if \cpp{empty()} returns \cpp{true}, or if \currthread is not the same
         as \lastthread.
 \end{description}
 
@@ -368,15 +390,14 @@ by \anyresume.}
     \item[---] \canresume must not be called concurrently from multiple threads.
 \end{description}
 
-\tsnote{\canresume is not marked \cpp{const} because in at least one
-implementation, it requires an internal context switch. However, the
-stack operations are effectively read-only.}
+\EnterBlock{Editorial note} \canresume is intentionally not
+marked \cpp{const}. \ExitBlock{editorial note}
 
 \mbrhdr{bool empty() const noexcept}
 
 \returns
 \begin{description}
-    \item[---] \cpp{false} if \cpp{*this} represents a fiber of
+    \item[---] \cpp{false} if \cpp{state} represents a fiber of
                execution, \cpp{true} otherwise.
 \end{description}
 
@@ -386,14 +407,14 @@ stack operations are effectively read-only.}
 \mbrhdr{explicit operator bool() const noexcept}
 
 \begin{description}
-    \item[---] Equivalent to \cpp{(\! empty())}
+    \item[---] As-if \cpp{(\! empty())}
 \end{description}
 
 \mbrhdr{void swap(fiber\_context\& other) noexcept}
 
 \effects
 \begin{description}
-    \item[---] Exchanges the state of \cpp{*this} with \cpp{other}.
+    \item[---] As-if \cpp{swap(this->state, other.state);}
 \end{description}
 
 %% \rSec3[fiber-context.unwinding]{Function unwind\_fiber()}
