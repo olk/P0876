@@ -110,10 +110,9 @@ signature `\cpp{fiber\_context(fiber\_context&&)}`. Using \fiber as the return
 value from such a function avoids global variables.}
 
 \uabschnitt{returning synthesized \fiber instance from \cpp{resume()}}\label{fiberreturn}
-An instance of \fiber remains empty after return from \resume, \resumewith,
-\xtresume or\\
-\xtresumewith -- the synthesized fiber is returned, instead of
-implicitly updating the\\\fiber instance on which \resume was called.
+An instance of \fiber remains empty after return from \anyresume: the
+synthesized fiber is returned, instead of implicitly updating the \fiber
+instance on which \resume was called.
 
 If the \fiber object were implicitly updated, the fiber would 
 change its identity because each fiber is associated with a stack. Each stack
