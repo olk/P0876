@@ -29,7 +29,7 @@ lambda. It is as if the \cpp{m.resume()} call at line 8 directly called the seco
 lambda.
 
 The function passed to \resumewith has almost the same range of possibilities as
-any function called on the fiber represented by \cpp{f}. Its special invocation
+any function called on \thefiber{\cpp{f}}. Its special invocation
 matters when control leaves it in either of two ways:
 
 \begin{enumerate}

@@ -49,7 +49,7 @@ am suspending; please resume me later.''
 fiber; and by the way, I am done.''
 
 Cancellation of another fiber is not explicitly supported
-by \cpp{fiber\_context}. If it is important for consuming code to communicate
+by \fiber. If it is important for consuming code to communicate
 to a suspended fiber the desire that it should terminate, lambda binding may
 be used to pass some relevant object, e.g. a \cpp{stop\_token}.
 
@@ -59,7 +59,7 @@ request before it could possibly observe the change. Even then, the \entryfn
 might not immediately return.
 
 One tactic would be to request termination, then loop over \anyresume calls until
-the returned \fiber is \cpp{empty()}. However, that information is ambiguous.
+the returned \fiber is \emptyfn. However, that information is ambiguous.
 
 Suppose we have a \fiber instance \cpp{f1} representing suspended fiber F,
 with an application-specific termination request mechanism. The running fiber
@@ -93,7 +93,7 @@ above.
 
 %% The \emph{last} fiber on a particular thread has no non-empty \fiber to
 %% return. For this reason, returning an empty \fiber instance (\opbool
-%% returns \cpp{false}) terminates the calling thread. This is true whether or
+%% returns \false) terminates the calling thread. This is true whether or
 %% not the thread's default fiber (see \nameref{fiber-context.implicit}) has
 %% terminated.
 
@@ -157,7 +157,7 @@ above.
 %% As a consequence, \curex can not return a \cpp{std::exception\_ptr} pointing
 %% to a \foreignex.
 %% 
-%% In order to detect if stack unwinding is currently in progress \uncex returns \cpp{true} and\\
+%% In order to detect if stack unwinding is currently in progress \uncex returns \true and\\
 %% \uncexs counts the \foreignex.
 %% 
 %% The rationale for moving to an uncatchable exception is further explained in

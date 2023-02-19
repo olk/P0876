@@ -31,18 +31,18 @@ is transferred back to the lambda and instance \cpp{m} represents the suspended
 Function \cpp{foo()} is resumed at line 4 by executing \cpp{m.resume()} so that
 control returns at line 8 and so on ...
 
-Class \cpp{symmetric_coroutine<>::yield_type} from N3985\cite{N3985} is
+Class \cpp{symmetric\_coroutine<>::yield\_type} from N3985\cite{N3985} is
 \bfs{not} equivalent to the synthesized \fiber.
 
-\cpp{symmetric_coroutine<>::yield_type} does not represent the suspended context,
+\cpp{symmetric\_coroutine<>::yield\_type} does not represent the suspended context,
 instead it is a special representation of the same coroutine. Thus \main or
-the current thread's \entryfn can \bfs{not} be represented by \cpp{yield_type}
+the current thread's \entryfn can \bfs{not} be represented by \cpp{yield\_type}
 (see next section \nameref{representation}).
 
-Because \cpp{symmetric_coroutine<>::yield_type()} yields back to the starting
+Because \cpp{symmetric\_coroutine<>::yield\_type()} yields back to the starting
 point, i.e. invocation of\\
-\cpp{symmetric_coroutine<>::call_type::operator()()},
-both instances (\cpp{call_type} as well as \cpp{yield_type}) must be preserved.
+\cpp{symmetric\_coroutine<>::call\_type::operator()()},
+both instances (\cpp{call\_type} as well as \cpp{yield\_type}) must be preserved.
 Additionally the caller must be kept alive until the called coroutine terminates
 or UB happens at resumption.
 
@@ -84,7 +84,7 @@ internal global variables that point to \main is to explicitly return a non-empt
 \cppfl{terminating_fiber}
 
 In line 5 the fiber is started by invoking \resume on instance \cpp{f}. \main
-is suspended and an instance of type \cpp{fiber\_context} is synthesized and passed as
+is suspended and an instance of type \fiber is synthesized and passed as
 parameter \cpp{m} to the lambda at line 2. The fiber terminates by returning
 \cpp{m}. Control is transferred to \main (returning from \cpp{f.resume()} at
 line 5) while fiber \cpp{f} is destroyed.
