@@ -9,9 +9,9 @@ This document supersedes P0876R12.
           simply \cpp{span<byte>}; also accepted deleter function, which it
           must \emph{decay-copy}.
     \item Specified constructor exceptions.
-    \item Specified that destroying a non-empty \cpp{fiber\_context}
+    \item Specified that destroying a non-empty \fiber
           calls \cpp{terminate()}.
-    \item Clarified that when \resumewith is called, \cpp{empty()} becomes
+    \item Clarified that when \resumewith is called, \emptyfn becomes
           true immediately.
     \item Introduced exposition-only \cpp{fiber\_context::state} member to
           streamline wording.
@@ -25,20 +25,20 @@ This document supersedes P0876R12.
 \begin{itemize}
     \item Removed \getsource, \gettoken, \reqstop and
           exposition-only \cpp{ssource} members.
-    \item Added a \cpp{fiber\_context} constructor accepting a caller-provided
+    \item Added a \fiber constructor accepting a caller-provided
           uninitialized memory area for the new fiber's function call stack.
 \end{itemize}
 
 Bundling a \cpp{stop\_source} into \fiber presented implementability concerns.
 Although each fiber (specifically, its function call stack) is itself a
-persistent entity, the \cpp{fiber\_context} representing that fiber is not: a
-new \cpp{fiber\_context} object is synthesized on every suspension. This
+persistent entity, the \fiber representing that fiber is not: a
+new \fiber object is synthesized on every suspension. This
 presents a problem: how does the code that suspends a fiber find its
 associated \cpp{stop\_source} shared state?
 
 A consumer wishing to pass a \cpp{std::stop\_token} to a new fiber can itself
 instantiate \cpp{std::stop\_source}, obtain from it a \cpp{stop\_token} and
-bind that \cpp{stop\_token} in a lambda passed to the \cpp{fiber\_context}
+bind that \cpp{stop\_token} in a lambda passed to the \fiber
 constructor. Accordingly, the \fiber API need not explicitly support that.
 
 \uabschnitt{Changes since P0876R10}
@@ -108,7 +108,7 @@ a particular fiber earlier in the lifespan of the fiber, a struct serves.
 A more compelling reason to avoid constructing an explicit fiber with
 a \cancelfn is that no implicit fiber has any such \cancelfn\xspace -- and the
 consuming application cannot tell, a priori, whether a given \fiber instance
-represents an explicit or an implicit fiber. If \cpp{*this} represents an
+represents an explicit or an implicit fiber. If \this represents an
 implicit fiber, what should the proposed \cpp{cancel()} member function do?
 
 Passing a specific \cancelfn to \anyresumewith avoids that problem.
@@ -131,16 +131,16 @@ auditable).
 In Cologne 2019, SG1 took the position that:
 
 \begin{itemize}
-    \item The \cpp{fiber\_context} facility is not the only C++ feature that
+    \item The \fiber facility is not the only C++ feature that
           requires ``special'' unwinding (special function exit path).
     \item Such functionality should be decoupled from \fiber. It requires its
           own proposal that follows its own course through WG21 process.
     \item Depending on this (yet to be written) proposal would unduly delay
-          the \cpp{fiber\_context} facility.
-    \item For now, the \cpp{fiber\_context} facility should adopt a ``less is
+          the \fiber facility.
+    \item For now, the \fiber facility should adopt a ``less is
           more'' approach, removing promises about implicit unwinding, placing
           the burden on the consumer of the facility instead.
-    \item This leaves the way open for \cpp{fiber\_context} to integrate with
+    \item This leaves the way open for \fiber to integrate with
           a new, improved unwind facility when such becomes available.
 \end{itemize}
 
@@ -160,7 +160,7 @@ default engages the new, improved unwind facility.
     \item \cpp{std::unwind\_exception} removed.
     \item \cpp{fiber\_context::can\_resume\_from\_any\_thread()} renamed to
       \canxtresume.
-    \item \cpp{fiber\_context::valid()} renamed to \cpp{empty()} with inverted
+    \item \cpp{fiber\_context::valid()} renamed to \emptyfn with inverted
       sense.
     \item Material has been added concerning the top-level wrapper
       logic governing each fiber.

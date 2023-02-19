@@ -68,9 +68,12 @@
         stringstyle=\ttfamily\color{magenta}
 ] {code/#1.cpp}}
 
+\newcommand{\true}{\cpp{true}}
+\newcommand{\false}{\cpp{false}}
 \newcommand{\dtor}{\cpp{\~fiber\_context()}}
 \newcommand{\main}{\cpp{main()}}
-\newcommand{\fiber}{\cpp{std::fiber\_context}}
+\newcommand{\stdfiber}{std::\fiber}
+\newcommand{\fiber}{\cpp{fiber\_context}}
 \newcommand{\op}{\cpp{operator()()}}
 \newcommand{\opbool}{\cpp{operator bool()}}
 \newcommand{\resume}{\cpp{resume()}}
@@ -87,6 +90,7 @@
 \newcommand{\cancel}{\cpp{cancel()}}
 \newcommand{\xtcancel}{\cpp{cancel\_from\_any\_thread()}}
 \newcommand{\anycancel}{\cancel}
+\newcommand{\emptyfn}{\cpp{empty()}}
 %% referenced in history.tex
 \newcommand{\source}{\cpp{stop\_source}}
 \newcommand{\getsource}{\cpp{get\_stop\_source()}}
@@ -98,7 +102,10 @@
 \newcommand{\thread}{\cpp{std::thread}}
 \newcommand{\Currthread}{The calling thread\xspace}
 \newcommand{\currthread}{the calling thread\xspace}
-\newcommand{\ownthread}{the owning thread of the fiber represented by \cpp{*this}}
+\newcommand{\ownthread}{the owning thread of \thisfiber}
+\newcommand{\thisfiber}{\thefiber{\this}}
+\newcommand{\thefiber}[1]{the fiber represented by #1}
+\newcommand{\this}{\cpp{*this}}
 \newcommand{\unwindex}{\cpp{std::unwind\_exception}}
 \newcommand{\unwindfib}{\cpp{std::unwind\_fiber()}}
 \newcommand{\uwforced}{\cpp{_Unwind_ForcedUnwind()}}

@@ -9,9 +9,6 @@
 
 \rSec3[fiber-context.general]{General}
 
-The extensions proposed here support creation and activation of cooperative
-user-mode threads, here called \emph{fibers}.
-
 A fiber is a thread of execution ([intro.multithread.general]) with
 weakly parallel forward progress guarantees ([intro.progress] paragraph 11).
 
@@ -43,6 +40,10 @@ current, in a manner appropriate to the existing implementation of function call
 A \fiber instance may be \emph{empty} or \emph{non-empty}. A
 default-constructed \fiber is empty. A moved-from \fiber is empty. A \fiber
 representing a suspended fiber is non-empty.
+
+When the running fiber returns a \fiber from its \entryfn, thus resuming the
+designated fiber, the synthesized \fiber passed into the resumed fiber is
+empty.
 
 \rSec3[fiber-context.implicit]{Explicit Fiber vs. Implicit Fiber}
 
@@ -81,8 +82,7 @@ The synthesized \fiber instance received in either of those ways might
 represent either an explicit fiber or an implicit fiber.
 
 An explicit fiber terminates by returning from its \entryfn. If the \entryfn
-returns a non-empty \fiber instance, the fiber represented by that \fiber
-instance is resumed.
+returns a non-empty \fiber instance, \thefiber{that \fiber instance} is resumed.
 
 %% \rSec3[fiber-context.toplevel]{Implicit Top-Level Function}
 
@@ -96,10 +96,10 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 
 \rSec3[fiber-context.currexc]{fiber\_context, uncaught\_exceptions and current\_exception}
 
-\cpp{uncaught\_exceptions} returns the total number of uncaught exceptions on
-any fiber within the current thread.
+The function \cpp{std::uncaught\_exceptions} ([uncaught.exceptions]) returns
+the number of uncaught exceptions in the calling fiber.
 
-\cpp{current\_exception} returns the exception currently being handled on the
+\cpp{std::current\_exception} ([propagation]) returns the exception currently being handled on the
 calling fiber.
 
 %% Returning a \fiber instance from the explicit fiber's \entryfn is equivalent
@@ -132,14 +132,19 @@ calling fiber.
 %%     function above \main, the process is terminated.
 %% \end{itemize}
 
+%--------------------------------- synopsis ----------------------------------
 \rSec3[fiber-context.synopsis]{Header <fiber\_context> synopsis}
 
 \cppf{synopsis}
 
+%--------------------------------- class def ---------------------------------
 \rSec3[fiber-context.class]{Class fiber\_context}
 
 \cppf{fiber}
 
+\newcommand{\state}{\cpp{state}}
+
+%------------------------------- nullary ctor --------------------------------
 \mbrhdr{fiber\_context() noexcept}\label{constructor}
 
 \effects
@@ -149,14 +154,15 @@ calling fiber.
 
 \postcond
 \begin{description}
-    \item[---] \cpp{empty()} returns \cpp{true}.
+    \item[---] \emptyfn returns \true.
 \end{description}
 
+%---------------------------- implicit stack ctor ----------------------------
 \mbrhdr{template<typename F> explicit fiber\_context(F\&\& entry)}
 
 \constraints
 \begin{description}
-    \item[---] \cpp{remove\_cvref\_t<F>} is not the same type as \cpp{fiber\_context}.
+    \item[---] \cpp{remove\_cvref\_t<F>} is not the same type as \fiber.
 \end{description}
 
 \mandates
@@ -177,7 +183,7 @@ calling fiber.
 
 \postcond
 \begin{description}
-    \item[---] \cpp{empty()} returns \cpp{false}.
+    \item[---] \emptyfn returns \false.
 \end{description}
 
 \except
@@ -187,15 +193,7 @@ calling fiber.
     \item[---] Any exception thrown by \cpp{entry}'s copy constructor.
 \end{description}
 
-\remarks
-\begin{description}
-    \item[---] On return from \cpp{Entry}:
-        \begin{itemize}
-            \item destroys \cpp{Entry}
-            \item destroys the stack.
-        \end{itemize}
-\end{description}
-
+%---------------------------- explicit stack ctor ----------------------------
 \mbrhdr{template<typename F, typename D> explicit fiber\_context(F\&\& entry, span<byte> stack, D\&\& deleter)}
 
 \mandates
@@ -231,7 +229,7 @@ calling fiber.
 
 \postcond
 \begin{description}
-    \item[---] \cpp{empty()} returns \cpp{false}.
+    \item[---] \emptyfn returns \false.
 \end{description}
 
 \except
@@ -248,57 +246,49 @@ calling fiber.
 
 \remarks
 \begin{description}
-    \item[---] On return from \cpp{Entry}:
-        \begin{itemize}
-            \item evaluates \cpp{invoke(Deleter, Stack)} on the fiber
-                  represented by the \cpp{fiber\_context} returned by \cpp{Entry}
-            \item destroys \cpp{Entry}
-            \item destroys \cpp{Deleter}.
-        \end{itemize}
-    \item[---] If the function call stack depth exceeds the size
-               of \cpp{stack}, Undefined Behaviour results. This condition
-               does \emph{not} throw a well-defined exception.
+    \item[---] If at any time during the life of the newly created fiber the
+          function call stack depth exceeds the size of \cpp{stack}, Undefined
+          Behaviour results.
 \end{description}
 
+%--------------------------------- move ctor ---------------------------------
 \mbrhdr{fiber\_context(fiber\_context\&\& other) noexcept}
 
-\effects
 \begin{description}
-    \item[---] As-if \cpp{this->state = move(other.state);}
+    \item[---] Equivalent to \cpp{this->state = move(other.state);}
 \end{description}
 
+%----------------------------------- dtor ------------------------------------
 \mbrhdr{\cpp{\~fiber\_context()}}
 
 \effects
 \begin{description}
-    \item[---] destroys a \fiber instance.
-\end{description}
-
-\effects
-\begin{description}
-    \item[---] If \cpp{empty()} returns \cpp{false}, evaluates \cpp{invoke(terminate)}.
+    \item[---] Destroys a \fiber instance.
+    \item[---] If \emptyfn returns \false, invokes \cpp{terminate} ([except.terminate]).
 \end{description}
 
 \tsnote{If a \fiber instance to be destroyed is not yet empty, an application
 must convey to the suspended fiber the need to terminate voluntarily.}
 
+%------------------------------ move assignment ------------------------------
 \mbrhdr{fiber\_context\& operator=(fiber\_context\&\& other) noexcept}
 
 \precond
 \begin{description}
-    \item[---] \cpp{empty()} returns \cpp{true}.
+    \item[---] \emptyfn returns \true.
 \end{description}
 
 \effects
 \begin{description}
-    \item[---] As-if \cpp{this->state = move(other.state);}
+    \item[---] Equivalent to \cpp{this->state = move(other.state);}
 \end{description}
 
 \returns
 \begin{description}
-    \item[---] \cpp{*this}
+    \item[---] \this
 \end{description}
 
+%-------------------------------- resume_with --------------------------------
 \mbrhdr{template<typename Fn> fiber\_context resume\_with(Fn\&\& fn) \&\&}
 
 \mandates
@@ -308,18 +298,18 @@ must convey to the suspended fiber the need to terminate voluntarily.}
 
 \precond
 \begin{description}
-    \item[---] \cpp{empty()} returns \cpp{false}
-    \item[---] the fiber represented by \cpp{*this} has no owning thread,
-               or \currthread is the owning thread
+    \item[---] \canresume returns \true
 \end{description}
+
+\newcommand{\continuation}{\cpp{continuation}}
 
 \effects
 \begin{description}
     \item[---] Saves the execution context of the calling fiber in a manner
                appropriate to the host ABI.
     \item[---] Suspends the calling fiber.
-    \item[---] Let \cpp{target} be the fiber represented by \cpp{state}.
-    \item[---] Resets \cpp{state} so that \cpp{empty()} returns \cpp{true}.
+    \item[---] Let \cpp{target} be \thefiber{\state}.
+    \item[---] Resets \state so that \emptyfn returns \true.
     \item[---] Resumes \cpp{target}.
     \item[---] Restores the execution context of \cpp{target}.
     \item[---] Let \cpp{caller} be a synthesized \fiber instance representing
@@ -330,8 +320,20 @@ must convey to the suspended fiber the need to terminate voluntarily.}
                \tsnote{\cpp{returned} may or may not be the same as \cpp{caller}.}
                \tsnote{\cpp{returned} may be empty.}
     \item[---] If \cpp{target} has not previously been
-               entered, passes \cpp{returned} to its \entryfn: executes\\
-               \cpp{invoke(Entry, std::move(returned))}
+               entered, passes \cpp{returned} to its \entryfn. Let \continuation
+               be the result of executing
+               \cpp{invoke\_r<fiber\_context>(Entry, std::move(returned))}. On return:
+        \begin{itemize}
+            \item restores the execution context of \continuation
+            \item destroys \cpp{Entry}
+            \item if \cpp{target} has an associated \cpp{Stack} and \cpp{Deleter}:
+                \begin{itemize}
+                    \item executes \cpp{invoke(Deleter, Stack)}
+                    \item destroys \cpp{Deleter}
+                \end{itemize}
+            \item otherwise reclaims the implementation-provided stack
+            \item resumes \continuation as if by \cpp{continuation.resume()}.
+        \end{itemize}
     \item[---] Otherwise, \cpp{target} previously
                suspended itself by calling one of \anyresume.
                Returns \cpp{returned} from that resume function.
@@ -359,29 +361,34 @@ must convey to the suspended fiber the need to terminate voluntarily.}
 %             \unwindex when, while suspended, the \fiber instance representing
 %             the suspended fiber is destroyed
     \item[---] Nothing before suspending the calling fiber and
-               ensuring \cpp{empty()} returns \cpp{true}.
-    \item[---] On resuming:
+               ensuring \emptyfn returns \true.
+    \item[---] On being resumed:
     \begin{itemize}
-        \item If the previous fiber resumed this one by returning a \fiber,
-              nothing.
+        \item If the previous fiber resumed this one by returning a \fiber:
+            \begin{itemize}
+                \item Any exception thrown as a result of destroying the
+                      previous fiber's associated \cpp{Entry}.
+                \item Any exception thrown by the previous fiber's
+                      associated \cpp{Deleter}.
+                \item Any exception thrown as a result of destroying the
+                      previous fiber's associated \cpp{Deleter}.
+            \end{itemize}
         \item If the previous fiber resumed this one by calling \someresume,
               nothing.
         \item If the previous fiber resumed this one by calling \anyresumewith:
         \begin{itemize}
-            \item If the \cpp{fn} passed by the previous fiber
-                  to \anyresumewith returned \fiber, nothing.
-            \item If the \cpp{fn} passed by the previous fiber
-                  to \anyresumewith threw an exception, that exception.
+            \item Any exception thrown by the \cpp{fn} passed by the previous
+                  fiber to \anyresumewith.
         \end{itemize}
     \end{itemize}
 \end{description}
 
 \postcond
 \begin{description}
-    \item[---] \cpp{empty()} returns \cpp{true}
+    \item[---] \emptyfn returns \true
 \end{description}
 
-\tsnote{The returned \cpp{fiber\_context} indicates via \cpp{empty()} whether the previous active
+\tsnote{The returned \fiber indicates via \emptyfn whether the previous active
 fiber has terminated (returned from \entryfn).}
 
 \tsnote{\anyresume empties the instance on which it is called. In order to
@@ -389,21 +396,24 @@ express the state change explicitly, these methods are rvalue-reference
 qualified. For this reason, no \fiber instance ever represents the
 currently-running fiber.}
 
+%---------------------------------- resume -----------------------------------
 \mbrhdr{fiber\_context resume() \&\&}
 
-\effects
-As-if:\\
+Equivalent to:\\
 \cpp{resume\_with([](fiber\_context&& caller)\{ return std::move(caller); \})}
 
+%-------------------------------- can_resume ---------------------------------
 \mbrhdr{bool can\_resume() noexcept}
 
 \returns
 \begin{description}
-    \item[---] \cpp{false} if \cpp{empty()} returns \cpp{true}, or if \currthread is not
-        \ownthread.
+    \item[---] \false if \emptyfn returns \true
+    \item[---] \true if \thisfiber has no owning thread
+    \item[---] \true if \currthread is \ownthread
+    \item[---] \false otherwise.
 \end{description}
 
-\tsnote{When \canresume returns \cpp{true}, the \fiber instance may be resumed
+\tsnote{When \canresume returns \true, the \fiber instance may be resumed
 by \anyresume.}
 
 \remarks
@@ -414,28 +424,30 @@ by \anyresume.}
 \EnterBlock{Editorial note} \canresume is intentionally not
 marked \cpp{const}. \ExitBlock{editorial note}
 
+%----------------------------------- empty -----------------------------------
 \mbrhdr{bool empty() const noexcept}
 
 \returns
 \begin{description}
-    \item[---] \cpp{false} if \cpp{state} represents a fiber of
-               execution, \cpp{true} otherwise.
+    \item[---] \false if \state represents a fiber of
+               execution, \true otherwise.
 \end{description}
 
 \tsnote{Regardless of the number of \fiber declarations, exactly one
 \fiber instance represents each suspended fiber.}
 
+%------------------------------- operator bool -------------------------------
 \mbrhdr{explicit operator bool() const noexcept}
 
 \begin{description}
-    \item[---] As-if \cpp{(\! empty())}
+    \item[---] Equivalent to \cpp{(\! empty())}
 \end{description}
 
+%----------------------------------- swap ------------------------------------
 \mbrhdr{void swap(fiber\_context\& other) noexcept}
 
-\effects
 \begin{description}
-    \item[---] As-if \cpp{swap(this->state, other.state);}
+    \item[---] Equivalent to \cpp{swap(this->state, other.state);}
 \end{description}
 
 %% \rSec3[fiber-context.unwinding]{Function unwind\_fiber()}
