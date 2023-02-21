@@ -105,3 +105,20 @@ passed (or returned) into the resumed fiber (see \nameref{synthesizing}).
 
 \zs{Using the active fiber's stack as storage for the CPU state is efficient because no
 additional allocations or deallocations are required.}
+
+\uabschnitt{\exfns}
+
+Both \exfns must report exceptions solely on the current thread of execution.
+Reporting exceptions on any other thread of execution would make them
+unreliable in practice.
+
+A straightforward implementation could make \allresume save and restore the
+data underlying \exfns as part of saving and restoring the rest of the fiber
+state. Since \exfns data is necessarily thread-local, the likely cost would be
+a TLS access on every \anyresume call.
+
+Alternatively, \fiber's constructor could update an internal associative
+container whose key is the high end of the new fiber stack. \exfns could
+call \cpp{upper\_bound()}, passing the current stack pointer, to discover
+which stack is current. This would shift the cost from every context switch
+to \exfns calls.

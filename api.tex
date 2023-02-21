@@ -1,16 +1,30 @@
 \newpage
+\abschnitt{API}\label{api}
+
+This wording is relative to N4928.\cite{Standard}
+
+\bfs{Modify} 14.4.8 \stdclause{except.handle} as indicated:
+
+The exception with the most recently activated handler \add{in the current
+thread of execution }that is still active is called the \emph{currently handled exception.}
+
+\bfs{Modify} 14.6.3.1 \stdclause{except.uncaught} as indicated:
+
+The function \cpp{std::uncaught\_exceptions}
+(\stdclause{uncaught.exceptions}) returns the number of uncaught exceptions
+in the current thread\add{ of execution}.
+
+\bfs{Insert} new final subclause in clause 33 \stdclause{thread} as indicated:
 
 \setcounter{section}{33}
 \setcounter{subsection}{10}
-
-\abschnitt{API}\label{api}
 
 \rSec2[fiber-context]{Cooperative User-Mode Threads}
 
 \rSec3[fiber-context.general]{General}
 
-A fiber is a thread of execution ([intro.multithread.general]) with
-weakly parallel forward progress guarantees ([intro.progress] paragraph 11).
+A fiber is a thread of execution (\stdclause{intro.multithread.general}) with
+weakly parallel forward progress guarantees (\stdclause{intro.progress} paragraph 11).
 
 The term ``user-mode'' means that control can be passed from one fiber to
 another without entering the operating-system kernel.
@@ -25,7 +39,7 @@ fiber.
 
 Suspending the running fiber in order to resume (or launch) another is
 called \emph{context switching}. This is an explicit variant of blocking with
-forward progress guarantee delegation ([intro.progress] paragraph 14).
+forward progress guarantee delegation (\stdclause{intro.progress} paragraph 14).
 
 Launching a fiber logically creates a new function call stack, which remains
 associated with that fiber throughout its lifetime. Calling functions on a
@@ -93,14 +107,6 @@ returns a non-empty \fiber instance, \thefiber{that \fiber instance} is resumed.
 %% is where unwinding stops.
 
 If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
-
-\rSec3[fiber-context.currexc]{fiber\_context, uncaught\_exceptions and current\_exception}
-
-The function \cpp{std::uncaught\_exceptions} ([uncaught.exceptions]) returns
-the number of uncaught exceptions in the calling fiber.
-
-\cpp{std::current\_exception} ([propagation]) returns the exception currently being handled on the
-calling fiber.
 
 %% Returning a \fiber instance from the explicit fiber's \entryfn is equivalent
 %% to returning control to the implicit top-level function.
@@ -173,10 +179,10 @@ calling fiber.
 
 \effects
 \begin{description}
-    \item[---] Let \cpp{Entry} be saved as-if by \emph{decay-copy}\cpp{(std::forward<F>(entry))}.
+    \item[---] Let \cpp{entry\_copy} be saved as-if by \emph{decay-copy}\cpp{(std::forward<F>(entry))}.
     \item[---] Instantiates a \fiber representing a fiber suspended before
-              entry to \cpp{Entry}.
-              \tsnote{\cpp{Entry} is entered only when \anyresume is called.}
+              entry to \cpp{entry\_copy}.
+              \tsnote{\cpp{entry\_copy} is entered only when \anyresume is called.}
     \item[---] The new fiber's function call stack and any other necessary
               resources are created.
 \end{description}
@@ -211,12 +217,12 @@ calling fiber.
 
 \effects
 \begin{description}
-    \item[---] Let \cpp{Entry} be saved as-if by \emph{decay-copy}\cpp{(std::forward<F>(entry))}.
-    \item[---] Let \cpp{Stack} be saved as-if by \emph{decay-copy}\cpp{(stack)}.
-    \item[---] Let \cpp{Deleter} be saved as-if by \emph{decay-copy}\cpp{(std::forward<D>(deleter))}.
+    \item[---] Let \cpp{entry\_copy} be saved as-if by \emph{decay-copy}\cpp{(std::forward<F>(entry))}.
+    \item[---] Let \cpp{stack\_copy} be saved as-if by \emph{decay-copy}\cpp{(stack)}.
+    \item[---] Let \cpp{deleter\_copy} be saved as-if by \emph{decay-copy}\cpp{(std::forward<D>(deleter))}.
     \item[---] Instantiates a \fiber representing a fiber suspended before
-              entry to \cpp{Entry}.
-              \tsnote{\cpp{Entry} is entered only when \anyresume is called.}
+              entry to \cpp{entry\_copy}.
+              \tsnote{\cpp{entry\_copy} is entered only when \anyresume is called.}
     \item[---] The contiguous block of uninitialized memory referenced
               by \cpp{stack} is set up as the new fiber's function call stack.
               \tsnote{It is the caller's responsibility to provide a span of
@@ -264,7 +270,7 @@ calling fiber.
 \effects
 \begin{description}
     \item[---] Destroys a \fiber instance.
-    \item[---] If \emptyfn returns \false, invokes \cpp{terminate} ([except.terminate]).
+    \item[---] If \emptyfn returns \false, invokes \cpp{terminate} (\stdclause{except.terminate}).
 \end{description}
 
 \tsnote{If a \fiber instance to be destroyed is not yet empty, an application
@@ -322,14 +328,14 @@ must convey to the suspended fiber the need to terminate voluntarily.}
     \item[---] If \cpp{target} has not previously been
                entered, passes \cpp{returned} to its \entryfn. Let \continuation
                be the result of executing
-               \cpp{invoke\_r<fiber\_context>(Entry, std::move(returned))}. On return:
+               \cpp{invoke\_r<fiber\_context>(entry\_copy, std::move(returned))}. On return:
         \begin{itemize}
             \item restores the execution context of \continuation
-            \item destroys \cpp{Entry}
-            \item if \cpp{target} has an associated \cpp{Stack} and \cpp{Deleter}:
+            \item destroys \cpp{entry\_copy}
+            \item if \cpp{target} has an associated \cpp{stack\_copy} and \cpp{deleter\_copy}:
                 \begin{itemize}
-                    \item executes \cpp{invoke(Deleter, Stack)}
-                    \item destroys \cpp{Deleter}
+                    \item executes \cpp{invoke(deleter\_copy, stack\_copy)}
+                    \item destroys \cpp{deleter\_copy}
                 \end{itemize}
             \item otherwise reclaims the implementation-provided stack
             \item resumes \continuation as if by \cpp{continuation.resume()}.
@@ -367,11 +373,11 @@ must convey to the suspended fiber the need to terminate voluntarily.}
         \item If the previous fiber resumed this one by returning a \fiber:
             \begin{itemize}
                 \item Any exception thrown as a result of destroying the
-                      previous fiber's associated \cpp{Entry}.
+                      previous fiber's associated \cpp{entry\_copy}.
                 \item Any exception thrown by the previous fiber's
-                      associated \cpp{Deleter}.
+                      associated \cpp{deleter\_copy}.
                 \item Any exception thrown as a result of destroying the
-                      previous fiber's associated \cpp{Deleter}.
+                      previous fiber's associated \cpp{deleter\_copy}.
             \end{itemize}
         \item If the previous fiber resumed this one by calling \someresume,
               nothing.
