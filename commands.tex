@@ -68,6 +68,13 @@
         stringstyle=\ttfamily\color{magenta}
 ] {code/#1.cpp}}
 
+\newcommand{\red}[1]{\colorbox{red}{#1}}
+\newcommand{\green}[1]{\colorbox{green}{#1}}
+\newcommand{\delete}[1]{\red{#1}}
+%% \insert is already defined, with a different meaning
+\newcommand{\add}[1]{\green{#1}}
+\newcommand{\replace}[2]{\delete{#1}\add{#2}}
+\newcommand{\stdclause}[1]{\href{https://eel.is/c++draft/#1}{[#1]}}
 \newcommand{\true}{\cpp{true}}
 \newcommand{\false}{\cpp{false}}
 \newcommand{\dtor}{\cpp{\~fiber\_context()}}
@@ -108,10 +115,10 @@
 \newcommand{\this}{\cpp{*this}}
 \newcommand{\unwindex}{\cpp{std::unwind\_exception}}
 \newcommand{\unwindfib}{\cpp{std::unwind\_fiber()}}
-\newcommand{\uwforced}{\cpp{_Unwind_ForcedUnwind()}}
-\newcommand{\curex}{\cpp{std::current_exception()}}
-\newcommand{\uncex}{\cpp{std::uncaught_exception()}}
-\newcommand{\uncexs}{\cpp{std::uncaught_exceptions()}}
+\newcommand{\uwforced}{\cpp{\_Unwind\_ForcedUnwind()}}
+\newcommand{\curex}{\cpp{std::current\_exception()}}
+\newcommand{\uncexs}{\cpp{std::uncaught\_exceptions()}}
+\newcommand{\exfns}{\uncexs and \curex}
 \newcommand{\catchall}{\cpp{catch (...)}}
 \newcommand{\swapcontext}{\cpp{swapcontext()}}
 \newcommand{\seeappalaunch}{(See \nameref{appendixa} for the definition of \cpp{autocancel}.)}
