@@ -179,7 +179,7 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 
 \effects
 \begin{description}
-    \item[---] Let \cpp{entry\_copy} be saved as-if by \emph{decay-copy}\cpp{(std::forward<F>(entry))}.
+    \item[---] Performs \emph{decay-copy}\cpp{(std::forward<F>(entry))}, and let the variable initialized as if thereby be referred to as \cpp{entry\_copy} throughout this clause.
     \item[---] Instantiates a \fiber representing a fiber suspended before
               entry to \cpp{entry\_copy}.
               \tsnote{\cpp{entry\_copy} is entered only when \anyresume is called.}
@@ -217,9 +217,9 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 
 \effects
 \begin{description}
-    \item[---] Let \cpp{entry\_copy} be saved as-if by \emph{decay-copy}\cpp{(std::forward<F>(entry))}.
-    \item[---] Let \cpp{stack\_copy} be saved as-if by \emph{decay-copy}\cpp{(stack)}.
-    \item[---] Let \cpp{deleter\_copy} be saved as-if by \emph{decay-copy}\cpp{(std::forward<D>(deleter))}.
+    \item[---] Performs \emph{decay-copy}\cpp{(std::forward<F>(entry))}, and let the variable initialized as if thereby be referred to as \cpp{entry\_copy} throughout this clause.
+    \item[---] Performs \emph{decay-copy}\cpp{(stack)}, and let the variable initialized as if thereby be referred to as \cpp{stack\_copy} throughout this clause.
+    \item[---] Performs \emph{decay-copy}\cpp{(std::forward<D>(deleter))}, and let the variable initialized as if thereby be referred to as \cpp{deleter\_copy} throughout this clause.
     \item[---] Instantiates a \fiber representing a fiber suspended before
               entry to \cpp{entry\_copy}.
               \tsnote{\cpp{entry\_copy} is entered only when \anyresume is called.}
