@@ -1,5 +1,5 @@
 \newpage
-\abschnitt{API}\label{api}
+\abschnitt{Wording}\label{api}
 
 This wording is relative to N4950.\cite{Standard}
 
@@ -7,7 +7,7 @@ This wording is relative to N4950.\cite{Standard}
 
 \add{\enternoten{5} The returned \cpp{exception\_ptr} may indicate an exception
 object thrown on some other fiber}\\
-\add{([fiber-context.general]) within the current thread. \exitnote}
+\add{([fibercontext.general]) within the current thread. \exitnote}
 
 \bfs{Modify} 14.4.8 \stdclause{except.handle} as indicated:
 
@@ -21,65 +21,67 @@ other thread.)
 
 \add{\enternoten{2}The return value is the aggregate number of uncaught
 exceptions in the thread rather than in the current fiber}\\
-\add{([fiber-context.general]). \exitnote}
+\add{([fibercontext.general]). \exitnote}
 
 \bfs{Insert} new final subclause in clause 33 \stdclause{thread} as indicated:
 
 \setcounter{section}{33}
 \setcounter{subsection}{10}
+\setcounter{secnumdepth}{5}
 
-\rSec2[fiber-context]{Cooperative Threads}
+\rSec2[fibercontext]{Cooperative Threads}
 
-\rSec3[fiber-context.general]{General}
+\rSec3[fibercontext.general]{General}
 
-A fiber is a thread of execution (\stdclause{intro.multithread.general}) with
+\para A fiber is a thread of execution (\stdclause{intro.multithread.general}) with
 weakly parallel forward progress guarantees (\stdclause{intro.progress} paragraph 11).
 
-The term \emph{cooperative} means that typically multiple fibers share an
-underlying execution agent, for example a \cpp{std::thread}. On the
-underlying execution agent, only one fiber is running at any given time. Sharing
-that agent is explicit rather than pre-emptive. The running
-fiber \emph{suspends} (or \emph{yields}) to another fiber. This
-action \emph{launches} a new fiber, or \emph{resumes} a previously-suspended
-fiber.
+\para The term \emph{cooperative} means that typically multiple fibers share
+an underlying execution agent, for example a \cpp{std::thread}
+(\stdclause{thread.thread.class}). On the underlying execution agent, only one
+fiber is running at any given time. Sharing that agent is explicit rather than
+pre-emptive. The running fiber \emph{suspends} (or \emph{yields}) to another
+fiber. This action \emph{launches} a new fiber, or \emph{resumes} a
+previously-suspended fiber.
 
-Suspending the running fiber in order to resume (or launch) another is
+\para Suspending the running fiber in order to resume (or launch) another is
 called \emph{context switching}. This is an explicit variant of blocking with
 forward progress guarantee delegation (\stdclause{intro.progress} paragraph 14).
 
-Launching a fiber logically creates a new function call stack, which remains
+\para Launching a fiber logically creates a new function call stack, which remains
 associated with that fiber throughout its lifetime. Calling functions on a
 particular fiber, and returning from them, is independent of function calls
 and returns on any other fiber.
 
-Context switching can be effected by designating some other fiber's stack as
+\para Context switching can be effected by designating some other fiber's stack as
 current, in a manner appropriate to the existing implementation of function call stacks.
 
-\rSec3[fiber-context.empty]{Empty vs. Non-Empty}
+\rSec3[fibercontext.empty]{Empty vs. Non-Empty}
 
-A \fiber instance may be \emph{empty} or \emph{non-empty}. A
+\para A \fiber instance may be \emph{empty} or \emph{non-empty}. A
 default-constructed \fiber is empty. A moved-from \fiber is empty. A \fiber
 representing a suspended fiber is non-empty.
 
-When the running fiber returns a \fiber from its \entryfn, thus resuming the
+\para When the running fiber returns a \fiber from its \entryfn, thus resuming the
 designated fiber, the synthesized \fiber passed into the resumed fiber is
 empty.
 
-\rSec3[fiber-context.implicit]{Explicit Fiber vs. Implicit Fiber}
+\rSec3[fibercontext.implicit]{Explicit Fiber vs. Implicit Fiber}
 
-The default thread on which the program runs \main has an
+\para The default thread on which the program runs \main has an
 initial \emph{default fiber} whose stack is the stack on which \main is
 entered. \tsnote{Thus, when \main instantiates a new \fiber, it becomes the
-second fiber in the program.} Similarly, every explicitly-launched
-\cpp{std::thread} or \cpp{std::jthread} has an initial default fiber whose
-stack is the stack on which the function passed to \cpp{std::thread} or
-\cpp{std::jthread}'s constructor is entered.
+second fiber in the program.} Similarly, every
+explicitly-launched \cpp{std::thread} (\stdclause{thread.thread.class})
+or \cpp{std::jthread} (\stdclause{thread.jthread.class}) has an initial
+default fiber whose stack is the stack on which the function passed
+to \cpp{std::thread} or \cpp{std::jthread}'s constructor is entered.
 
-\emph{explicit fiber} or \emph{explicitly-launched fiber}
+\para \emph{explicit fiber} or \emph{explicitly-launched fiber}
 designates a fiber instantiated by user code; conversely, \emph{implicit fiber}
 designates the default fiber on any thread.
 
-An explicit fiber is instantiated by passing an \emph{\entryfn} to \fiber's
+\para An explicit fiber is instantiated by passing an \emph{\entryfn} to \fiber's
 constructor. This function is not entered until the first call to one of
 the \cpp{fiber\_context::resume()} family of methods.
 
@@ -91,20 +93,20 @@ the \cpp{fiber\_context::resume()} family of methods.
           thread becomes the fiber's owning thread.
 \end{itemize}
 
-When a fiber is first entered, a synthesized non-empty \fiber instance
+\para When a fiber is first entered, a synthesized non-empty \fiber instance
 representing the newly-suspended previous fiber is passed as a parameter to
 its \entryfn. Once entered, a fiber may suspend by calling one of the \resume
 family of methods on any available non-empty \fiber instance. When the
 suspended fiber is resumed, that method returns a synthesized \fiber instance
 representing the newly-suspended previous fiber.
 
-The synthesized \fiber instance received in either of those ways might
+\para The synthesized \fiber instance received in either of those ways might
 represent either an explicit fiber or an implicit fiber.
 
-An explicit fiber terminates by returning from its \entryfn. If the \entryfn
+\para An explicit fiber terminates by returning from its \entryfn. If the \entryfn
 returns a non-empty \fiber instance, \thefiber{that \fiber instance} is resumed.
 
-%% \rSec3[fiber-context.toplevel]{Implicit Top-Level Function}
+%% \rSec3[fibercontext.toplevel]{Implicit Top-Level Function}
 
 %% On every explicit fiber, the behaviour is equivalent to calling the \entryfn
 %% passed to \fiber's constructor from an implicit top-level function.
@@ -112,7 +114,7 @@ returns a non-empty \fiber instance, \thefiber{that \fiber instance} is resumed.
 %% unwound, this conceptual top-level stack frame serves as delimiter: this point
 %% is where unwinding stops.
 
-If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
+\para If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 
 %% Returning a \fiber instance from the explicit fiber's \entryfn is equivalent
 %% to returning control to the implicit top-level function.
@@ -145,37 +147,32 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 %% \end{itemize}
 
 %--------------------------------- synopsis ----------------------------------
-\rSec3[fiber-context.synopsis]{Header <fiber\_context> synopsis}
+\rSec3[fibercontext.syn]{Header <fiber\_context> synopsis}
 
 \cppf{synopsis}
 
 %--------------------------------- class def ---------------------------------
-\rSec3[fiber-context.class]{Class fiber\_context}
+\rSec3[fibercontext.class]{Class fiber\_context}
 
 \cppf{fiber}
 
 \newcommand{\state}{\cpp{state}}
 
+\rSec4[fibercontext.cons]{Constructors, move and assignment}
 %------------------------------- nullary ctor --------------------------------
 \mbrhdr{fiber\_context() noexcept}\label{constructor}
 
 \effects
-\begin{description}
-    \item[---] instantiates an empty \fiber.
-\end{description}
+instantiates an empty \fiber.
 
 \postcond
-\begin{description}
-    \item[---] \emptyfn returns \true.
-\end{description}
+\emptyfn returns \true.
 
 %---------------------------- implicit stack ctor ----------------------------
 \mbrhdr{template<typename F> explicit fiber\_context(F\&\& entry)}
 
 \constraints
-\begin{description}
-    \item[---] \cpp{remove\_cvref\_t<F>} is not the same type as \fiber.
-\end{description}
+\cpp{remove\_cvref\_t<F>} is not the same type as \fiber.
 
 \mandates
 \begin{description}
@@ -194,9 +191,7 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 \end{description}
 
 \postcond
-\begin{description}
-    \item[---] \emptyfn returns \false.
-\end{description}
+\emptyfn returns \false.
 
 \except
 \begin{description}
@@ -206,9 +201,7 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 \end{description}
 
 \errors
-\begin{description}
-    \item[---] \cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary resources to create another fiber.
-\end{description}
+\cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary resources to create another fiber.
 
 %---------------------------- explicit stack ctor ----------------------------
 \mbrhdr{template<typename F, typename D> fiber\_context(F\&\& entry, span<byte> stack, D\&\& deleter)}
@@ -222,9 +215,7 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 \end{description}
 
 \precond
-\begin{description}
-    \item[---] \cpp{stack} must have implementation-defined alignment and minimum size.
-\end{description}
+\cpp{stack} must have implementation-defined alignment and minimum size.
 
 \effects
 \begin{description}
@@ -245,9 +236,7 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 \end{description}
 
 \postcond
-\begin{description}
-    \item[---] \emptyfn returns \false.
-\end{description}
+\emptyfn returns \false.
 
 \except
 \begin{description}
@@ -261,28 +250,21 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 \end{description}
 
 \errors
-\begin{description}
-    \item[---] \cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary resources to create another fiber.
-\end{description}
+\cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary resources to create another fiber.
 
 \remarks
-\begin{description}
-    \item[---] If at any time during the life of the newly created fiber the
-          function call stack depth exceeds the size of \cpp{stack}, Undefined
-          Behaviour results.
-\end{description}
+If at any time during the life of the newly created fiber the
+function call stack depth exceeds the size of \cpp{stack}, Undefined
+Behaviour results.
 
 %--------------------------------- move ctor ---------------------------------
 \mbrhdr{fiber\_context(fiber\_context\&\& other) noexcept}
 
-\begin{description}
-    \item[---] Equivalent to \cpp{this->state = move(other.state);}
-\end{description}
+\effects
+Equivalent to: \cpp{this->state = move(other.state)}.
 
 \postcond
-\begin{description}
-    \item[---] \cpp{other.}\emptyfn returns \true
-\end{description}
+\cpp{other.}\emptyfn returns \true.
 
 %----------------------------------- dtor ------------------------------------
 \mbrhdr{\cpp{\~fiber\_context()}}
@@ -302,31 +284,24 @@ must convey to the suspended fiber the need to terminate voluntarily.}
 \effects
 \begin{description}
     \item[---] If \emptyfn returns \false, invokes \cpp{terminate} (\stdclause{except.terminate}).
-    \item[---] Equivalent to \cpp{this->state = move(other.state);}
+    \item[---] Equivalent to: \cpp{this->state = move(other.state)}.
 \end{description}
 
 \returns
-\begin{description}
-    \item[---] \this
-\end{description}
+\this
 
 \postcond
-\begin{description}
-    \item[---] \cpp{other.}\emptyfn returns \true
-\end{description}
+\cpp{other.}\emptyfn returns \true
 
+\rSec4[fibercontext.mem]{Members}
 %-------------------------------- resume_with --------------------------------
 \mbrhdr{template<typename Fn> fiber\_context resume\_with(Fn\&\& fn) \&\&}
 
 \mandates
-\begin{description}
-    \item[---] \cpp{is\_invocable\_r\_v<fiber\_context, decay\_t<Fn>, fiber\_context&&>}
-\end{description}
+\cpp{is\_invocable\_r\_v<fiber\_context, decay\_t<Fn>, fiber\_context&&>}
 
 \precond
-\begin{description}
-    \item[---] \canresume returns \true
-\end{description}
+\canresume returns \true
 
 \newcommand{\continuation}{\cpp{continuation}}
 
@@ -364,10 +339,8 @@ must convey to the suspended fiber the need to terminate voluntarily.}
 \end{description}
 
 \remarks
-\begin{description}
-    \item[---] A newly constructed but not yet resumed fiber may be resumed by
-              any thread.
-\end{description}
+A newly constructed but not yet resumed fiber may be resumed by
+any thread.
 
 \returns
 \begin{description}
@@ -404,9 +377,7 @@ must convey to the suspended fiber the need to terminate voluntarily.}
 \end{description}
 
 \postcond
-\begin{description}
-    \item[---] \emptyfn returns \true
-\end{description}
+\emptyfn returns \true.
 
 \tsnote{The returned \fiber indicates via \emptyfn whether the previous active
 fiber has terminated (returned from \entryfn).}
@@ -419,8 +390,9 @@ currently-running fiber.}
 %---------------------------------- resume -----------------------------------
 \mbrhdr{fiber\_context resume() \&\&}
 
+\effects
 Equivalent to:\\
-\cpp{resume\_with([](fiber\_context&& caller)\{ return std::move(caller); \})}
+\cpp{resume\_with([](fiber\_context&& caller)\{ return std::move(caller); \})}.
 
 %-------------------------------- can_resume ---------------------------------
 \mbrhdr{bool can\_resume() noexcept}
@@ -443,10 +415,8 @@ marked \cpp{const}. \ExitBlock{editorial note}
 \mbrhdr{bool empty() const noexcept}
 
 \returns
-\begin{description}
-    \item[---] \false if \state represents a fiber of
-               execution, \true otherwise.
-\end{description}
+\false if \state represents a fiber of
+execution, \true otherwise.
 
 \tsnote{Regardless of the number of \fiber declarations, exactly one
 \fiber instance represents each suspended fiber.}
@@ -454,18 +424,23 @@ marked \cpp{const}. \ExitBlock{editorial note}
 %------------------------------- operator bool -------------------------------
 \mbrhdr{explicit operator bool() const noexcept}
 
-\begin{description}
-    \item[---] Equivalent to \cpp{(\! empty())}
-\end{description}
+\effects
+Equivalent to: \cpp{(\! empty())}.
 
 %----------------------------------- swap ------------------------------------
 \mbrhdr{void swap(fiber\_context\& other) noexcept}
 
-\begin{description}
-    \item[---] Equivalent to \cpp{swap(this->state, other.state);}
-\end{description}
+\effects
+Equivalent to: \cpp{swap(this->state, other.state)}.
 
-%% \rSec3[fiber-context.unwinding]{Function unwind\_fiber()}
+\rSec4[fibercontext.special]{Specialized algorithms}
+\mbrhdr{friend void swap(fiber\_context\& lhs, fiber\_context\& rhs) noexcept}
+
+\effects
+Equivalent to: \cpp{lhs.swap(rhs)}.
+
+
+%% \rSec3[fibercontext.unwinding]{Function unwind\_fiber()}
 %% 
 %% \mbrhdr{[[ noreturn ]] void unwind\_fiber(fiber\_context\&\& other)}
 %% 
@@ -505,3 +480,8 @@ marked \cpp{const}. \ExitBlock{editorial note}
 %% \begin{description}
 %%     \item[---] None catchable by C++
 %% \end{description}
+
+\abschnitt{Feature-test Macro}
+\bfs{Add} a new feature-test macro to 17.3.2 \stdclause{version.syn}:
+
+\cpp{#define \__cpp\_lib\_fiber\_context 2023XXL // also in <fiber\_context>}

@@ -27,8 +27,17 @@ This document supersedes P0876R13.
           regarding \resume, since they can be inferred from \resumewith and
           the trivial-lambda equivalence described for \resume.
     \item Removed the \remarks about concurrent calls from multiple threads
-          from \canresume, leaving the editorial note about the intentional
-          absence of \cpp{const} in place.
+          from \canresume, leaving in place the editorial note about the
+          intentional absence of \cpp{const}.
+    \item Changed exposition-only \cpp{state} member from unspecified-type
+          to \cpp{void*}.
+    \item Sanitized stable names.
+    \item Moved feature-test macro to appropriate section.
+    \item Cleaned up the header-file synopsis.
+    \item Grouped class members with forward references.
+    \item Added \cpp{std::swap()} specialization.
+    \item Added obtrusive paragraph numbers.
+    \item Streamlined single-item dash lists.
 \end{itemize}
 
 \uabschnitt{Changes since P0876R12}

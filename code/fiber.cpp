@@ -2,6 +2,7 @@ namespace std {
 
 class fiber_context {
 public:
+    // [fibercontext.cons], constructors, move and assignment
     fiber_context() noexcept;
 
     template<typename F>
@@ -17,6 +18,7 @@ public:
     fiber_context(const fiber_context& other) noexcept = delete;
     fiber_context& operator=(const fiber_context& other) noexcept = delete;
 
+    // [fibercontext.mem], members
     fiber_context resume() &&;
     template<typename Fn>
     fiber_context resume_with(Fn&& fn) &&;
@@ -25,10 +27,14 @@ public:
 
     explicit operator bool() const noexcept;
     bool empty() const noexcept;
+
     void swap(fiber_context& other) noexcept;
 
+    // [fibercontext.special], specialized algorithms
+    friend void swap(fiber_context& lhs, fiber_context& rhs) noexcept;
+
 private:
-    unspecified-type state;         // exposition only
+    void* state;         // exposition only
 };
 
 } // namespace std
