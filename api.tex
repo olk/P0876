@@ -1,35 +1,41 @@
 \newpage
 \abschnitt{API}\label{api}
 
-This wording is relative to N4928.\cite{Standard}
+This wording is relative to N4950.\cite{Standard}
+
+\bfs{Append} to 17.9.7.8 \stdclause{propagation} as indicated:
+
+\add{\enternoten{5} The returned \cpp{exception\_ptr} may indicate an exception
+object thrown on some other fiber}\\
+\add{([fiber-context.general]) within the current thread. \exitnote}
 
 \bfs{Modify} 14.4.8 \stdclause{except.handle} as indicated:
 
 The exception with the most recently activated handler \add{in the current
-thread of execution }that is still active is called the \emph{currently handled exception.}
+thread }that is still active is called the \emph{currently handled exception.}
 
-\bfs{Modify} 14.6.3.1 \stdclause{except.uncaught} as indicated:
+(``Most recently activated'' could conceivably mean a handler activated in some
+other thread.)
 
-The function \cpp{std::uncaught\_exceptions}
-(\stdclause{uncaught.exceptions}) returns the number of uncaught exceptions
-in the current thread\add{ of execution}.
+\bfs{Append} to 14.6.3.1 \stdclause{except.uncaught} as indicated:
+
+\add{\enternoten{2}The return value is the aggregate number of uncaught
+exceptions in the thread rather than in the current fiber}\\
+\add{([fiber-context.general]). \exitnote}
 
 \bfs{Insert} new final subclause in clause 33 \stdclause{thread} as indicated:
 
 \setcounter{section}{33}
 \setcounter{subsection}{10}
 
-\rSec2[fiber-context]{Cooperative User-Mode Threads}
+\rSec2[fiber-context]{Cooperative Threads}
 
 \rSec3[fiber-context.general]{General}
 
 A fiber is a thread of execution (\stdclause{intro.multithread.general}) with
 weakly parallel forward progress guarantees (\stdclause{intro.progress} paragraph 11).
 
-The term ``user-mode'' means that control can be passed from one fiber to
-another without entering the operating-system kernel.
-
-The term ``cooperative'' means that typically multiple fibers share an
+The term \emph{cooperative} means that typically multiple fibers share an
 underlying execution agent, for example a \cpp{std::thread}. On the
 underlying execution agent, only one fiber is running at any given time. Sharing
 that agent is explicit rather than pre-emptive. The running
@@ -69,8 +75,8 @@ second fiber in the program.} Similarly, every explicitly-launched
 stack is the stack on which the function passed to \cpp{std::thread} or
 \cpp{std::jthread}'s constructor is entered.
 
-We use the phrase \emph{explicit fiber} or \emph{explicitly-launched fiber} to
-designate a fiber instantiated by user code; conversely, \emph{implicit fiber}
+\emph{explicit fiber} or \emph{explicitly-launched fiber}
+designates a fiber instantiated by user code; conversely, \emph{implicit fiber}
 designates the default fiber on any thread.
 
 An explicit fiber is instantiated by passing an \emph{\entryfn} to \fiber's
@@ -194,13 +200,18 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 
 \except
 \begin{description}
-    \item[---] \cpp{bad\_alloc} on failure to acquire necessary system
-               resources.
+    \item[---] \cpp{bad\_alloc} if unable to acquire a new function call stack.
+    \item[---] \cpp{system\_error} if unable to start the new fiber.
     \item[---] Any exception thrown by \cpp{entry}'s copy constructor.
 \end{description}
 
+\errors
+\begin{description}
+    \item[---] \cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary resources to create another fiber.
+\end{description}
+
 %---------------------------- explicit stack ctor ----------------------------
-\mbrhdr{template<typename F, typename D> explicit fiber\_context(F\&\& entry, span<byte> stack, D\&\& deleter)}
+\mbrhdr{template<typename F, typename D> fiber\_context(F\&\& entry, span<byte> stack, D\&\& deleter)}
 
 \mandates
 \begin{description}
@@ -244,10 +255,14 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
                implementation-defined alignment requirements.
     \item[---] \cpp{length\_error} if \cpp{stack} is less than the
                implementation-defined minimum length.
-    \item[---] \cpp{bad\_alloc} on failure to acquire necessary system
-               resources.
+    \item[---] \cpp{system\_error} if unable to start the new fiber.
     \item[---] Any exception thrown by \cpp{entry}'s copy constructor.
     \item[---] Any exception thrown by \cpp{deleter}'s copy constructor.
+\end{description}
+
+\errors
+\begin{description}
+    \item[---] \cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary resources to create another fiber.
 \end{description}
 
 \remarks
@@ -262,6 +277,11 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 
 \begin{description}
     \item[---] Equivalent to \cpp{this->state = move(other.state);}
+\end{description}
+
+\postcond
+\begin{description}
+    \item[---] \cpp{other.}\emptyfn returns \true
 \end{description}
 
 %----------------------------------- dtor ------------------------------------
@@ -279,19 +299,20 @@ must convey to the suspended fiber the need to terminate voluntarily.}
 %------------------------------ move assignment ------------------------------
 \mbrhdr{fiber\_context\& operator=(fiber\_context\&\& other) noexcept}
 
-\precond
-\begin{description}
-    \item[---] \emptyfn returns \true.
-\end{description}
-
 \effects
 \begin{description}
+    \item[---] If \emptyfn returns \false, invokes \cpp{terminate} (\stdclause{except.terminate}).
     \item[---] Equivalent to \cpp{this->state = move(other.state);}
 \end{description}
 
 \returns
 \begin{description}
     \item[---] \this
+\end{description}
+
+\postcond
+\begin{description}
+    \item[---] \cpp{other.}\emptyfn returns \true
 \end{description}
 
 %-------------------------------- resume_with --------------------------------
@@ -311,15 +332,12 @@ must convey to the suspended fiber the need to terminate voluntarily.}
 
 \effects
 \begin{description}
-    \item[---] Saves the execution context of the calling fiber in a manner
-               appropriate to the host ABI.
     \item[---] Suspends the calling fiber.
     \item[---] Let \cpp{target} be \thefiber{\state}.
     \item[---] Resets \state so that \emptyfn returns \true.
     \item[---] Resumes \cpp{target}.
-    \item[---] Restores the execution context of \cpp{target}.
     \item[---] Let \cpp{caller} be a synthesized \fiber instance representing
-               the suspended caller.
+               the suspended calling fiber.
     \item[---] Evaluates \cpp{invoke(std::forward<Fn>(fn), std::move(caller))}
                on fiber \cpp{target}.
                Let \cpp{returned} be the \fiber instance returned by \cpp{fn}.
@@ -355,8 +373,6 @@ must convey to the suspended fiber the need to terminate voluntarily.}
 \begin{description}
     \item[---] If the previous fiber resumed this one by returning a \fiber,
                an empty \fiber.
-    \item[---] If the previous fiber resumed this one by calling \someresume,
-               a \fiber representing that previous fiber.
     \item[---] If the previous fiber resumed this one by passing some \cpp{fn}
                to \anyresumewith, the \fiber returned by that \cpp{fn}.
 \end{description}
@@ -379,8 +395,6 @@ must convey to the suspended fiber the need to terminate voluntarily.}
                 \item Any exception thrown as a result of destroying the
                       previous fiber's associated \cpp{deleter\_copy}.
             \end{itemize}
-        \item If the previous fiber resumed this one by calling \someresume,
-              nothing.
         \item If the previous fiber resumed this one by calling \anyresumewith:
         \begin{itemize}
             \item Any exception thrown by the \cpp{fn} passed by the previous
@@ -421,11 +435,6 @@ Equivalent to:\\
 
 \tsnote{When \canresume returns \true, the \fiber instance may be resumed
 by \anyresume.}
-
-\remarks
-\begin{description}
-    \item[---] \canresume must not be called concurrently from multiple threads.
-\end{description}
 
 \EnterBlock{Editorial note} \canresume is intentionally not
 marked \cpp{const}. \ExitBlock{editorial note}

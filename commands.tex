@@ -190,9 +190,11 @@
 \newcommand{\EnterBlock}[1]{[\,\textit{#1:}\space}
 \newcommand{\ExitBlock}[1]{\textit{\,---\,end #1}\,]\xspace}
 \newcommand{\enternote}{\EnterBlock{Note}}
+\newcommand{\enternoten}[1]{\EnterBlock{Note #1}}
 \newcommand{\exitnote}{\ExitBlock{note}}
 
 \newcommand{\tsnote}[1]{\enternote {#1} \exitnote}
+\newcommand{\tsnoten}[2]{\enternoten{#1}{#2} \exitnote}
 \newcommand{\mbrhdr}[1]{\subparagraph*{#1};\\}
 
 %% The point of these macros is that we might need to adjust the formatting
@@ -206,3 +208,4 @@
 \newcommand{\precond}{\textit{Preconditions:}\xspace}
 \newcommand{\postcond}{\textit{Ensures:}\xspace}
 \newcommand{\except}{\textit{Throws:}\xspace}
+\newcommand{\errors}{\textit{Error conditions:}\xspace}

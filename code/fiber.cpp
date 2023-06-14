@@ -8,7 +8,7 @@ public:
     explicit fiber_context(F&& entry);
 
     template<typename F, typename D>
-    explicit fiber_context(F&& entry, span<byte> stack, D&& deleter);
+    fiber_context(F&& entry, span<byte> stack, D&& deleter);
 
     ~fiber_context();
 
