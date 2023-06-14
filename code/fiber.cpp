@@ -5,10 +5,10 @@ public:
     // [fibercontext.cons], constructors, move and assignment
     fiber_context() noexcept;
 
-    template<typename F>
+    template<class F>
     explicit fiber_context(F&& entry);
 
-    template<typename F, typename D>
+    template<class F, class D>
     fiber_context(F&& entry, span<byte> stack, D&& deleter);
 
     ~fiber_context();
@@ -20,7 +20,7 @@ public:
 
     // [fibercontext.mem], members
     fiber_context resume() &&;
-    template<typename Fn>
+    template<class Fn>
     fiber_context resume_with(Fn&& fn) &&;
 
     bool can_resume() noexcept;

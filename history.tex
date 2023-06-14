@@ -38,6 +38,20 @@ This document supersedes P0876R13.
     \item Added \cpp{std::swap()} specialization.
     \item Added obtrusive paragraph numbers.
     \item Streamlined single-item dash lists.
+    \item Changed \textit{Ensures} to \textit{Postconditions}.
+    \item Changed template parameters from \cpp{typename} to \cpp{class}.
+    \item Tweaked constructor \precond / \mandates.
+    \item Clarified that \cpp{entry\_copy}, \cpp{stack\_copy}
+          and \cpp{deleter\_copy} are not intended to be data members
+          of \fiber.
+    \item Streamlined initialization of these exposition objects.
+    \item ``Instantiates a \fiber'' => ``Initializes \cpp{state}''
+    \item \emptyfn returns \true => \emptyfn is \true, et al.
+    \item Removed explicit-stack constructor \precond for stack size and
+          alignment, since \except explicitly specifies exceptions for
+          violations.
+    \item Rephrased \effects of move constructor.
+    \item Extracted ``Let'' statements from \effects to preceding paragraphs.
 \end{itemize}
 
 \uabschnitt{Changes since P0876R12}
