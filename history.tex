@@ -1,9 +1,65 @@
 \abschnitt{Revision History}\label{history}
-This document supersedes P0876R12.
+This document supersedes P0876R13.
+
+\uabschnitt{Changes since P0876R13}
+
+\begin{itemize}
+    \item At LEWG's request, retracted changes to \cpp{uncaught\_exceptions()}
+          and \cpp{current\_exception()}, instead clarifying that results may
+          reflect exceptions on other fibers running on the current thread.
+    \item Updated against draft standard N4950.
+    \item Deleted ``User-Mode'' from new section title ``Cooperative Threads''
+          and removed the explanatory paragraph.
+    \item Removed \cpp{explicit} from the explicit-stack constructor.
+    \item Added \cpp{system\_error}: \cpp{resource\_unavailable\_try\_again}
+          to the \except clause of the implicit-stack constructor.
+    \item Changed \cpp{bad\_alloc}
+          to \cpp{system\_error}: \cpp{resource\_unavailable\_try\_again}
+          in the \except clause of the explicit-stack constructor.
+    \item Stated that the move constructor and move assignment operator empty
+          the moved-from \fiber.
+    \item Removed the \emptyfn precondition from assignment operator; instead
+          added the same \cpp{(\! empty())} effect as for the destructor.
+    \item Removed \resumewith references to ``execution context.'' Existing
+          section 7.6.1.3 Function call \stdclause{expr.call} makes no mention
+          of saving or restoring state.
+    \item Removed bullets in \resumewith \returns and \except clauses
+          regarding \resume, since they can be inferred from \resumewith and
+          the trivial-lambda equivalence described for \resume.
+    \item Removed the \remarks about concurrent calls from multiple threads
+          from \canresume, leaving in place the editorial note about the
+          intentional absence of \cpp{const}.
+    \item Changed exposition-only \cpp{state} member from unspecified-type
+          to \cpp{void*}.
+    \item Sanitized stable names.
+    \item Moved feature-test macro to appropriate section.
+    \item Cleaned up the header-file synopsis.
+    \item Grouped class members with forward references.
+    \item Added \cpp{std::swap()} specialization.
+    \item Added obtrusive paragraph numbers.
+    \item Streamlined single-item dash lists.
+    \item Changed \textit{Ensures} to \textit{Postconditions}.
+    \item Changed template parameters from \cpp{typename} to \cpp{class}.
+    \item Tweaked constructor \precond / \mandates.
+    \item Clarified that \cpp{entry\_copy}, \cpp{stack\_copy}
+          and \cpp{deleter\_copy} are not intended to be data members
+          of \fiber.
+    \item Streamlined initialization of these exposition objects.
+    \item ``Instantiates a \fiber'' => ``Initializes \cpp{state}''
+    \item \emptyfn returns \true => \emptyfn is \true, et al.
+    \item Removed explicit-stack constructor \precond for stack size and
+          alignment, since \except explicitly specifies exceptions for
+          violations.
+    \item Rephrased \effects of move constructor.
+    \item Extracted ``Let'' statements from \effects to preceding paragraphs.
+\end{itemize}
 
 \uabschnitt{Changes since P0876R12}
 
 \begin{itemize}
+    \item Proposed that \cpp{uncaught\_exceptions()}
+          and \cpp{current\_exception()} be specific to the current thread of
+          execution.
     \item Specified that constructors \emph{decay-copy} the \entryfn.
     \item Changed \cpp{span<byte, N>} constructor param to
           simply \cpp{span<byte>}; also accepted deleter function, which it

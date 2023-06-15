@@ -187,22 +187,28 @@
 \addtocounter{scratch}{\value{SectionDepthBase}}
 \Sec{\arabic{scratch}}[#2]{#3}}
 
+\newcommand{\para}{\paragraph{}}
+%%\renewcommand{\theparagraph}{\arabic{paragraph}}
+
 \newcommand{\EnterBlock}[1]{[\,\textit{#1:}\space}
 \newcommand{\ExitBlock}[1]{\textit{\,---\,end #1}\,]\xspace}
 \newcommand{\enternote}{\EnterBlock{Note}}
+\newcommand{\enternoten}[1]{\EnterBlock{Note #1}}
 \newcommand{\exitnote}{\ExitBlock{note}}
 
 \newcommand{\tsnote}[1]{\enternote {#1} \exitnote}
+\newcommand{\tsnoten}[2]{\enternoten{#1}{#2} \exitnote}
 \newcommand{\mbrhdr}[1]{\subparagraph*{#1};\\}
 
 %% The point of these macros is that we might need to adjust the formatting
 %% for all such subheadings.
-\newcommand{\constraints}{\textit{Constraints:}\xspace}
-\newcommand{\mandates}{\textit{Mandates:}\xspace}
-\newcommand{\requires}{\textit{Requires:}\xspace}
-\newcommand{\remarks}{\textit{Remarks:}\xspace}
-\newcommand{\effects}{\textit{Effects:}\xspace}
-\newcommand{\returns}{\textit{Returns:}\xspace}
-\newcommand{\precond}{\textit{Preconditions:}\xspace}
-\newcommand{\postcond}{\textit{Ensures:}\xspace}
-\newcommand{\except}{\textit{Throws:}\xspace}
+\newcommand{\constraints}{\para \textit{Constraints:}\xspace}
+\newcommand{\mandates}{\para \textit{Mandates:}\xspace}
+\newcommand{\requires}{\para \textit{Requires:}\xspace}
+\newcommand{\remarks}{\para \textit{Remarks:}\xspace}
+\newcommand{\effects}{\para \textit{Effects:}\xspace}
+\newcommand{\returns}{\para \textit{Returns:}\xspace}
+\newcommand{\precond}{\para \textit{Preconditions:}\xspace}
+\newcommand{\postcond}{\para \textit{Postconditions:}\xspace}
+\newcommand{\except}{\para \textit{Throws:}\xspace}
+\newcommand{\errors}{\para \textit{Error conditions:}\xspace}
