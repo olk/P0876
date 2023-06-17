@@ -5,7 +5,7 @@ This wording is relative to N4950.\cite{Standard}
 
 \bfs{Append} to 17.9.7.8 \stdclause{propagation} as indicated:
 
-\add{\enternoten{5} The returned \cpp{exception\_ptr} may indicate an exception
+\add{\enternoten{5} The returned \cpp{exception\_ptr} may reference an exception
 object thrown on some other fiber}\\
 \add{([fibercontext.general]) within the current thread. \exitnote}
 
@@ -14,12 +14,12 @@ object thrown on some other fiber}\\
 The exception with the most recently activated handler \add{in the current
 thread }that is still active is called the \emph{currently handled exception.}
 
-(``Most recently activated'' could conceivably mean a handler activated in some
-other thread.)
+(WG21 note: without qualification, ``most recently activated'' could
+conceivably mean a handler activated in some other thread.)
 
 \bfs{Append} to 14.6.3.1 \stdclause{except.uncaught} as indicated:
 
-\add{\enternoten{2}The return value is the aggregate number of uncaught
+\add{\enternoten{2}The return value may be the aggregate number of uncaught
 exceptions in the thread rather than in the current fiber}\\
 \add{([fibercontext.general]). \exitnote}
 
