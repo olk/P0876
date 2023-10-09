@@ -5,7 +5,7 @@ This wording is relative to N4958.\cite{Standard}
 
 \bfs{Append} to 17.9.7.8 \stdclause{propagation} as indicated:
 
-\add{\enternoten{5} It is implementation-defined whether:}
+\add{It is implementation-defined whether:}
 \begin{itemize}
     \item \add{\cpp{current\_exception()} returns the exception with the most
           recently activated handler that is still active}\\
@@ -14,20 +14,16 @@ This wording is relative to N4958.\cite{Standard}
           recently activated handler that is still active}\\
           \add{within the current \cpp{std::thread}.}
 \end{itemize}
-\add{\exitnote}
-
-\bfs{Modify} 17.9.7.12 to \emph{Note \replace{5}{6}}.
 
 \bfs{Append} to 14.6.3.1 \stdclause{except.uncaught} as indicated:
 
-\add{\enternoten{1} It is implementation-defined whether:}
+\add{It is implementation-defined whether:}
 \begin{itemize}
     \item \add{\cpp{uncaught\_exceptions()} returns the number of uncaught
           exceptions in the current thread of execution, or}
     \item \add{\cpp{uncaught\_exceptions()} returns the number of uncaught
           exceptions in the current \cpp{std::thread}.}
 \end{itemize}
-\add{\exitnote}
 
 \bfs{Insert} new final subclause in clause 33 \stdclause{thread} as indicated:
 
