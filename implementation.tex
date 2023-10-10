@@ -108,7 +108,7 @@ additional allocations or deallocations are required.}
 
 \uabschnitt{\exfns}
 
-Both \exfns must report exceptions solely on the current thread of execution.
+Both \exfns should report exceptions solely on the current thread of execution.
 Reporting exceptions on any other thread of execution would make them
 unreliable in practice.
 
@@ -122,3 +122,9 @@ container whose key is the high end of the new fiber stack. \exfns could
 call \cpp{upper\_bound()}, passing the current stack pointer, to discover
 which stack is current. This would shift the cost from every context switch
 to \exfns calls.
+
+In 2023, though, the zeitgeist appears to be that \exfns are not sufficiently
+important to warrant altering exception-handling implementations to fix their
+behavior. This is why, in the \nameref{api} section, it is
+implementation-defined whether \exfns are specific to the current thread of
+execution or the current \thread.

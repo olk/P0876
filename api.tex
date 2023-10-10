@@ -3,26 +3,23 @@
 
 This wording is relative to N4958.\cite{Standard}
 
-\bfs{Append} to 17.9.7.8 \stdclause{propagation} as indicated:
+\bfs{Append} to 14.4.8 \stdclause{except.handle} as indicated:
 
-\add{It is implementation-defined whether:}
+\add{It is implementation-defined whether the currently handled exception
+designates the exception with the most recently}\\
+\add{activated handler that is still active within:}
 \begin{itemize}
-    \item \add{\cpp{current\_exception()} returns the exception with the most
-          recently activated handler that is still active}\\
-          \add{within the current thread of execution, or}
-    \item \add{\cpp{current\_exception()} returns the exception with the most
-          recently activated handler that is still active}\\
-          \add{within the current \cpp{std::thread}.}
+    \item \add{the current thread of execution, or}
+    \item \add{the current \thread.}
 \end{itemize}
 
 \bfs{Append} to 14.6.3.1 \stdclause{except.uncaught} as indicated:
 
-\add{It is implementation-defined whether:}
+\add{It is implementation-defined whether \cpp{uncaught\_exceptions()} returns
+the number of uncaught exceptions in:}
 \begin{itemize}
-    \item \add{\cpp{uncaught\_exceptions()} returns the number of uncaught
-          exceptions in the current thread of execution, or}
-    \item \add{\cpp{uncaught\_exceptions()} returns the number of uncaught
-          exceptions in the current \cpp{std::thread}.}
+    \item \add{the current thread of execution, or}
+    \item \add{the current \thread.}
 \end{itemize}
 
 \bfs{Insert} new final subclause in clause 33 \stdclause{thread} as indicated:
