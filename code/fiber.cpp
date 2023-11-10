@@ -34,7 +34,7 @@ public:
     friend void swap(fiber_context& lhs, fiber_context& rhs) noexcept;
 
 private:
-    void* state;         // exposition only
+    void* state{};         // exposition only
 };
 
 } // namespace std

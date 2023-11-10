@@ -1,5 +1,17 @@
 \abschnitt{Revision History}\label{history}
-This document supersedes P0876R13.
+This document supersedes P0876R14.
+
+\uabschnitt{Changes since P0876R14}
+
+\begin{itemize}
+    \item Invoked ``blocks with forward progress guarantee delegation'' words
+          of power for \resumewith, guaranteeing mutual exclusion.
+    \item Fixed Mandates and Throws concerning the entry function and deleter
+          passed to the implicit-stack or explicit-stack constructor.
+    \item Cleaned up wording around initializing, assigning and testing the
+          exposition-only \cpp{state} member.
+    \item Dampened the optimism of the proposed feature-test macro.
+\end{itemize}
 
 \uabschnitt{Changes since P0876R13}
 

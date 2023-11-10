@@ -1,9 +1,60 @@
 \newpage
 \abschnitt{Wording}\label{api}
 
-This wording is relative to N4958.\cite{Standard}
+This wording is relative to N4964.\cite{Standard}
 
-\bfs{Append} to 14.4.8 \stdclause{except.handle} as indicated:
+\bfs{Append} to §6.9.2.1 \stdclause{intro.multithread.general} as indicated:
+
+\setcounter{section}{6}
+\setcounter{subsection}{9}
+\setcounter{subsubsection}{2}
+\setcounter{secnumdepth}{4}
+
+3 A \emph{processor thread} is the default thread of execution on
+which \main is entered, or the thread of execution created by \thread
+(\stdclause{thread.thread.class}), or the thread of execution created
+by \jthread (\stdclause{thread.jthread.class}).
+
+4 A \emph{fiber} is a thread of execution with weakly parallel forward
+progress guarantees (\stdclause{intro.progress} paragraph 11).
+
+5 A \emph{function call stack} represents the invocation sequence
+(\stdclause{stacktrace.general} paragraph 2) of every evaluation in the thread
+of execution.
+
+6 Each fiber has a one-to-one association with a function call stack.
+Calling functions on a particular fiber, and returning from them, is
+independent of function calls and returns on any other fiber.
+
+7 The default thread of execution on which \main is entered has an
+initial \emph{default fiber} whose function call stack is the stack on
+which \main is entered. \tsnote{Thus, when \main creates a new fiber, it
+becomes the second fiber in the program.}
+Similarly, every explicitly-created \thread or \jthread has an initial default
+fiber whose function call stack is the stack on which the function passed to
+the respective constructor is entered.
+
+8 A new fiber may be explicitly created (\stdclause{fibercontext}).
+\emph{explicit fiber} or \emph{explicitly-launched fiber} designates a fiber
+created by program evaluation; conversely, \emph{implicit fiber} designates
+the default fiber on any processor thread.
+
+9 On entry, a processor thread blocks with forward progress guarantee
+delegation (\stdclause{intro.progress} paragraph 14) on its default fiber. The
+running fiber may block with forward progress guarantee delegation on another
+fiber.
+
+\bfs{Modify} §6.9.2.2 \stdclause{intro.races} paragraph 2 as indicated:
+
+Two expression evaluations \emph{conflict} if \add{ they are running on distinct
+threads of execution with forward progress guarantees}\\
+\add{stronger than weakly parallel, and} one of them modifies a memory location
+(\stdclause{intro.memory}) and the other one reads or modifies the same memory
+location. \add{\enternote If either thread of execution has weakly parallel forward
+progress guarantees,}\\
+\add{it does not conflict with the other. \exitnote}
+
+\bfs{Append} to §14.4.8 \stdclause{except.handle} as indicated:
 
 \add{It is implementation-defined whether the currently handled exception
 designates the exception with the most recently}\\
@@ -13,7 +64,7 @@ designates the exception with the most recently}\\
     \item \add{the current \thread.}
 \end{itemize}
 
-\bfs{Append} to 14.6.3.1 \stdclause{except.uncaught} as indicated:
+\bfs{Append} to §14.6.3.1 \stdclause{except.uncaught} as indicated:
 
 \add{It is implementation-defined whether \cpp{uncaught\_exceptions()} returns
 the number of uncaught exceptions in:}
@@ -26,7 +77,7 @@ the number of uncaught exceptions in:}
 
 \setcounter{section}{33}
 \setcounter{subsection}{11}
-\setcounter{secnumdepth}{5}
+\setcounter{secnumdepth}{4}
 
 \rSec2[fibercontext]{Cooperative Threads}
 
@@ -35,25 +86,16 @@ the number of uncaught exceptions in:}
 \para A fiber is a thread of execution (\stdclause{intro.multithread.general}) with
 weakly parallel forward progress guarantees (\stdclause{intro.progress} paragraph 11).
 
-\para The term \emph{cooperative} means that typically multiple fibers share
-an underlying execution agent, for example a \cpp{std::thread}
-(\stdclause{thread.thread.class}). On the underlying execution agent, only one
-fiber is running at any given time. Sharing that agent is explicit rather than
-pre-emptive. The running fiber \emph{suspends} (or \emph{yields}) to another
-fiber. This action \emph{launches} a new fiber, or \emph{resumes} a
+\para The term \emph{cooperative} means that typically multiple fibers share a
+given processor thread. On the underlying processor thread, only one fiber is
+running at any given time. Sharing that processor thread is explicit rather
+than pre-emptive. The running fiber \emph{suspends}, or \emph{yields} to
+another fiber. This action enters a newly created fiber, or \emph{resumes} a
 previously-suspended fiber.
 
-\para Suspending the running fiber in order to resume (or launch) another is
-called \emph{context switching}. This is an explicit variant of blocking with
+\para Suspending the running fiber in order to resume (or enter) another is
+called \emph{context switching}. This is an explicit case of blocking with
 forward progress guarantee delegation (\stdclause{intro.progress} paragraph 14).
-
-\para Launching a fiber logically creates a new function call stack, which remains
-associated with that fiber throughout its lifetime. Calling functions on a
-particular fiber, and returning from them, is independent of function calls
-and returns on any other fiber.
-
-\para Context switching can be effected by designating some other fiber's stack as
-current, in a manner appropriate to the existing implementation of function call stacks.
 
 \rSec3[fibercontext.empty]{Empty vs. Non-Empty}
 
@@ -64,21 +106,6 @@ representing a suspended fiber is non-empty.
 \para When the running fiber returns a \fiber from its \entryfn, thus resuming the
 designated fiber, the synthesized \fiber passed into the resumed fiber is
 empty.
-
-\rSec3[fibercontext.implicit]{Explicit Fiber vs. Implicit Fiber}
-
-\para The default thread on which the program runs \main has an
-initial \emph{default fiber} whose stack is the stack on which \main is
-entered. \tsnote{Thus, when \main instantiates a new \fiber, it becomes the
-second fiber in the program.} Similarly, every
-explicitly-launched \cpp{std::thread} (\stdclause{thread.thread.class})
-or \cpp{std::jthread} (\stdclause{thread.jthread.class}) has an initial
-default fiber whose stack is the stack on which the function passed
-to \cpp{std::thread} or \cpp{std::jthread}'s constructor is entered.
-
-\para \emph{explicit fiber} or \emph{explicitly-launched fiber}
-designates a fiber instantiated by user code; conversely, \emph{implicit fiber}
-designates the default fiber on any thread.
 
 \para An explicit fiber is instantiated by passing an \emph{\entryfn} to \fiber's
 constructor. This function is not entered until the first call to one of
@@ -175,7 +202,7 @@ instantiates an empty \fiber.
 
 \mandates
 \begin{description}
-    \item[---] \cpp{is\_copy\_constructible\_v<F>} is \true.
+    \item[---] \cpp{is\_constructible\_v<decay\_t<F>, F>} is \true.
     \item[---] \cpp{is\_invocable\_r\_v<fiber\_context, decay\_t<F>,
                fiber\_context&&>} is \true.
 \end{description}
@@ -204,7 +231,7 @@ could be stored at the base of the new fiber's stack.}
 \begin{description}
     \item[---] \cpp{bad\_alloc} if unable to acquire a new function call stack.
     \item[---] \cpp{system\_error} if unable to start the new fiber.
-    \item[---] Any exception thrown by \cpp{entry}'s copy constructor.
+    \item[---] Any exception thrown by the selected constructor of \cpp{entry}.
 \end{description}
 
 \errors
@@ -215,8 +242,8 @@ could be stored at the base of the new fiber's stack.}
 
 \mandates
 \begin{description}
-    \item[---] \cpp{is\_copy\_constructible\_v<F>} is \true.
-    \item[---] \cpp{is\_copy\_constructible\_v<D>} is \true.
+    \item[---] \cpp{is\_constructible\_v<decay\_t<F>, F>} is \true.
+    \item[---] \cpp{is\_constructible\_v<decay\_t<D>, D>} is \true.
     \item[---] \cpp{is\_invocable\_r\_v<fiber\_context, decay\_t<F>,
                fiber\_context&&>} is \true.
     \item[---] \cpp{is\_invocable\_v<decay\_t<D>, span<byte>>} is \true.
@@ -262,8 +289,8 @@ the base of the new fiber's stack.}
     \item[---] \cpp{length\_error} if \cpp{stack} is less than the
                implementation-defined minimum length.
     \item[---] \cpp{system\_error} if unable to start the new fiber.
-    \item[---] Any exception thrown by \cpp{entry}'s copy constructor.
-    \item[---] Any exception thrown by \cpp{deleter}'s copy constructor.
+    \item[---] Any exception thrown by the selected constructor of \cpp{entry}.
+    \item[---] Any exception thrown by the selected constructor of \cpp{deleter}.
 \end{description}
 
 \errors
@@ -278,7 +305,7 @@ undefined.
 \mbrhdr{fiber\_context(fiber\_context\&\& other) noexcept}
 
 \effects
-Move constructs \cpp{this->state} from \cpp{other.state}.
+Initializes \cpp{state} with \cpp{exchange(other.state, nullptr)}.
 
 \postcond
 \cpp{other.}\emptyfn is \true.
@@ -298,7 +325,7 @@ must convey to the suspended fiber the need to terminate voluntarily.}
 \effects
 \begin{description}
     \item[---] If \emptyfn is \false, \cpp{terminate} is invoked (\stdclause{except.terminate}).
-    \item[---] Equivalent to: \cpp{this->state = move(other.state)}.
+    \item[---] Equivalent to: \cpp{this->state = exchange(other.state, nullptr)}.
 \end{description}
 
 \returns
@@ -325,9 +352,9 @@ the suspended calling fiber.
 
 \effects
 \begin{description}
-    \item[---] Suspends the calling fiber.
     \item[---] Resets \state so that \emptyfn is \true.
-    \item[---] Resumes \cpp{target}.
+    \item[---] Blocks with forward progress guarantee delegation \stdclause{intro.progress}
+               on \cpp{target}.
     \item[---] Evaluates \cpp{invoke(std::forward<Fn>(fn), std::move(caller))}
                on fiber \cpp{target}.
                Let \cpp{returned} be the \fiber instance returned by \cpp{fn}.
@@ -430,8 +457,7 @@ marked \cpp{const}. \ExitBlock{editorial note}
 \mbrhdr{bool empty() const noexcept}
 
 \returns
-\false if \state represents a fiber of
-execution, \true otherwise.
+Equivalent to: \cpp{(\! state)}.
 
 \tsnote{Regardless of the number of \fiber declarations, exactly one
 \fiber instance represents each suspended fiber.}
@@ -497,6 +523,6 @@ Equivalent to: \cpp{lhs.swap(rhs)}.
 %% \end{description}
 
 \abschnitt{Feature-test Macro}
-\bfs{Add} a new feature-test macro to 17.3.2 \stdclause{version.syn}:
+\bfs{Add} a new feature-test macro to §17.3.2 \stdclause{version.syn}:
 
-\cpp{#define \__cpp\_lib\_fiber\_context 2023XXL // also in <fiber\_context>}
+\cpp{#define \__cpp\_lib\_fiber\_context 202XXXL // also in <fiber\_context>}
