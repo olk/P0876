@@ -28,6 +28,8 @@ public:
     explicit operator bool() const noexcept;
     bool empty() const noexcept;
 
+    static bool current_exception_within_fiber() const noexcept;
+
     void swap(fiber_context& other) noexcept;
 
     // [fibercontext.special], specialized algorithms

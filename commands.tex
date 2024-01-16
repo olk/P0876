@@ -75,10 +75,12 @@
 \newcommand{\add}[1]{\green{#1}}
 \newcommand{\replace}[2]{\delete{#1}\add{#2}}
 \newcommand{\stdclause}[1]{\href{https://eel.is/c++draft/#1}{[#1]}}
+\newcommand{\xref}[1]{(\stdclause{#1})}
 \newcommand{\true}{\cpp{true}}
 \newcommand{\false}{\cpp{false}}
 \newcommand{\dtor}{\cpp{\~fiber\_context()}}
 \newcommand{\main}{\cpp{main()}}
+\newcommand{\justmain}{\cpp{main}}
 \newcommand{\stdfiber}{std::\fiber}
 \newcommand{\fiber}{\cpp{fiber\_context}}
 \newcommand{\op}{\cpp{operator()()}}
@@ -112,6 +114,7 @@
 \newcommand{\currthread}{the calling thread\xspace}
 \newcommand{\ownthread}{the owning thread of \thisfiber}
 \newcommand{\thisfiber}{\thefiber{\this}}
+\newcommand{\Thefiber}[1]{The fiber represented by #1}
 \newcommand{\thefiber}[1]{the fiber represented by #1}
 \newcommand{\this}{\cpp{*this}}
 \newcommand{\unwindex}{\cpp{std::unwind\_exception}}
@@ -203,13 +206,13 @@
 
 %% The point of these macros is that we might need to adjust the formatting
 %% for all such subheadings.
-\newcommand{\constraints}{\para \textit{Constraints:}\xspace}
-\newcommand{\mandates}{\para \textit{Mandates:}\xspace}
-\newcommand{\requires}{\para \textit{Requires:}\xspace}
-\newcommand{\remarks}{\para \textit{Remarks:}\xspace}
-\newcommand{\effects}{\para \textit{Effects:}\xspace}
-\newcommand{\returns}{\para \textit{Returns:}\xspace}
-\newcommand{\precond}{\para \textit{Preconditions:}\xspace}
-\newcommand{\postcond}{\para \textit{Postconditions:}\xspace}
-\newcommand{\except}{\para \textit{Throws:}\xspace}
-\newcommand{\errors}{\para \textit{Error conditions:}\xspace}
+\newcommand{\constraints}{\textit{Constraints:}\xspace}
+\newcommand{\mandates}{\textit{Mandates:}\xspace}
+\newcommand{\requires}{\textit{Requires:}\xspace}
+\newcommand{\remarks}{\textit{Remarks:}\xspace}
+\newcommand{\effects}{\textit{Effects:}\xspace}
+\newcommand{\returns}{\textit{Returns:}\xspace}
+\newcommand{\precond}{\textit{Preconditions:}\xspace}
+\newcommand{\postcond}{\textit{Postconditions:}\xspace}
+\newcommand{\except}{\textit{Throws:}\xspace}
+\newcommand{\errors}{\textit{Error conditions:}\xspace}
