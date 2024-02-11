@@ -163,8 +163,16 @@ functions that have been entered but have not yet returned.}
 \emph{explicit fiber} denotes a fiber created by program evaluation;
 conversely, \emph{implicit fiber} denotes the default fiber on any
 thread.
-\tsnote{An explicitly-instantiated fiber is useful for distributing
-computation across distinct sequences of active function calls.}
+\tsnote{An explicit fiber is useful for distributing computation across
+distinct invocation sequences.}
+
+\begin{itemize}
+    \item An implicit fiber's \emph{owning thread} is the thread of which that
+          fiber is the default fiber.
+    \item An explicit fiber initially has no owning thread.
+    \item When some thread first calls \anyresume on an explicit fiber, that
+          thread becomes the fiber's owning thread.
+\end{itemize}
 
 3 Given an object of type \fiber representing a suspended fiber, calling
 its \anyresume member functions passes control from the current fiber to that
@@ -220,14 +228,6 @@ empty.
 3 An explicit fiber is instantiated by passing an \emph{\entryfn} to \fiber's
 constructor. This function is not entered until the first call to one of
 the \anyresume member functions.
-
-\begin{itemize}
-    \item An implicit fiber's \emph{owning thread} is the thread of which that
-          fiber is the default fiber.
-    \item An explicit fiber initially has no owning thread.
-    \item When some thread first calls \anyresume on an explicit fiber, that
-          thread becomes the fiber's owning thread.
-\end{itemize}
 
 4 When a fiber is first entered, a synthesized non-empty \fiber object
 representing the newly-suspended previous fiber is passed as a parameter to
