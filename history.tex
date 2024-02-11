@@ -6,7 +6,12 @@ This document supersedes D0876R15.
 \begin{itemize}
     \item Updated to reference N4971.
     \item Inserted a section to clarify relationship between threads and fibers.
-    \item Hoisted definition of ``fiber'' to start of paragraph.
+    \item Borrowed ``single flow of control'' definition for ``fiber.''
+    \item Added Note clarifying ``flow of control'' as state, with reference
+    to \stdclause{stacktrace.general}.
+    \item Changed stacktrace ``invocation sequence'' to reference ``fiber'' rather
+    than ``thread of execution.''
+    \item Changed ``thread'' definition to be the execution agent that runs fibers.
     \item Clarified that if a fiber terminates by returning an empty \fiber
           instance, \cpp{std::terminate} is called.
     \item Added \cpp{constexpr fiber\_context::current\_exception\_within\_fiber}.

@@ -126,6 +126,20 @@ thread.}}
 %   destroying or assigning to a non-empty fiber_context
 %*****************************************************************************
 
+\zs{Modify §6.9.2.1 \stdclause{intro.multithread.general} paragraph 1 as indicated:}
+
+A \emph{thread of execution} (also known as a \emph{thread}) is
+\replace{a single flow of control}{the primary execution agent}\\
+\add{\xref{thread.req.lockable.general}}
+within a program\delete{, including the initial invocation of a specific top-level
+function, and}\\
+\replace{recursively including every function invocation subsequently
+executed by the thread}{. When the host environment first}\\
+\add{enters a program, it provides a default thread to perform the program's
+execution steps}.
+
+\add{When a thread is created, it runs a default fiber ([intro.fibers]).}
+
 \zs{Insert before §6.9.3 \stdclause{basic.start} and renumber existing 6.9.3 to 6.9.4:}
 
 \setcounter{section}{6}
@@ -135,8 +149,15 @@ thread.}}
 
 \rSec3[intro.fibers]{Fibers and Threads}
 
-1 A \emph{fiber} is a flow of control whose steps are performed by the current
-thread. When a thread is created, it runs a default fiber.
+1 A \emph{fiber} is a single flow of control within a program, including the
+initial invocation of a specific top-level function, and recursively including
+every function invocation subsequently executed by the fiber. The execution
+steps of a fiber are performed by a thread.
+
+\tsnote{``Flow of control'' here refers to state necessary to program
+execution, for example the contents of a processor's registers including its
+instruction pointer, and the invocation sequence \xref{stacktrace.general} of
+functions that have been entered but have not yet returned.}
 
 2 A new fiber may be created using \fiber ([fiber.context.class]).
 \emph{explicit fiber} denotes a fiber created by program evaluation;
@@ -617,6 +638,18 @@ Equivalent to: \cpp{lhs.swap(rhs)}.
 %% \begin{description}
 %%     \item[---] None catchable by C++
 %% \end{description}
+
+\zs{Modify §19.6.1 \stdclause{stacktrace.general} as indicated:}
+
+1 Subclause \stdclause{stacktrace} describes components that C++ programs may use to
+store the stacktrace of the current \delete{thread of}\\
+\replace{execution}{fiber ([intro.fibers])}
+and query information about the stored stacktrace at runtime.
+
+2 The \emph{invocation sequence} of the current evaluation $x_0$
+in the current \replace{thread of execution}{fiber} is a sequence
+($x_0$,...,$x_n$) of evaluations such that, for $i >= 0$,
+$x_i$ is within the function invocation $x_{i+1}$ \xref{intro.execution}.
 
 \abschnitt{Feature-test Macro}
 \zs{Add a new feature-test macro to §17.3.2 \stdclause{version.syn} as indicated:}
