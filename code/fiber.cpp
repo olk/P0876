@@ -28,7 +28,7 @@ public:
     explicit operator bool() const noexcept;
     bool empty() const noexcept;
 
-    static bool current_exception_within_fiber() const noexcept;
+    static constexpr bool current_exception_within_fiber() noexcept;
 
     void swap(fiber_context& other) noexcept;
 
@@ -36,7 +36,7 @@ public:
     friend void swap(fiber_context& lhs, fiber_context& rhs) noexcept;
 
 private:
-    void* state{};         // exposition only
+    void* state = nullptr;          // exposition only
 };
 
 } // namespace std

@@ -6,21 +6,24 @@ This document supersedes D0876R15.
 \begin{itemize}
     \item Updated to reference N4971.
     \item Inserted a section to clarify relationship between threads and fibers.
-    \item Added definition of ``processor thread''
-          in \stdclause{intro.progress} paragraph 8, using the words already
-          present, to be able to reference that term elsewhere.
-    \item Clarified that \cpp{thread\_local} storage is per processor thread.
-    \item Clarified that a blocking operation blocks a processor thread.
-    \item Clarified that ``potentially concurrent'' actions are performed by
-          different processor threads.
+    \item Hoisted definition of ``fiber'' to start of paragraph.
     \item Clarified that if a fiber terminates by returning an empty \fiber
           instance, \cpp{std::terminate} is called.
-    \item Added \cpp{fiber\_context::current\_exception\_within\_fiber}.
+    \item Added \cpp{constexpr fiber\_context::current\_exception\_within\_fiber}.
     \item Removed definition of ``function call stack.''
     \item Removed change to definition of expression evaluation conflict.
     \item Removed Note about the second fiber in the program.
+    \item Changed ``\fiber instance'' to ``\fiber object.''
+    \item Changed ``method'' to ``member function.''
     \item Removed paragraph numbers from internal cross-references.
     \item Clarified editorial directives amongst not-green new text.
+    \item Used ``fiber.context'' in stable labels.
+    \item Changed the lone remaining preamble section in [fiber.context] from
+    ``Empty vs. Non-Empty'' to ``Preamble.''
+    \item Moved to ``Preamble'' the 1:1 relationship between non-empty \fiber
+    objects and suspended fibers.
+    \item Used ``Effects: Equivalent to \cpp{return <expression>}'' for
+    \cpp{empty()} and \cpp{operator bool()}.
     \item Referenced \justmain instead of \main.
 \end{itemize}
 
