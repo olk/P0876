@@ -3,7 +3,7 @@ namespace std {
 class fiber_context {
 public:
     // [fibercontext.cons], constructors, move and assignment
-    fiber_context() noexcept;
+    fiber_context() noexcept = default;
 
     template<class F>
     explicit fiber_context(F&& entry);
@@ -13,7 +13,7 @@ public:
 
     ~fiber_context();
 
-    fiber_context(fiber_context&& other) noexcept;
+    fiber_context(fiber_context&& other) noexcept = default;
     fiber_context& operator=(fiber_context&& other) noexcept;
     fiber_context(const fiber_context& other) noexcept = delete;
     fiber_context& operator=(const fiber_context& other) noexcept = delete;

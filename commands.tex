@@ -68,6 +68,16 @@
         stringstyle=\ttfamily\color{magenta}
 ] {code/#1.cpp}}
 
+%% based on https://tex.stackexchange.com/a/147883
+\makeatletter
+\newcommand{\dotref}[1][]{%
+  \def\@tempa{#1}%
+  \ifx\@tempa\@empty
+  \else
+\cpp{#1.}
+  \fi
+}
+
 \newcommand{\red}[1]{\colorbox{red}{#1}}
 \newcommand{\green}[1]{\colorbox{green}{#1}}
 \newcommand{\delete}[1]{\red{#1}}
@@ -83,31 +93,31 @@
 \newcommand{\justmain}{\cpp{main}}
 \newcommand{\stdfiber}{std::\fiber}
 \newcommand{\fiber}{\cpp{fiber\_context}}
-\newcommand{\op}{\cpp{operator()()}}
-\newcommand{\opbool}{\cpp{operator bool()}}
-\newcommand{\resume}{\cpp{resume()}}
-\newcommand{\resumewith}{\cpp{resume\_with()}}
-\newcommand{\xtresume}{\cpp{resume\_from\_any\_thread()}}
-\newcommand{\xtresumewith}{\cpp{resume\_from\_any\_thread\_with()}}
-\newcommand{\someresume}{\resume} %% {\resume or \xtresume}
-\newcommand{\anyresumewith}{\resumewith} %% {\resumewith or \xtresumewith}
-\newcommand{\allresumewith}{\resumewith} %% {\resumewith and \xtresumewith}
-\newcommand{\resumesome}{\resume or \resumewith}
-\newcommand{\xtresumesome}{\xtresume or \xtresumewith}
-\newcommand{\anyresume}{\resume or \resumewith} %% {\resume, \resumewith, \xtresume or \xtresumewith}
-\newcommand{\allresume}{\resume and \resumewith} %% {\resume, \resumewith, \xtresume and \xtresumewith}
-\newcommand{\cancel}{\cpp{cancel()}}
-\newcommand{\xtcancel}{\cpp{cancel\_from\_any\_thread()}}
-\newcommand{\anycancel}{\cancel}
-\newcommand{\emptyfn}{\cpp{empty()}}
+\newcommand{\op}[1][]{\dotref[#1]\cpp{operator()()}}
+\newcommand{\opbool}[1][]{\dotref[#1]\cpp{operator bool()}}
+\newcommand{\resume}[1][]{\dotref[#1]\cpp{resume()}}
+\newcommand{\resumewith}[1][]{\dotref[#1]\cpp{resume\_with()}}
+\newcommand{\xtresume}[1][]{\dotref[#1]\cpp{resume\_from\_any\_thread()}}
+\newcommand{\xtresumewith}[1][]{\dotref[#1]\cpp{resume\_from\_any\_thread\_with()}}
+\newcommand{\someresume}[1][]{\resume[#1]} %% {\resume[#1] or \xtresume[#1]}
+\newcommand{\anyresumewith}[1][]{\resumewith[#1]} %% {\resumewith[#1] or \xtresumewith[#1]}
+\newcommand{\allresumewith}[1][]{\resumewith[#1]} %% {\resumewith[#1] and \xtresumewith[#1]}
+\newcommand{\resumesome}[1][]{\resume[#1] or \resumewith[#1]}
+\newcommand{\xtresumesome}[1][]{\xtresume[#1] or \xtresumewith[#1]}
+\newcommand{\anyresume}[1][]{\resume[#1] or \resumewith[#1]} %% {\resume[#1], \resumewith[#1], \xtresume[#1] or \xtresumewith[#1]}
+\newcommand{\allresume}[1][]{\resume[#1] and \resumewith[#1]} %% {\resume[#1], \resumewith[#1], \xtresume[#1] and \xtresumewith[#1]}
+\newcommand{\cancel}[1][]{\dotref[#1]\cpp{cancel()}}
+\newcommand{\xtcancel}[1][]{\dotref[#1]\cpp{cancel\_from\_any\_thread()}}
+\newcommand{\anycancel}[1][]{\cancel[#1]}
+\newcommand{\emptyfn}[1][]{\dotref[#1]\cpp{empty()}}
 %% referenced in history.tex
 \newcommand{\source}{\cpp{stop\_source}}
 \newcommand{\getsource}{\cpp{get\_stop\_source()}}
 \newcommand{\gettoken}{\cpp{get\_stop\_token()}}
 \newcommand{\reqstop}{\cpp{request\_stop()}}
-\newcommand{\canresume}{\cpp{can\_resume()}}
-\newcommand{\canxtresume}{\cpp{can\_resume\_from\_this\_thread()}}
-\newcommand{\canresumesome}{\canresume}
+\newcommand{\canresume}[1][]{\dotref[#1]\cpp{can\_resume()}}
+\newcommand{\canxtresume}[1][]{\dotref[#1]\cpp{can\_resume\_from\_this\_thread()}}
+\newcommand{\canresumesome}[1][]{\canresume[#1]}
 \newcommand{\thread}{\cpp{std::thread}}
 \newcommand{\jthread}{\cpp{std::jthread}}
 \newcommand{\Currthread}{The calling thread\xspace}
