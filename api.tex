@@ -221,31 +221,27 @@ the number of uncaught exceptions in:}
 
 \rSec2[fiber.context]{fiber\_context}
 
-\rSec3[fiber.context.pre]{Overview}
+\rSec3[fiber.context.overview]{Overview}
 
 1 A \fiber object is either \emph{empty} or \emph{non-empty}. A
-default-constructed \fiber is empty. A moved-from \fiber is empty. A \fiber
+default-constructed or moved-from \fiber is empty. A \fiber
 representing a suspended fiber is non-empty.
 
-2 When the running fiber returns a \fiber from its \entryfn, thus resuming the
-designated fiber, the synthesized \fiber passed into the resumed fiber is
-empty.
-
-3 An explicit fiber is prepared by passing an \emph{\entryfn} to \fiber's
+2 An explicit fiber is prepared by passing an \emph{\entryfn} to \fiber's
 constructor. The fiber conceptually comes into existence at the first call to
 one of the \anyresume member functions, which is when that \entryfn is
 entered.
 
-4 When a fiber is first entered, a synthesized non-empty \fiber object
+3 When a fiber is first entered, a synthesized non-empty \fiber object
 representing the newly-suspended previous fiber is passed as a parameter to
 its \entryfn. Once entered, a fiber can suspend by calling one of the \anyresume
-member functions on any accessible non-empty \fiber object. When the
-suspended fiber is resumed, that member function returns a synthesized \fiber object
-representing the newly-suspended previous fiber.
+functions on any accessible non-empty \fiber object. When the
+suspended fiber is resumed, a synthesized \fiber object
+representing the newly-suspended previous fiber is returned.
 \tsnote{The synthesized \fiber object received in either of those ways might
 represent either an explicit fiber or an implicit fiber.}
 
-6 An explicit fiber terminates by returning a non-empty \fiber object from
+4 An explicit fiber terminates by returning a non-empty \fiber object from
 its \entryfn. \Thefiber{that \fiber object} is resumed.
 
 %% \rSec3[fiber.context.toplevel]{Implicit Top-Level Function}
@@ -256,10 +252,14 @@ its \entryfn. \Thefiber{that \fiber object} is resumed.
 %% unwound, this conceptual top-level stack frame serves as delimiter: this point
 %% is where unwinding stops.
 
-7 If the fiber's \entryfn returns an empty \fiber object, \cpp{std::terminate} is called.
+5 When a running fiber returns a \fiber from its \entryfn, thus resuming the
+designated fiber, the synthesized \fiber passed into the resumed fiber is
+empty.
+
+6 If the fiber's \entryfn returns an empty \fiber object, \cpp{std::terminate} is called.
 If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 
-8 Regardless of the number of \fiber declarations, exactly one \fiber object
+7 Regardless of the number of \fiber objects in the program, exactly one of them
 represents each suspended fiber. No \fiber object represents a running fiber.
 
 %% Returning a \fiber object from the explicit fiber's \entryfn is equivalent
