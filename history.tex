@@ -4,10 +4,6 @@ This document supersedes P0876R15.
 \uabschnitt{Changes since P0876R15}
 
 \begin{itemize}
-    \item In [intro.fibers], hoist ``owning thread'' definition to its own
-          paragraph 3 and clarify.
-    \item In [intro.fibers] former paragraph 3, use expositional names for the
-          current fiber and the target fiber to clarify.
     \item \null [fiber.context.pre] is now ``Overview'' instead of ``Preamble''.
     \item Merge [fiber.context.syn] into [fiber.context.class].
     \item Make default \fiber constructor and move constructor \cpp{= default}.
@@ -26,6 +22,36 @@ This document supersedes P0876R15.
           the appearance of a normative statement.
     \item Remove mention of ``legacy behaviour'' from
           \cpp{current\_exception\_within\_fiber()}.
+    \item Remove mention of ``thread of execution'' from ``abstract,''
+          ``control transfer mechanism'' and the section on \exfns.
+    \item Simplify definitions of implicit fiber vs. explicit fiber.
+    \item Add [intro.fibers] statement that a thread is always running one
+          fiber, but can switch between fibers. This replaces the more
+          detailed description of what happens when a fiber calls \anyresume.
+    \item In [intro.fibers], hoist ``owning thread'' definition to its own
+          paragraph 3 and clarify.
+    \item Remove assertion that a fiber is an execution agent.
+    \item Modify \stdclause{except.throw} paragraphs 2 and 4, and \stdclause{except.handle}
+          paragraph 6, to constrain exception propagation to a fiber.
+    \item Describe explicit fiber as being ``prepared,'' with a statement that
+          it comes into existence on first resumption.
+    \item Remove a few stray instances of ``may''.
+    \item Move assertion that a received \fiber object could represent either
+          an explicit fiber or an implicit fiber to a Note.
+    \item Move assertion that no \fiber object represents a running fiber up
+          to Overview.
+    \item In \resumewith description, tease apart ``calling fiber'' from
+          ``previous fiber'' -- previously, ``previous fiber'' was used for
+          each in different places. Use ``calling fiber'' rather than ``this one.''
+    \item Use \cpp{successor} rather than the more generic \cpp{continuation}
+          to reference the \fiber object returned by a terminating fiber.
+    \item Remove one level of nesting from \resumewith \except.
+    \item Remove Note that the caller of \resumewith can detect whether the
+          previous fiber has terminated: not necessarily.
+    \item Hoist section on \exfns to have its own table of contents entry.
+          Extend with examples of bad behavior when switching out of a catch
+          block to a fiber which itself catches some exception before
+          switching back to the original fiber.
 \end{itemize}
 
 \uabschnitt{Changes since D0876R15}

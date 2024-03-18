@@ -84,7 +84,9 @@
 %% \insert is already defined, with a different meaning
 \newcommand{\add}[1]{\green{#1}}
 \newcommand{\replace}[2]{\delete{#1}\add{#2}}
-\newcommand{\stdclause}[1]{\href{https://eel.is/c++draft/#1}{[#1]}}
+\newcommand{\eel}[2]{\href{https://eel.is/c++draft/#1}{#2}}
+\newcommand{\nt}[2]{\eel{#1\#nt:#2}{\emph{#2}}}
+\newcommand{\stdclause}[1]{\eel{#1}{[#1]}}                          
 \newcommand{\xref}[1]{(\stdclause{#1})}
 \newcommand{\true}{\cpp{true}}
 \newcommand{\false}{\cpp{false}}

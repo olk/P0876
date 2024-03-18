@@ -106,10 +106,10 @@ passed (or returned) into the resumed fiber (see \nameref{synthesizing}).
 \zs{Using the active fiber's stack as storage for the CPU state is efficient because no
 additional allocations or deallocations are required.}
 
-\uabschnitt{\exfns}
+\abschnitt{\exfns}\label{exc_scope}
 
-Both \exfns should report exceptions solely on the current thread of execution.
-Reporting exceptions on any other thread of execution would make them
+Both \exfns should report exceptions solely on the current fiber.
+Reporting exceptions thrown on any other fiber would make them
 unreliable in practice.
 
 A straightforward implementation could make \allresume save and restore the
@@ -118,13 +118,65 @@ state. Since \exfns data is necessarily thread-local, the likely cost would be
 a TLS access on every \anyresume call.
 
 Alternatively, \fiber's constructor could update an internal associative
-container whose key is the high end of the new fiber stack. \exfns could
+container whose key is the high end of the new fiber stack area. \exfns could
 call \cpp{upper\_bound()}, passing the current stack pointer, to discover
 which stack is current. This would shift the cost from every context switch
 to \exfns calls.
 
-In 2023, though, the zeitgeist appears to be that \exfns are not sufficiently
+As of 2023, though, the zeitgeist appears to be that \exfns are not sufficiently
 important to warrant altering exception-handling implementations to fix their
 behavior. This is why, in the \nameref{api} section, it is
-implementation-defined whether \exfns are specific to the current thread of
-execution or the current \thread.
+implementation-defined whether \exfns are specific to the current fiber
+or the current \thread.
+
+The following examples have been floated to illustrate problems that can arise
+when \exfns are not local to the current fiber.
+
+In these small examples, the problematic code is obvious. But the power of
+fibers is that a function need not know whether some function it calls (or
+some indirect callee thereof) will resume another fiber. It's not practical
+simply to forbid coders from switching fibers within a catch block.
+
+\uabschnitt{Premature destruction of exception object}
+
+In \stdclause{except.throw} paragraph 4, the destruction of an exception object is
+specified to potentially occur when an active handler for the exception exits,
+not when a handler exits while the exception is still the currently handled
+exception. It is possible to observe, with the Boost implementation, cases
+where an exception is destroyed at a different point than specified (and, in
+particular, when a handler for the exception is still active in a fiber).
+
+\cppf{early_exc_destroy}
+
+\uabschnitt{Throw-expression with no operand}
+
+Both \stdclause{expr.throw} paragraph 3 and \cpp{current\_exception()}
+(\stdclause{propagation} paragraph 8) reference the ``currently handled
+exception'' (\stdclause{except.handle} paragraph 8). Thus, the
+construct \cpp{throw;} is by definition equivalent to
+\cpp{std::rethrow\_exception(std::current\_exception());}
+(\stdclause{propagation} paragraph 9).
+
+The existing definition of currently handled exception:
+
+``The exception with the most recently activated handler that is still active
+is called the \emph{currently handled exception.}''
+
+does not clearly constrain the scope to the current thread. This constraint
+must be inferred from \stdclause{except.throw} paragraph 2:
+
+``When an exception is thrown, control is transferred to the nearest handler
+with a matching type \xref{except.handle}; ``nearest'' means the handler for
+which the \nt{stmt.block}{compound-statement} or
+\nt{class.base.init}{ctor-initializer} following the \cpp{try} keyword was
+most recently entered by the thread of control and not yet exited.''
+
+In any case, if ``currently handled exception'' means the exception with the
+most recently activated handler within any fiber on the current thread, we can
+get the following result.
+
+\cppfl{nullary_throw}
+
+Worse still, the exceptions in question aren't necessarily related to each
+other, and line 36 is more likely to read \cpp{catch (const Bad& caught)} --
+in which case the \cpp{throw;} on line 34 would \emph{not} be caught.
