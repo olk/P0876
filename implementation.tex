@@ -139,12 +139,13 @@ simply to forbid coders from switching fibers within a catch block.
 
 \uabschnitt{Premature destruction of exception object}
 
-In \stdclause{except.throw} paragraph 4, the destruction of an exception object is
-specified to potentially occur when an active handler for the exception exits,
-not when a handler exits while the exception is still the currently handled
-exception. It is possible to observe, with the Boost implementation, cases
-where an exception is destroyed at a different point than specified (and, in
-particular, when a handler for the exception is still active in a fiber).
+In \stdclause{except.throw} paragraph 4, the destruction of an exception
+object is specified to potentially occur when an active handler for the
+exception exits, not when a handler exits while the exception is still the
+currently handled exception. It is possible to observe, with the Boost
+implementation in an Itanium C++ ABI environment, cases where an exception is
+destroyed at a different point than specified (and, in particular, when a
+handler for the exception is still active in a fiber).
 
 \cppf{early_exc_destroy}
 
