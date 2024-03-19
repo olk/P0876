@@ -305,17 +305,17 @@ represents each suspended fiber. No \fiber object represents a running fiber.
 %---------------------------- implicit stack ctor ----------------------------
 \mbrhdr{template<class F> explicit fiber\_context(F\&\& entry)}
 
-1 \mandates
+1 \constraints
+\begin{description}
+    \item[---] \cpp{remove\_cvref\_t<F>} is not the same type as \fiber.
+    \item[---] \cpp{F} meets the \emph{Cpp17CopyConstructible} requirements.
+\end{description}
+
+2 \mandates
 \begin{description}
     \item[---] \cpp{is\_constructible\_v<decay\_t<F>, F>} is \true.
     \item[---] \cpp{is\_invocable\_r\_v<fiber\_context, decay\_t<F>,
                fiber\_context&&>} is \true.
-\end{description}
-
-2 \constraints
-\begin{description}
-    \item[---] \cpp{remove\_cvref\_t<F>} is not the same type as \fiber.
-    \item[---] \cpp{F} meets the \emph{Cpp17CopyConstructible} requirements.
 \end{description}
 
 3 \effects
@@ -346,19 +346,19 @@ represents each suspended fiber. No \fiber object represents a running fiber.
 %---------------------------- explicit stack ctor ----------------------------
 \mbrhdr{template<class F, class D> fiber\_context(F\&\& entry, span<byte> stack, D\&\& deleter)}
 
-1 \mandates
+1 \constraints
+\begin{description}
+    \item[---] \cpp{F} meets the \emph{Cpp17CopyConstructible} requirements.
+    \item[---] \cpp{D} meets the \emph{Cpp17CopyConstructible} requirements.
+\end{description}
+
+2 \mandates
 \begin{description}
     \item[---] \cpp{is\_constructible\_v<decay\_t<F>, F>} is \true.
     \item[---] \cpp{is\_constructible\_v<decay\_t<D>, D>} is \true.
     \item[---] \cpp{is\_invocable\_r\_v<fiber\_context, decay\_t<F>,
                fiber\_context&&>} is \true.
     \item[---] \cpp{is\_invocable\_v<decay\_t<D>, span<byte>>} is \true.
-\end{description}
-
-2 \constraints
-\begin{description}
-    \item[---] \cpp{F} meets the \emph{Cpp17CopyConstructible} requirements.
-    \item[---] \cpp{D} meets the \emph{Cpp17CopyConstructible} requirements.
 \end{description}
 
 3 \effects
