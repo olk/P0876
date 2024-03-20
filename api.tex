@@ -262,6 +262,12 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 7 Regardless of the number of \fiber objects in the program, exactly one of them
 represents each suspended fiber. No \fiber object represents a running fiber.
 
+8 A \fiber object can optionally be constructed by passing an explicit
+\cpp{span<byte>} in which to track the fiber's invocation sequence
+\xref{stacktrace.general}. If at any time during the life of a fiber the
+data storage required to track its invocation sequence exceeds the
+\cpp{size()} of that \cpp{span<byte>}, the behaviour is undefined.
+
 %% Returning a \fiber object from the explicit fiber's \entryfn is equivalent
 %% to returning control to the implicit top-level function.
 %% Similarly,
@@ -292,10 +298,14 @@ represents each suspended fiber. No \fiber object represents a running fiber.
 %%     function above \justmain, the process is terminated.
 %% \end{itemize}
 
+%--------------------------------- synopsis ----------------------------------
+\rSec3[fiber.context.syn]{Header <fiber\_context> synopsis}
+
+\cppf{synopsis}
+
 %--------------------------------- class def ---------------------------------
 \rSec3[fiber.context.class]{Class fiber\_context}
 
-\cppf{synopsis}
 \cppf{fiber}
 
 \newcommand{\state}{\cpp{state}}
@@ -308,7 +318,6 @@ represents each suspended fiber. No \fiber object represents a running fiber.
 1 \constraints
 \begin{description}
     \item[---] \cpp{remove\_cvref\_t<F>} is not the same type as \fiber.
-    \item[---] \cpp{F} meets the \emph{Cpp17CopyConstructible} requirements.
 \end{description}
 
 2 \mandates
@@ -320,7 +329,9 @@ represents each suspended fiber. No \fiber object represents a running fiber.
 
 3 \effects
 \begin{description}
-    \item[---] Let \cpp{entry\_copy} be a copy of \cpp{entry}.
+    \item[---] Let \cpp{entry\_copy} be an object of
+               type \cpp{std::decay\_t<F>} direct-non-list-initialized
+               with \cpp{std::forward<F>(entry)}. 
                \tsnote{\cpp{entry\_copy} is not a member of \fiber because it
                is destroyed on fiber termination, not when a \fiber object is
                destroyed.}
@@ -335,9 +346,8 @@ represents each suspended fiber. No \fiber object represents a running fiber.
 
 5 \except
 \begin{description}
-    \item[---] \cpp{bad\_alloc} if unable to acquire a new function call stack.
-    \item[---] \cpp{system\_error} if unable to prepare the new fiber.
-    \item[---] Any exception thrown by the selected constructor of \cpp{entry}.
+    \item[---] \cpp{bad\_alloc} or \cpp{system\_error} if unable to prepare the new fiber.
+    \item[---] Any exception from initialization of \cpp{entry\_copy}.
 \end{description}
 
 6 \errors
@@ -346,13 +356,7 @@ represents each suspended fiber. No \fiber object represents a running fiber.
 %---------------------------- explicit stack ctor ----------------------------
 \mbrhdr{template<class F, class D> fiber\_context(F\&\& entry, span<byte> stack, D\&\& deleter)}
 
-1 \constraints
-\begin{description}
-    \item[---] \cpp{F} meets the \emph{Cpp17CopyConstructible} requirements.
-    \item[---] \cpp{D} meets the \emph{Cpp17CopyConstructible} requirements.
-\end{description}
-
-2 \mandates
+1 \mandates
 \begin{description}
     \item[---] \cpp{is\_constructible\_v<decay\_t<F>, F>} is \true.
     \item[---] \cpp{is\_constructible\_v<decay\_t<D>, D>} is \true.
@@ -361,11 +365,15 @@ represents each suspended fiber. No \fiber object represents a running fiber.
     \item[---] \cpp{is\_invocable\_v<decay\_t<D>, span<byte>>} is \true.
 \end{description}
 
-3 \effects
+2 \effects
 \begin{description}
-    \item[---] Let \cpp{entry\_copy} be a copy of \cpp{entry}.
+    \item[---] Let \cpp{entry\_copy} be an object of
+               type \cpp{std::decay\_t<F>} direct-non-list-initialized
+               with \cpp{std::forward<F>(entry)}. 
     \item[---] Let \cpp{stack\_copy} be a copy of \cpp{stack}.
-    \item[---] Let \cpp{deleter\_copy} be a copy of \cpp{deleter}.
+    \item[---] Let \cpp{deleter\_copy} be an object of
+               type \cpp{std::decay\_t<D>} direct-non-list-initialized
+               with \cpp{std::forward<F>(deleter)}. 
                \tsnote{\cpp{entry\_copy}, \cpp{stack\_copy} and
                 \cpp{deleter\_copy} are not members of \fiber because they 
                are destroyed on fiber termination, not when a \fiber object is
@@ -373,34 +381,33 @@ represents each suspended fiber. No \fiber object represents a running fiber.
     \item[---] Initializes \cpp{state} to prepare a fiber that will, when
                first resumed, enter \cpp{entry\_copy}.
     \item[---] Any necessary resources are created.
-              \tsnote{It is the caller's responsibility to provide a span of
-              sufficient size for the most deeply nested function calls that
-              will be performed by the new fiber. It might be advantageous to
-              obtain from the operating system a memory block with a read-only
-              guard page to trap stack overflow.}
+               \tsnote{It might be advantageous to obtain from the host
+               environment a memory block with a read-only guard page to trap
+               stack overflow.}
 \end{description}
 
-4 \postcond
+3 \postcond
 \emptyfn is \false.
 
-5 \except
+4 \except
 \begin{description}
-    \item[---] \cpp{invalid\_argument} if \cpp{stack} fails to meet
+    \item[---] \cpp{invalid\_argument} if \cpp{stack.data()} fails to meet
                implementation-defined alignment requirements.
-    \item[---] \cpp{length\_error} if \cpp{stack} is less than the
+    \item[---] \cpp{length\_error} if \cpp{stack.size()} is less than the
                implementation-defined minimum length.
     \item[---] \cpp{system\_error} if unable to prepare the new fiber.
-    \item[---] Any exception thrown by the selected constructor of \cpp{entry}.
-    \item[---] Any exception thrown by the selected constructor of \cpp{deleter}.
+    \item[---] Any exception from initialization of \cpp{entry\_copy}.
+    \item[---] Any exception from initialization of \cpp{deleter\_copy}.
 \end{description}
 
-6 \errors
+5 \errors
 \cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary resources to prepare another fiber.
 
-7 \remarks
-If at any time during the life of the newly created fiber the
-function call stack depth exceeds the size of \cpp{stack}, the behaviour is
-undefined.
+%--------------------------------- move ctor ---------------------------------
+\mbrhdr{fiber\_context(fiber\_context\&\& other) noexcept}
+
+1 \effects
+Initializes \cpp{state} with \cpp{exchange(other.state, nullptr)}.
 
 %----------------------------------- dtor ------------------------------------
 \mbrhdr{\cpp{\~fiber\_context()}}
@@ -422,9 +429,6 @@ must convey to the suspended fiber the need to terminate voluntarily.}
 
 2 \returns
 \this
-
-3 \postcond
-\emptyfn[other] is \true
 
 \rSec4[fiber.context.mem]{Members}
 %-------------------------------- resume_with --------------------------------
@@ -466,7 +470,6 @@ time, ``previous fiber'' means the fiber that resumed \cpp{caller}.
                 \begin{itemize}
                     \item executes \cpp{invoke(deleter\_copy, stack\_copy)}
                     \item destroys \cpp{deleter\_copy}
-                    \item destroys \cpp{stack\_copy}
                 \end{itemize}
             \item reclaims implementation-provided resources
             \item executes \resume[successor].

@@ -13,10 +13,8 @@ public:
 
     ~fiber_context();
 
-    fiber_context(fiber_context&& other) noexcept = default;
+    fiber_context(fiber_context&& other) noexcept;
     fiber_context& operator=(fiber_context&& other) noexcept;
-    fiber_context(const fiber_context& other) noexcept = delete;
-    fiber_context& operator=(const fiber_context& other) noexcept = delete;
 
     // [fibercontext.mem], members
     fiber_context resume() &&;

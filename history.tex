@@ -5,9 +5,8 @@ This document supersedes P0876R15.
 
 \begin{itemize}
     \item \null [fiber.context.overview] is now ``Overview'' instead of ``Preamble''.
-    \item Merge [fiber.context.syn] into [fiber.context.class].
-    \item Make default \fiber constructor and move constructor \cpp{= default}.
-          Remove their sections from member descriptions.
+    \item Make default \fiber constructor \cpp{= default}.
+          Remove its section from member descriptions.
     \item In unary constructor, move ``Mandates'' before ``Constraints''. The
           ``Preconditions'' entry is actually a Constraint: move it and remove
           ``Preconditions''.
@@ -52,6 +51,21 @@ This document supersedes P0876R15.
           Extend with examples of bad behavior when switching out of a catch
           block to a fiber which itself catches some exception before
           switching back to the original fiber.
+    \item Remove explicit \cpp{delete} declarations of copy constructor and
+          copy assignment: these are implicitly deleted.
+    \item Since we want the constructor's \cpp{entry} and \cpp{deleter}
+          parameters to support move-only objects,
+          remove \emph{Cpp17CopyConstructible} requirements.
+    \item For the same reason, state that \cpp{entry\_copy}
+          and \cpp{deleter\_copy} are initialized rather than copied.
+    \item Therefore ``any exception from initialization of \cpp{entry\_copy}''
+          and the same for \cpp{deleter\_copy}.
+    \item Remove mention of ``function call stack'' from constructor \except.
+    \item \cpp{stack.data()} and \cpp{stack.size()} must meet implementation
+          requirements, not the \cpp{span<byte>} itself.
+    \item Remove \postcond \cpp{other.empty()} from move constructor and
+          move assignment: these are implied by definition.
+    \item Move statement about UB from stack overflow to \fiber Overview.
 \end{itemize}
 
 \uabschnitt{Changes since D0876R15}
