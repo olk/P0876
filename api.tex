@@ -489,8 +489,8 @@ following sequence of steps:
                     \item destroy \cpp{after\_deleter\_copy}
                 \end{itemize}
             \item reclaim implementation-provided resources
-            \item exit \thefiber{before}
-            \item direct the current thread to resume \thefiber{successor}
+            \item exit \thefiber{\cpp{before}}
+            \item direct the current thread to resume \thefiber{\cpp{successor}}
             \item execute internal-resume(\cpp{successor}, \cpp{fiber\_context()}).
         \end{itemize}
 \end{description}
@@ -520,13 +520,13 @@ The calling fiber can be resumed by the previous fiber in either of two ways:
                Let \cpp{returned} be the \fiber object returned by \cpp{fn}.
                \tsnote{\cpp{returned} can be other than \cpp{caller}.
                \cpp{returned} can be empty.}
-    \item[---] executes internal-resume(\cpp{target}, \cpp{returned}).
+    \item[---] Executes internal-resume(\cpp{target}, \cpp{returned}).
 \end{description}
 
 4 \returns
 \begin{description}
-    \item[\bfs{Case C:}] an empty \fiber.
-    \item[\bfs{Case D:}] the \fiber returned
+    \item[\bfs{Case C:}] an empty \fiber object.
+    \item[\bfs{Case D:}] the \fiber object returned
     by \cpp{invoke\_r<fiber\_context>(somefn, std::move(previous))}.
 \end{description}
 
