@@ -2,7 +2,7 @@ namespace std {
 
 class fiber_context {
 public:
-    // [fibercontext.cons], constructors, move and assignment
+    // [fiber.context.cons], constructors, move and assignment
     fiber_context() noexcept = default;
 
     template<class F>
@@ -16,7 +16,7 @@ public:
     fiber_context(fiber_context&& other) noexcept;
     fiber_context& operator=(fiber_context&& other) noexcept;
 
-    // [fibercontext.mem], members
+    // [fiber.context.mem], members
     fiber_context resume() &&;
     template<class Fn>
     fiber_context resume_with(Fn&& fn) &&;
@@ -30,7 +30,7 @@ public:
 
     void swap(fiber_context& other) noexcept;
 
-    // [fibercontext.special], specialized algorithms
+    // [fiber.context.special], specialized algorithms
     friend void swap(fiber_context& lhs, fiber_context& rhs) noexcept;
 
 private:

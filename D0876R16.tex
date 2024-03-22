@@ -8,6 +8,7 @@
 \usepackage[iso,american]{isodate}  % ISO format of dates
 \usepackage[final]{listings}        % code listings
 \usepackage{booktabs}               % fancy tables
+\usepackage[color]{changebar}       % changebars for large inserted passages
 \usepackage{longtable}              % auto breaking tables
 \usepackage{ltcaption}              % fix captions for long tables
 \usepackage{relsize}                % provide relative font size changes
@@ -33,6 +34,8 @@
 \usepackage{svg}                    % SVG pictures
 \usepackage{tikz}                   % creating PS and PDF graphics
 \usetikzlibrary{arrows,automata}
+
+\cbcolor{green}
 
 \usepackage[pdftex,
             pdftitle    = {fibers without scheduler},
@@ -60,7 +63,7 @@
 \small
 \begin{tabbing}
     Document number: \= D0876R16\\
-    Date:            \> 2024-03-20\\
+    Date:            \> 2024-03-22\\
     Author:          \> Oliver Kowalke (oliver.kowalke@gmail.com)\\
                      \> Nat Goodspeed (nat@lindenlab.com)\\
     Audience:        \> LWG, CWG\\

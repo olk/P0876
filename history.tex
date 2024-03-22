@@ -14,9 +14,6 @@ This document supersedes P0876R15.
     \item In constructor descriptions, use less precise language about copying
           \cpp{entry}, \cpp{stack} and \cpp{deleter}. Add Note about them not
           being \fiber members. Move mention of stack to a Note.
-    \item In \resumewith description, move statement forbidding early
-          exceptions from ``Throws'' to ``Effects''.
-    \item \resumewith executes \resume[continuation], not ``as if by''.
     \item Rephrase \resumewith Note about emptying its \fiber object to avoid
           the appearance of a normative statement.
     \item Remove mention of ``legacy behaviour'' from
@@ -39,12 +36,9 @@ This document supersedes P0876R15.
           an explicit fiber or an implicit fiber to a Note.
     \item Move assertion that no \fiber object represents a running fiber up
           to Overview.
-    \item In \resumewith description, tease apart ``calling fiber'' from
-          ``previous fiber'' -- previously, ``previous fiber'' was used for
-          each in different places. Use ``calling fiber'' rather than ``this one.''
     \item Use \cpp{successor} rather than the more generic \cpp{continuation}
           to reference the \fiber object returned by a terminating fiber.
-    \item Remove one level of nesting from \resumewith \except.
+    \item Remove nesting from \resumewith \except.
     \item Remove Note that the caller of \resumewith can detect whether the
           previous fiber has terminated: not necessarily.
     \item Hoist section on \exfns to have its own table of contents entry.
@@ -66,6 +60,34 @@ This document supersedes P0876R15.
     \item Remove \postcond \cpp{other.empty()} from move constructor and
           move assignment: these are implied by definition.
     \item Move statement about UB from stack overflow to \fiber Overview.
+    \item Modify example about early destruction of exceptions to add sequence
+          comments, highlight access to a destroyed exception object.
+    \item Fix erroneous [fibercontext.mumble] references in class comments.
+    \item Add green changebars for entirely new sections.
+    \item Remove \cpp{std::} qualification from \cpp{decay\_t} in \effects.
+    \item Remove the destructor Note about encouraging a fiber to terminate
+          voluntarily.
+    \item Clarify that \cpp{current\_exception\_within\_fiber()} is \true if
+          \curex reports exceptions ``only'' within the current fiber.
+          Remove \cpp{constexpr}: compiler can produce object code that might
+          be linked with alternative runtimes.
+    \item Remove ``.'' after ``;''.
+    \item \resumewith\xspace\mandates\xspace\cpp{is\_invocable\_r<...>} is \true.
+          Add periods to \mandates and \precond.
+    \item Add \precond to span constructor that \cpp{deleter} must not throw.
+          Remove cleanup exceptions from \resumewith \xspace \except. Remove
+          ``before this point, no exceptions'' bullet in \effects.\
+    \item \resumewith evaluates \cpp{invoke\_r(fn)}. Merge Notes about what
+          its \cpp{returned} can be.
+    \item Substantially rework \resumewith description. Break out and label
+          the four cases: (target not yet entered, target previously
+          suspended); (previous exited, previous called \resumewith). Use case
+          labels in \effects, \returns and \except. Break out internal-resume
+          operation because it's self-referential.
+    \item Add span constructor \precond for \cpp{decay\_t<D>}
+          meeting \emph{Cpp17MoveConstructible} requirements.
+    \item Remove \canresume Note about ``can resume.''
+    \item For \resume, use \cpp{std::identity} instead of identity lambda.
 \end{itemize}
 
 \uabschnitt{Changes since D0876R15}
