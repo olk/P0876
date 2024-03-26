@@ -94,7 +94,7 @@ above.
 %% The \emph{last} fiber on a particular thread has no non-empty \fiber to
 %% return. For this reason, returning an empty \fiber instance (\opbool
 %% returns \false) terminates the calling thread. This is true whether or
-%% not the thread's default fiber (see \nameref{fiber-context.implicit}) has
+%% not the thread's default fiber (see \nameref{fiber-context.general}) has
 %% terminated.
 
 %% \uabschnitt{stack unwinding}\label{unwinding}
@@ -198,7 +198,7 @@ above.
 %% on the thread destroying the \fiber instance.
 %% 
 %% As a consequence, destroying a \fiber instance representing a thread's default
-%% fiber (see \nameref{fiber-context.implicit})
+%% fiber (see \nameref{fiber-context.general})
 %% from any other thread engages Undefined Behaviour.\footnote{One unobvious case
 %% would be if a fiber running on non-\main thread \cpp{T} stores a \fiber
 %% representing \cpp{T}'s default fiber in a static variable, whether
@@ -208,7 +208,7 @@ above.
 %% \subparagraph{marker frame}
 %% 
 %% The \fiber facility behaves as if there is an implicit top-level function above
-%% each explicit fiber's \entryfn. (See \nameref{fiber-context.implicit}) This
+%% each explicit fiber's \entryfn. (See \nameref{fiber-context.general}) This
 %% top-level function serves to delimit stack unwinding. Once the stack has been
 %% unwound to that point, it is as if control returns to the implicit top-level function. The
 %% implicit top-level function is conceptually responsible for freeing the explicit fiber's

@@ -2,8 +2,8 @@ namespace std {
 
 class fiber_context {
 public:
-    // [fibercontext.cons], constructors, move and assignment
-    fiber_context() noexcept;
+    // [fiber.context.cons], constructors, move and assignment
+    fiber_context() noexcept = default;
 
     template<class F>
     explicit fiber_context(F&& entry);
@@ -15,10 +15,8 @@ public:
 
     fiber_context(fiber_context&& other) noexcept;
     fiber_context& operator=(fiber_context&& other) noexcept;
-    fiber_context(const fiber_context& other) noexcept = delete;
-    fiber_context& operator=(const fiber_context& other) noexcept = delete;
 
-    // [fibercontext.mem], members
+    // [fiber.context.mem], members
     fiber_context resume() &&;
     template<class Fn>
     fiber_context resume_with(Fn&& fn) &&;
@@ -28,13 +26,15 @@ public:
     explicit operator bool() const noexcept;
     bool empty() const noexcept;
 
+    static constexpr bool current_exception_within_fiber() noexcept;
+
     void swap(fiber_context& other) noexcept;
 
-    // [fibercontext.special], specialized algorithms
+    // [fiber.context.special], specialized algorithms
     friend void swap(fiber_context& lhs, fiber_context& rhs) noexcept;
 
 private:
-    void* state;         // exposition only
+    void* state = nullptr;          // exposition only
 };
 
 } // namespace std
