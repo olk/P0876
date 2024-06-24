@@ -88,6 +88,8 @@
 \newcommand{\nt}[2]{\eel{#1\#nt:#2}{\emph{#2}}}
 \newcommand{\stdclause}[1]{\eel{#1}{[#1]}}                          
 \newcommand{\xref}[1]{(\stdclause{#1})}
+\newcommand{\stdterm}[2]{#1\xspace\xref{#2}}
+\newcommand{\stdsection}[2]{§#1\xspace\stdclause{#2}}
 \newcommand{\true}{\cpp{true}}
 \newcommand{\false}{\cpp{false}}
 \newcommand{\dtor}{\cpp{\~fiber\_context()}}

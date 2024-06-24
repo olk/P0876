@@ -1,14 +1,14 @@
 \newpage
 \abschnitt{Wording}\label{api}
 
-This wording is relative to N4971.\cite{Standard}
+This wording is relative to N4981.\cite{Standard}
 
-\zs{Append to §3.6 \stdclause{defns.block} as indicated:}
+\zs{Append to \stdsection{3.6}{defns.block} as indicated:}
 
 \add{\tsnoten{1 to entry}{Unless stated otherwise, blocking blocks the current
 thread.}}
 
-\zs{Modify §4.1.2 \stdclause{intro.abstract} paragraph 6.3 as indicated:}
+\zs{Modify \stdsection{4.1.2}{intro.abstract} paragraph 7.3 as indicated:}
 
 \begin{description}
     \item[---] The input and output dynamics of interactive devices shall take
@@ -126,7 +126,7 @@ thread.}}
 %   destroying or assigning to a non-empty fiber_context
 %*****************************************************************************
 
-\zs{Modify §6.9.2.1 \stdclause{intro.multithread.general} paragraph 1 as indicated:}
+\zs{Modify \stdsection{6.9.2.1}{intro.multithread.general} paragraph 1 as indicated:}
 
 A \emph{thread of execution} (also known as a \emph{thread}) is
 \replace{a single flow of control}{the primary execution agent}\\
@@ -140,7 +140,7 @@ execution steps}.
 
 \add{When a thread is created, it runs a default fiber ([intro.fibers]).}
 
-\zs{Insert before §6.9.3 \stdclause{basic.start} and renumber existing 6.9.3 to 6.9.4:}
+\zs{Insert before \stdsection{6.9.3}{basic.start} and renumber existing 6.9.3 to 6.9.4:}
 
 \setcounter{section}{6}
 \setcounter{subsection}{9}
@@ -175,7 +175,7 @@ fiber's \emph{owning thread.} The owning thread never changes.
 undefined.}
 \cbend
 
-\zs{Modify §14.2 \stdclause{except.throw} paragraph 2 as indicated:}
+\zs{Modify \stdsection{14.2}{except.throw} paragraph 2 as indicated:}
 
 When an exception is thrown, control is transferred to the nearest handler
 with a matching type \xref{except.handle}; ``nearest'' means the handler for
@@ -184,19 +184,19 @@ which the \nt{stmt.block}{compound-statement} or
 most recently entered by the \replace{thread of control}{current fiber} and
 not yet exited.
 
-\zs{Modify §14.2 \stdclause{except.throw} paragraph 4 Note 3 as indicated:}
+\zs{Modify \stdsection{14.2}{except.throw} paragraph 4 Note 3 as indicated:}
 
 \tsnoten{3}{A thrown exception does not propagate to other
 \replace{threads}{fibers} unless caught, stored, and rethrown using
 appropriate library functions; see \stdclause{propagation} and \stdclause{futures}.}
 
-\zs{Modify §14.4 \stdclause{except.handle} paragraph 6 as indicated:}
+\zs{Modify \stdsection{14.4}{except.handle} paragraph 6 as indicated:}
 
 If no match is found among the handlers for a try block, the search for a
 matching handler continues in a dynamically surrounding try block of the same
 \replace{thread}{fiber}.
 
-\zs{Append to §14.4 \stdclause{except.handle} paragraph 8 as indicated:}
+\zs{Append to \stdsection{14.4}{except.handle} paragraph 8 as indicated:}
 
 \cbstart
 It is implementation-defined whether the currently handled exception
@@ -208,7 +208,10 @@ activated handler that is still active within:
 \end{itemize}
 \cbend
 
-\zs{Append to §14.6.3 \stdclause{except.uncaught} paragraph 1 as indicated:}
+\zs{Modify \stdsection{14.6.3}{except.uncaught} paragraph 1 as indicated:}
+
+The function \stdterm{\cpp{std​::​uncaught\_exceptions}}{uncaught.exceptions}
+returns the number of uncaught exceptions \delete{in the current thread}.
 
 \cbstart
 It is implementation-defined whether \cpp{uncaught\_exceptions()} returns
@@ -271,10 +274,10 @@ If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 represents each suspended fiber. No \fiber object represents a running fiber.
 
 8 A \fiber object can optionally be constructed by passing an explicit
-\cpp{span<byte>} in which to track the fiber's invocation sequence
-\xref{stacktrace.general}. If at any time during the life of a fiber the
-data storage required to track its invocation sequence exceeds the
-\cpp{size()} of that \cpp{span<byte>}, the behaviour is undefined.
+\cpp{span<byte>} in which to track the fiber's
+\stdterm{invocation sequence}{stacktrace.general}. If at any time during the
+life of a fiber the data storage required to track its invocation sequence
+exceeds the \cpp{size()} of that \cpp{span<byte>}, the behaviour is undefined.
 
 %% Returning a \fiber object from the explicit fiber's \entryfn is equivalent
 %% to returning control to the implicit top-level function.
@@ -639,7 +642,7 @@ Equivalent to: \cpp{lhs.swap(rhs)}.
 
 \cbend
 
-\zs{Modify §19.6.1 \stdclause{stacktrace.general} as indicated:}
+\zs{Modify \stdsection{19.6.1}{stacktrace.general} as indicated:}
 
 1 Subclause \stdclause{stacktrace} describes components that C++ programs may use to
 store the stacktrace of the current \delete{thread of}\\
@@ -652,6 +655,6 @@ in the current \replace{thread of execution}{fiber} is a sequence
 $x_i$ is within the function invocation $x_{i+1}$ \xref{intro.execution}.
 
 \abschnitt{Feature-test Macro}
-\zs{Add a new feature-test macro to §17.3.2 \stdclause{version.syn} as indicated:}
+\zs{Add a new feature-test macro to \stdsection{17.3.2}{version.syn} as indicated:}
 
 \add{\cpp{#define \__cpp\_lib\_fiber\_context 202XXXL // also in <fiber\_context>}}
