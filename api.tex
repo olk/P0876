@@ -456,56 +456,52 @@ The operation of \resumewith involves at least two and possibly three fibers:
     \item \resumewith suspends the calling fiber and synthesizes
           a \fiber object representing the suspended calling fiber. Let
           \cpp{caller} be the synthesized \fiber object representing the
-          calling fiber. \resumewith does not return until a running fiber, the
+          calling fiber.
+    \item \resumewith does not return until a running fiber, the
           ``previous fiber,'' resumes \cpp{caller}.
           \tsnote{The previous fiber can be other than the target fiber.}
+          Let \cpp{previous} be the synthesized \fiber object representing the
+          previous fiber.
 \end{itemize}
 
 Given a non-empty \fiber object \cpp{after}, the ``destination fiber''
-(\thefiber{\cpp{after}}) can be in either of two states:
+(\thefiber{\cpp{after}}) can be in either of two states, as follows.
 
 \begin{description}
-    \item[\bfs{Case A:}] The destination fiber has already been entered. At some earlier
-          time, it suspended by calling \resumewith[other], where \cpp{other}
-          was some non-empty \fiber object.
-    \item[\bfs{Case B:}] The destination fiber's \entryfn has not yet been entered.
-\end{description}
-
-Let \emph{internal-resume(\cpp{after}, \cpp{before})}, where \cpp{after} is a
-non-empty \fiber object and \cpp{before} is another \fiber object, denote the
-following sequence of steps:
-
-\begin{description}
-    \item[\bfs{Case A:}] Return \cpp{before} from \resumewith[other].
-    \item[\bfs{Case B:}]
-           Let \cpp{after\_entry\_copy} be the \cpp{entry\_copy} associated with \cpp{after}.
-           Let \cpp{after\_stack\_copy} be the \cpp{stack\_copy}, if any, associated with \cpp{after}.
-           Let \cpp{after\_deleter\_copy} be the \cpp{deleter\_copy}, if any, associated with \cpp{after}.
-           Let \cpp{successor} be the result of executing
-           \cpp{invoke\_r<fiber\_context>(after\_entry\_copy, std::move(before))}.
-           On return from \cpp{after\_entry\_copy}:
+    \item[---]
+          Let \emph{internal-resume(\cpp{after}, \cpp{before})},
+          where \cpp{after} is a non-empty \fiber object and \cpp{before} is
+          another \fiber object, denote the following sequence of steps if the
+          destination fiber has already been entered. That implies that at
+          some earlier time, the destination fiber suspended itself by
+          calling \resumewith[other], where \cpp{other} was some
+          non-empty \fiber object.
         \begin{itemize}
-            \item destroy \cpp{after\_entry\_copy}
-            \item if \cpp{after\_stack\_copy} and \cpp{after\_deleter\_copy} exist:
-                \begin{itemize}
-                    \item execute \cpp{invoke(after\_deleter\_copy, after\_stack\_copy)}
-                    \item destroy \cpp{after\_deleter\_copy}
-                \end{itemize}
-            \item reclaim implementation-provided resources
-            \item exit \thefiber{\cpp{before}}
-            \item direct the current thread to resume \thefiber{\cpp{successor}}
-            \item execute internal-resume(\cpp{successor}, \cpp{fiber\_context()}).
+            \item Return \cpp{before} from \resumewith[other].
+        \end{itemize}   
+    \item[---] Otherwise (the destination fiber's \entryfn has not
+          yet been entered), let \emph{internal-resume(\cpp{after}, \cpp{before})}
+          denote the following sequence of steps:
+        \begin{itemize}
+            \item Let \cpp{after\_entry\_copy} be the \cpp{entry\_copy} associated with \cpp{after}.
+            \item Let \cpp{after\_stack\_copy} be the \cpp{stack\_copy}, if any, associated with \cpp{after}.
+            \item Let \cpp{after\_deleter\_copy} be the \cpp{deleter\_copy}, if any, associated with \cpp{after}.
+            \item Let \cpp{successor} be the result of executing
+                  \cpp{invoke\_r<fiber\_context>(after\_entry\_copy, std::move(before))}.
+            \item On return from \cpp{after\_entry\_copy}:
+            \begin{itemize}
+                \item destroy \cpp{after\_entry\_copy}
+                \item if \cpp{after\_stack\_copy} and \cpp{after\_deleter\_copy} exist:
+                    \begin{itemize}
+                        \item execute \cpp{invoke(after\_deleter\_copy, after\_stack\_copy)}
+                        \item destroy \cpp{after\_deleter\_copy}
+                    \end{itemize}
+                \item reclaim implementation-provided resources
+                \item exit \thefiber{\cpp{after}}
+                \item direct the current thread to resume \thefiber{\cpp{successor}}
+                \item execute internal-resume(\cpp{successor}, \cpp{fiber\_context()}).
+            \end{itemize}
         \end{itemize}
-\end{description}
-
-The calling fiber can be resumed by the previous fiber in either of two ways:
-
-\begin{description}
-    \item[\bfs{Case C:}] The previous fiber returns \cpp{caller} from its \entryfn.
-    \item[\bfs{Case D:}] The previous fiber
-          calls \cpp{caller.resume\_with(somefn)}, where \cpp{somefn} can be
-          other than \cpp{fn}. Let \cpp{previous} be the synthesized \fiber
-          object representing the previous fiber.
 \end{description}
 
 1 \mandates
@@ -527,17 +523,25 @@ The calling fiber can be resumed by the previous fiber in either of two ways:
 \end{description}
 
 4 \returns
+
 \begin{description}
-    \item[\bfs{Case C:}] an empty \fiber object.
-    \item[\bfs{Case D:}] the \fiber object returned
-    by \cpp{invoke\_r<fiber\_context>(somefn, std::move(previous))}.
+    \item[---] If the previous fiber resumed the calling fiber by returning \cpp{caller},
+          an empty \fiber.
+    \item[---] If the previous fiber resumed the calling fiber by
+          calling \cpp{caller.resume\_with(somefn)}, the \fiber object returned
+          by \cpp{invoke\_r<fiber\_context>(somefn, std::move(previous))}.
 \end{description}
 
 5 \except
-\begin{description}
-    \item[\bfs{Case D:}] Any exception thrown by \cpp{invoke\_r<fiber\_context>(somefn,
+
+If the previous fiber resumed the calling fiber by calling \cpp{caller.resume\_with(somefn)}:
+\begin{itemize}
+    \item Any exception thrown by \cpp{invoke\_r<fiber\_context>(somefn,
           std::move(previous))}.
-\end{description}
+\end{itemize}
+
+\tsnote{\resumewith throws nothing before suspending the calling fiber and
+ensuring \emptyfn is \true.} 
 
 6 \postcond
 \emptyfn is \true.
@@ -653,6 +657,12 @@ and query information about the stored stacktrace at runtime.
 in the current \replace{thread of execution}{fiber} is a sequence
 ($x_0$,...,$x_n$) of evaluations such that, for $i \geq 0$,
 $x_i$ is within the function invocation $x_{i+1}$ \xref{intro.execution}.
+
+\abschnitt{Header File}
+
+\zs{Add a new header file to Table 24 in \stdsection{16.4.2.3}{headers}:}
+
+\add{\cpp{<fiber\_context>}}
 
 \abschnitt{Feature-test Macro}
 \zs{Add a new feature-test macro to \stdsection{17.3.2}{version.syn} as indicated:}
