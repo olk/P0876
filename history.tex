@@ -1,5 +1,148 @@
 \abschnitt{Revision History}\label{history}
-This document supersedes P0876R13.
+This document supersedes P0876R16.
+
+\uabschnitt{Changes since P0876R16}
+
+\begin{itemize}
+    \item Update to reference N4981.
+    \item Add \cpp{<fiber\_context>} header file to headers table.
+    \item Remove \resumewith ``Case A'' and ``Case B'' in favor of
+          nested bullet lists. Fix a bug in definition of internal-resume.
+    \item Revert \resumewith\xspace\returns and \except clauses to R15
+          structure, eliminating ``Case C'' and ``Case D''.
+\end{itemize}
+
+\uabschnitt{Changes since P0876R15}
+
+\begin{itemize}
+    \item \null [fiber.context.overview] is now ``Overview'' instead of ``Preamble''.
+    \item Make default \fiber constructor \cpp{= default}.
+          Remove its section from member descriptions.
+    \item In unary constructor, move ``Mandates'' before ``Constraints''. The
+          ``Preconditions'' entry is actually a Constraint: move it and remove
+          ``Preconditions''.
+    \item In span constructor, stated ``Preconditions'' are actually ``Constraints''.
+    \item In constructor descriptions, use less precise language about copying
+          \cpp{entry}, \cpp{stack} and \cpp{deleter}. Add Note about them not
+          being \fiber members. Move mention of stack to a Note.
+    \item Rephrase \resumewith Note about emptying its \fiber object to avoid
+          the appearance of a normative statement.
+    \item Remove mention of ``legacy behaviour'' from
+          \cpp{current\_exception\_within\_fiber()}.
+    \item Remove mention of ``thread of execution'' from ``abstract,''
+          ``control transfer mechanism'' and the section on \exfns.
+    \item Simplify definitions of implicit fiber vs. explicit fiber.
+    \item Add [intro.fibers] statement that a thread is always running one
+          fiber, but can switch between fibers. This replaces the more
+          detailed description of what happens when a fiber calls \anyresume.
+    \item In [intro.fibers], hoist ``owning thread'' definition to its own
+          paragraph 3 and clarify.
+    \item Remove assertion that a fiber is an execution agent.
+    \item Modify \stdclause{except.throw} paragraphs 2 and 4, and \stdclause{except.handle}
+          paragraph 6, to constrain exception propagation to a fiber.
+    \item Describe explicit fiber as being ``prepared,'' with a statement that
+          it comes into existence on first resumption.
+    \item Remove a few stray instances of ``may''.
+    \item Move assertion that a received \fiber object could represent either
+          an explicit fiber or an implicit fiber to a Note.
+    \item Move assertion that no \fiber object represents a running fiber up
+          to Overview.
+    \item Use \cpp{successor} rather than the more generic \cpp{continuation}
+          to reference the \fiber object returned by a terminating fiber.
+    \item Remove nesting from \resumewith \except.
+    \item Remove Note that the caller of \resumewith can detect whether the
+          previous fiber has terminated: not necessarily.
+    \item Hoist section on \exfns to have its own table of contents entry.
+          Extend with examples of bad behavior when switching out of a catch
+          block to a fiber which itself catches some exception before
+          switching back to the original fiber.
+    \item Remove explicit \cpp{delete} declarations of copy constructor and
+          copy assignment: these are implicitly deleted.
+    \item Since we want the constructor's \cpp{entry} and \cpp{deleter}
+          parameters to support move-only objects,
+          remove \emph{Cpp17CopyConstructible} requirements.
+    \item For the same reason, state that \cpp{entry\_copy}
+          and \cpp{deleter\_copy} are initialized rather than copied.
+    \item Therefore ``any exception from initialization of \cpp{entry\_copy}''
+          and the same for \cpp{deleter\_copy}.
+    \item Remove mention of ``function call stack'' from constructor \except.
+    \item \cpp{stack.data()} and \cpp{stack.size()} must meet implementation
+          requirements, not the \cpp{span<byte>} itself.
+    \item Remove \postcond \cpp{other.empty()} from move constructor and
+          move assignment: these are implied by definition.
+    \item Move statement about UB from stack overflow to \fiber Overview.
+    \item Modify example about early destruction of exceptions to add sequence
+          comments, highlight access to a destroyed exception object.
+    \item Fix erroneous [fibercontext.mumble] references in class comments.
+    \item Add green changebars for entirely new sections.
+    \item Remove \cpp{std::} qualification from \cpp{decay\_t} in \effects.
+    \item Remove the destructor Note about encouraging a fiber to terminate
+          voluntarily.
+    \item Clarify that \cpp{current\_exception\_within\_fiber()} is \true if
+          \curex reports exceptions ``only'' within the current fiber.
+          Remove \cpp{constexpr}: compiler can produce object code that might
+          be linked with alternative runtimes.
+    \item Remove ``.'' after ``;''.
+    \item \resumewith\xspace\mandates\xspace\cpp{is\_invocable\_r<...>} is \true.
+          Add periods to \mandates and \precond.
+    \item Add \precond to span constructor that \cpp{deleter} must not throw.
+          Remove cleanup exceptions from \resumewith \xspace \except. Remove
+          ``before this point, no exceptions'' bullet in \effects.\
+    \item \resumewith evaluates \cpp{invoke\_r(fn)}. Merge Notes about what
+          its \cpp{returned} can be.
+    \item Substantially rework \resumewith description. Break out and label
+          the four cases: (target not yet entered, target previously
+          suspended); (previous exited, previous called \resumewith). Use case
+          labels in \effects, \returns and \except. Break out internal-resume
+          operation because it's self-referential.
+    \item Add span constructor \precond for \cpp{decay\_t<D>}
+          meeting \emph{Cpp17MoveConstructible} requirements.
+    \item Remove \canresume Note about ``can resume.''
+    \item For \resume, use \cpp{std::identity} instead of identity lambda.
+\end{itemize}
+
+\uabschnitt{Changes since D0876R15}
+
+\begin{itemize}
+    \item Updated to reference N4971.
+    \item Inserted a section to clarify relationship between threads and fibers.
+    \item Borrowed ``single flow of control'' definition for ``fiber.''
+    \item Added Note clarifying ``flow of control'' as state, with reference
+    to \stdclause{stacktrace.general}.
+    \item Changed stacktrace ``invocation sequence'' to reference ``fiber'' rather
+    than ``thread of execution.''
+    \item Changed ``thread'' definition to be the execution agent that runs fibers.
+    \item Clarified that if a fiber terminates by returning an empty \fiber
+          instance, \cpp{std::terminate} is called.
+    \item Added \cpp{constexpr fiber\_context::current\_exception\_within\_fiber}.
+    \item Removed definition of ``function call stack.''
+    \item Removed change to definition of expression evaluation conflict.
+    \item Removed Note about the second fiber in the program.
+    \item Changed ``\fiber instance'' to ``\fiber object.''
+    \item Changed ``method'' to ``member function.''
+    \item Removed paragraph numbers from internal cross-references.
+    \item Clarified editorial directives amongst not-green new text.
+    \item Used ``fiber.context'' in stable labels.
+    \item Changed the lone remaining preamble section in [fiber.context] from
+    ``Empty vs. Non-Empty'' to ``Preamble.''
+    \item Moved to ``Preamble'' the 1:1 relationship between non-empty \fiber
+    objects and suspended fibers.
+    \item Used ``Effects: Equivalent to \cpp{return <expression>}'' for
+    \cpp{empty()} and \cpp{operator bool()}.
+    \item Referenced \justmain instead of \main.
+\end{itemize}
+
+\uabschnitt{Changes since P0876R14}
+
+\begin{itemize}
+    \item Invoked ``blocks with forward progress guarantee delegation'' words
+          of power for \resumewith, guaranteeing mutual exclusion.
+    \item Fixed Mandates and Throws concerning the entry function and deleter
+          passed to the implicit-stack or explicit-stack constructor.
+    \item Cleaned up wording around initializing, assigning and testing the
+          exposition-only \cpp{state} member.
+    \item Dampened the optimism of the proposed feature-test macro.
+\end{itemize}
 
 \uabschnitt{Changes since P0876R13}
 
@@ -7,7 +150,7 @@ This document supersedes P0876R13.
     \item At LEWG's request, retracted changes to \cpp{uncaught\_exceptions()}
           and \cpp{current\_exception()}, instead clarifying that results may
           reflect exceptions on other fibers running on the current thread.
-    \item Updated against draft standard N4950.
+    \item Updated against draft standard N4958.
     \item Deleted ``User-Mode'' from new section title ``Cooperative Threads''
           and removed the explanatory paragraph.
     \item Removed \cpp{explicit} from the explicit-stack constructor.

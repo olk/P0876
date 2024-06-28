@@ -68,49 +68,67 @@
         stringstyle=\ttfamily\color{magenta}
 ] {code/#1.cpp}}
 
+%% based on https://tex.stackexchange.com/a/147883
+\makeatletter
+\newcommand{\dotref}[1][]{%
+  \def\@tempa{#1}%
+  \ifx\@tempa\@empty
+  \else
+\cpp{#1.}
+  \fi
+}
+
 \newcommand{\red}[1]{\colorbox{red}{#1}}
 \newcommand{\green}[1]{\colorbox{green}{#1}}
 \newcommand{\delete}[1]{\red{#1}}
 %% \insert is already defined, with a different meaning
 \newcommand{\add}[1]{\green{#1}}
 \newcommand{\replace}[2]{\delete{#1}\add{#2}}
-\newcommand{\stdclause}[1]{\href{https://eel.is/c++draft/#1}{[#1]}}
+\newcommand{\eel}[2]{\href{https://eel.is/c++draft/#1}{#2}}
+\newcommand{\nt}[2]{\eel{#1\#nt:#2}{\emph{#2}}}
+\newcommand{\stdclause}[1]{\eel{#1}{[#1]}}                          
+\newcommand{\xref}[1]{(\stdclause{#1})}
+\newcommand{\stdterm}[2]{#1\xspace\xref{#2}}
+\newcommand{\stdsection}[2]{§#1\xspace\stdclause{#2}}
 \newcommand{\true}{\cpp{true}}
 \newcommand{\false}{\cpp{false}}
 \newcommand{\dtor}{\cpp{\~fiber\_context()}}
 \newcommand{\main}{\cpp{main()}}
+\newcommand{\justmain}{\cpp{main}}
 \newcommand{\stdfiber}{std::\fiber}
 \newcommand{\fiber}{\cpp{fiber\_context}}
-\newcommand{\op}{\cpp{operator()()}}
-\newcommand{\opbool}{\cpp{operator bool()}}
-\newcommand{\resume}{\cpp{resume()}}
-\newcommand{\resumewith}{\cpp{resume\_with()}}
-\newcommand{\xtresume}{\cpp{resume\_from\_any\_thread()}}
-\newcommand{\xtresumewith}{\cpp{resume\_from\_any\_thread\_with()}}
-\newcommand{\someresume}{\resume} %% {\resume or \xtresume}
-\newcommand{\anyresumewith}{\resumewith} %% {\resumewith or \xtresumewith}
-\newcommand{\allresumewith}{\resumewith} %% {\resumewith and \xtresumewith}
-\newcommand{\resumesome}{\resume or \resumewith}
-\newcommand{\xtresumesome}{\xtresume or \xtresumewith}
-\newcommand{\anyresume}{\resume or \resumewith} %% {\resume, \resumewith, \xtresume or \xtresumewith}
-\newcommand{\allresume}{\resume and \resumewith} %% {\resume, \resumewith, \xtresume and \xtresumewith}
-\newcommand{\cancel}{\cpp{cancel()}}
-\newcommand{\xtcancel}{\cpp{cancel\_from\_any\_thread()}}
-\newcommand{\anycancel}{\cancel}
-\newcommand{\emptyfn}{\cpp{empty()}}
+\newcommand{\op}[1][]{\dotref[#1]\cpp{operator()()}}
+\newcommand{\opbool}[1][]{\dotref[#1]\cpp{operator bool()}}
+\newcommand{\resume}[1][]{\dotref[#1]\cpp{resume()}}
+\newcommand{\resumewith}[1][]{\dotref[#1]\cpp{resume\_with()}}
+\newcommand{\xtresume}[1][]{\dotref[#1]\cpp{resume\_from\_any\_thread()}}
+\newcommand{\xtresumewith}[1][]{\dotref[#1]\cpp{resume\_from\_any\_thread\_with()}}
+\newcommand{\someresume}[1][]{\resume[#1]} %% {\resume[#1] or \xtresume[#1]}
+\newcommand{\anyresumewith}[1][]{\resumewith[#1]} %% {\resumewith[#1] or \xtresumewith[#1]}
+\newcommand{\allresumewith}[1][]{\resumewith[#1]} %% {\resumewith[#1] and \xtresumewith[#1]}
+\newcommand{\resumesome}[1][]{\resume[#1] or \resumewith[#1]}
+\newcommand{\xtresumesome}[1][]{\xtresume[#1] or \xtresumewith[#1]}
+\newcommand{\anyresume}[1][]{\resume[#1] or \resumewith[#1]} %% {\resume[#1], \resumewith[#1], \xtresume[#1] or \xtresumewith[#1]}
+\newcommand{\allresume}[1][]{\resume[#1] and \resumewith[#1]} %% {\resume[#1], \resumewith[#1], \xtresume[#1] and \xtresumewith[#1]}
+\newcommand{\cancel}[1][]{\dotref[#1]\cpp{cancel()}}
+\newcommand{\xtcancel}[1][]{\dotref[#1]\cpp{cancel\_from\_any\_thread()}}
+\newcommand{\anycancel}[1][]{\cancel[#1]}
+\newcommand{\emptyfn}[1][]{\dotref[#1]\cpp{empty()}}
 %% referenced in history.tex
 \newcommand{\source}{\cpp{stop\_source}}
 \newcommand{\getsource}{\cpp{get\_stop\_source()}}
 \newcommand{\gettoken}{\cpp{get\_stop\_token()}}
 \newcommand{\reqstop}{\cpp{request\_stop()}}
-\newcommand{\canresume}{\cpp{can\_resume()}}
-\newcommand{\canxtresume}{\cpp{can\_resume\_from\_this\_thread()}}
-\newcommand{\canresumesome}{\canresume}
+\newcommand{\canresume}[1][]{\dotref[#1]\cpp{can\_resume()}}
+\newcommand{\canxtresume}[1][]{\dotref[#1]\cpp{can\_resume\_from\_this\_thread()}}
+\newcommand{\canresumesome}[1][]{\canresume[#1]}
 \newcommand{\thread}{\cpp{std::thread}}
+\newcommand{\jthread}{\cpp{std::jthread}}
 \newcommand{\Currthread}{The calling thread\xspace}
 \newcommand{\currthread}{the calling thread\xspace}
 \newcommand{\ownthread}{the owning thread of \thisfiber}
 \newcommand{\thisfiber}{\thefiber{\this}}
+\newcommand{\Thefiber}[1]{The fiber represented by #1}
 \newcommand{\thefiber}[1]{the fiber represented by #1}
 \newcommand{\this}{\cpp{*this}}
 \newcommand{\unwindex}{\cpp{std::unwind\_exception}}
@@ -202,13 +220,13 @@
 
 %% The point of these macros is that we might need to adjust the formatting
 %% for all such subheadings.
-\newcommand{\constraints}{\para \textit{Constraints:}\xspace}
-\newcommand{\mandates}{\para \textit{Mandates:}\xspace}
-\newcommand{\requires}{\para \textit{Requires:}\xspace}
-\newcommand{\remarks}{\para \textit{Remarks:}\xspace}
-\newcommand{\effects}{\para \textit{Effects:}\xspace}
-\newcommand{\returns}{\para \textit{Returns:}\xspace}
-\newcommand{\precond}{\para \textit{Preconditions:}\xspace}
-\newcommand{\postcond}{\para \textit{Postconditions:}\xspace}
-\newcommand{\except}{\para \textit{Throws:}\xspace}
-\newcommand{\errors}{\para \textit{Error conditions:}\xspace}
+\newcommand{\constraints}{\textit{Constraints:}\xspace}
+\newcommand{\mandates}{\textit{Mandates:}\xspace}
+\newcommand{\requires}{\textit{Requires:}\xspace}
+\newcommand{\remarks}{\textit{Remarks:}\xspace}
+\newcommand{\effects}{\textit{Effects:}\xspace}
+\newcommand{\returns}{\textit{Returns:}\xspace}
+\newcommand{\precond}{\textit{Preconditions:}\xspace}
+\newcommand{\postcond}{\textit{Postconditions:}\xspace}
+\newcommand{\except}{\textit{Throws:}\xspace}
+\newcommand{\errors}{\textit{Error conditions:}\xspace}
