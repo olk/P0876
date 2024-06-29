@@ -196,31 +196,16 @@ If no match is found among the handlers for a try block, the search for a
 matching handler continues in a dynamically surrounding try block of the same
 \replace{thread}{fiber}.
 
-\zs{Append to \stdsection{14.4}{except.handle} paragraph 8 as indicated:}
+\zs{Modify \stdsection{14.4}{except.handle} paragraph 8 as indicated:}
 
-\cbstart
-It is implementation-defined whether the currently handled exception
-designates the exception with the most recently\\
-activated handler that is still active within:
-\begin{itemize}
-    \item the current fiber ([intro.fibers]), or
-    \item the current thread.
-\end{itemize}
-\cbend
+8 The exception with the most recently activated handler \add{in the current fiber ([intro.fibers])} that is
+still active is called the
+\emph{currently handled exception}.
 
 \zs{Modify \stdsection{14.6.3}{except.uncaught} paragraph 1 as indicated:}
 
-The function \stdterm{\cpp{std::uncaught\_exceptions}}{uncaught.exceptions}
-returns the number of uncaught exceptions \delete{in the current thread}.
-
-\cbstart
-It is implementation-defined whether \cpp{uncaught\_exceptions()} returns
-the number of uncaught exceptions in:
-\begin{itemize}
-    \item the current fiber ([intro.fibers]), or
-    \item the current thread.
-\end{itemize}
-\cbend
+... The function \stdterm{\cpp{std::uncaught\_exceptions}}{uncaught.exceptions}
+returns the number of uncaught exceptions in the current \replace{thread}{fiber ([intro.fibers])}.
 
 \zs{Insert new final subclause in clause 33 \stdclause{thread} as indicated:}
 
