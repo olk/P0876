@@ -1,0 +1,276 @@
+%//////////////////////////////////////////////////////////////////////////////
+
+\documentclass[fontsize=10pt,paper=A4,pagesize,DIV=15]{scrartcl}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[american]{babel}        % required for ISO dates
+\usepackage[iso,american]{isodate}  % ISO format of dates
+\usepackage[final]{listings}        % code listings
+\usepackage{booktabs}               % fancy tables
+\usepackage[color]{changebar}       % changebars for large inserted passages
+\usepackage{longtable}              % auto breaking tables
+\usepackage{ltcaption}              % fix captions for long tables
+\usepackage{relsize}                % provide relative font size changes
+%\usepackage{underscore}             % remove special status of '_' in ordinary text
+%\usepackage{verbatim}               % improved verbatim environment
+\usepackage{parskip}                % handle non-indented paragraphs "properly"
+\usepackage{array}                  % new column definitions for tables
+\usepackage[normalem]{ulem}         % underline commands
+\usepackage{xcolor}                 % driver-independent color extensions
+\usepackage{amsmath}                % mathematical symbols
+\usepackage{mathrsfs}               % mathscr font
+\usepackage{xspace}                 % inserts a space to replace one "eaten" by TeX
+\usepackage[final]{microtype}       % micro-typographic extensions introduced by pdfTeX
+\usepackage{xstring}                % manipulating strings
+\usepackage{fixme}                  % collaborative annotations
+\usepackage{multicol}               % intermix single and multiple columns
+\usepackage{perpage}                % counter reset at every page boundary
+\usepackage{palatino}               % Adobe Palatino font
+\usepackage{overcite}               % citations
+\usepackage{boxedminipage}          % framed mini-pages
+\usepackage{fancyhdr}               % control of page headers and footers
+\usepackage{soul}                   % hyphenatable spacingout), underlining, striking out, et.
+\usepackage{svg}                    % SVG pictures
+\usepackage{tikz}                   % creating PS and PDF graphics
+\usetikzlibrary{arrows,automata}
+
+\cbcolor{green}
+
+\usepackage[pdftex,
+            pdftitle    = {thread\_local means fiber-specific},
+            pdfsubject  = {},
+            pdfauthor   = {Nat Goodspeed},
+            pdfkeywords = {C++,fiber_context,thread_local},
+            bookmarks=true,
+            bookmarksnumbered=true,
+            pdfpagelabels=true,
+            pdfpagemode=UseOutlines,
+            pdfstartview=FitH,
+            linktocpage=true,
+            colorlinks=true,
+            linkcolor=blue,
+            plainpages=false
+           ]{hyperref}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\input{commands}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\begin{document}
+\small
+\begin{tabbing}
+    Document number: \= P3346R0\\
+    Date:            \> 2024-06-28\\
+    Author:          \> Nat Goodspeed (nat@lindenlab.com)\\
+    Audience:        \> LEWG, EWG\\
+\end{tabbing}
+
+\section*{thread\_local means fiber-specific}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\tableofcontents
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\abschnitt{abstract}\label{abstract}
+
+P0876R17\cite{P0876R17} does not specify any changes to the semantics of
+\stdterm{thread storage duration}{basic.stc.thread}. The implication is that
+if two fibers are running on the same thread, they will both share the same
+value of a given \tlocal variable. Each fiber will see modifications made by
+the other fiber. They will not \stdterm{race}{intro.races}, since at every
+moment a specific thread is running exactly one fiber.
+
+Nonetheless, this could be problematic for an existing library that relies on
+\tlocal variables if multiple fibers on the same thread take turns making
+calls into that library. From the library's point of view, the value of its
+\tlocal variables might change whimsically.
+
+This is analogous to the problem faced by libraries relying on \cpp{static}
+variables when threads were first introduced, albeit without the UB resulting
+from data races.
+
+It is suggested that every \tlocal variable should have a distinct value for
+each fiber that accesses it. This paper details changes to P0876R17 and to
+the Standard\cite{Standard} to express that functionality.
+
+\abschnitt{Revision History}\label{history}
+Initial revision.
+
+%%This document supersedes P3346R0.
+%%
+%%\uabschnitt{Changes since P3346R0}
+%%
+%%\begin{itemize}
+%%    \item Update to reference N4981.
+%%\end{itemize}
+
+%%\newpage
+
+\abschnitt{Wording}\label{api}
+
+This wording is relative to N4981\cite{Standard} and P0876R17.\cite{P0876R17}
+
+\zs{Modify \stdsection{6.7.5.3}{basic.stc.thread} as follows:}
+
+1 All variables declared with the \cpp{thread\_local} keyword have
+\emph{thread storage duration}.
+The storage for these entities lasts for the duration of
+the \replace{thread}{fiber} in which they are created. There is a distinct object or reference
+per \replace{thread}{fiber}, and use of the declared name refers to the entity associated with
+the current \replace{thread}{fiber}.
+
+2 \tsnoten{1}{A variable with thread storage duration is initialized as specified
+in \stdclause{basic.start.static}, \stdclause{basic.start.dynamic}, and \stdclause{stmt.dcl}
+and, if constructed, is destroyed on \replace{thread}{fiber} exit \xref{basic.start.term}.}
+
+\zs{Modify \stdsection{6.9.3.4}{basic.start.term} paragraph 2 as follows:}
+
+2 Constructed objects with thread storage duration within a given \replace{thread}{fiber}
+are destroyed as a result of returning from the initial function of that \replace{thread}{fiber} and as a
+result of that \replace{thread}{fiber} calling \cpp{std::exit}.
+The destruction of all constructed objects with thread storage
+duration within that \replace{thread}{fiber} strongly happens before destroying
+any object with static storage duration.
+
+\zs{Modify \stdsection{11.4.9.3}{class.static.data} paragraph 1 as follows:}
+
+1 A static data member is not part of the subobjects of a class. If a
+static data member is declared \cpp{thread\_local} there is one copy of
+the member per \replace{thread}{fiber}. If a static data member is not declared
+\cpp{thread\_local} there is one copy of the data member that is shared by all
+the objects of the class.
+
+\zs{Modify \stdsection{17.5}{support.start.term} paragraph 9.1 as follows:}
+
+(9.1) --- First, objects with thread storage duration and associated with the current
+\replace{thread}{thread's default fiber}
+are destroyed. Next, objects with static storage duration are destroyed
+and functions registered by calling
+\cpp{atexit}
+are called.\textsuperscript{191}
+
+See \stdclause{basic.start.term} for the order of destructions and calls.
+(Objects with automatic storage duration are not destroyed as a result of calling
+\cpp{exit()}.)\textsuperscript{192}
+
+If a registered function invoked by \cpp{exit} exits via an exception,
+the function \cpp{std::terminate} is invoked\xref{except.terminate}.
+
+\zs{Modify \stdsection{33.10.10.2}{futures.task.members} paragraph 23 as follows:}
+
+23 \effects
+As if by \emph{INVOKE}\cpp{<R>(f, t}$_1$\cpp{, t}$_2$, $\dotsc$\cpp{, t}$_N$\cpp{)}\xref{func.require},
+where \cpp{f} is the stored task and
+\cpp{t}$_1$\cpp{, t}$_2$, $\dotsc$\cpp{, t}$_N$ are the values in \cpp{args...}. If the task returns normally,
+the return value is stored as the asynchronous result in the shared state of
+\cpp{*this}, otherwise the exception thrown by the task is stored. In either
+case, this is done without making that state ready\xref{futures.state} immediately. Schedules
+the shared state to be made ready when the current thread exits,
+after all objects of thread storage duration associated with the current \replace{thread}
+{thread's default fiber} have been destroyed.
+
+\zs{Append to ???? in P0876R17:}
+
+\cbstart
+
+\rSec2[thread.ptr]{thread\_specific\_ptr}
+
+\rSec3[thread.ptr.overview]{Overview}
+
+1 Objects with thread storage duration now have a distinct instance for each
+fiber within a thread, and are destroyed when the fiber terminates. It is
+sometimes desirable to access storage that is shared between all fibers on a
+thread, but distinct for each referencing thread.
+
+2 The \tptr class manages pointers, one per referencing thread. This can be
+used to access a distinct object with dynamic storage duration for each
+thread, that is nonetheless shared between all fibers on that thread.
+
+%--------------------------------- synopsis ----------------------------------
+\rSec3[thread.ptr.synopsis]{Header <thread\_specific\_ptr> synopsis}
+
+\cppf{synopsis.tls}
+
+%--------------------------------- class def ---------------------------------
+
+thread_specific_ptr construct/copy/destruct
+thread_specific_ptr();
+Requires:	The expression delete get() is well formed.
+Effects:	A thread-specific data key is allocated and visible to all threads in the process. Upon creation, the value NULL will be associated with the new key in all active threads. A cleanup method is registered with the key that will call delete on the value associated with the key for a thread when it exits. When a thread exits, if a key has a registered cleanup method and the thread has a non-NULL value associated with that key, the value of the key is set to NULL and then the cleanup method is called with the previously associated value as its sole argument. The order in which registered cleanup methods are called when a thread exits is undefined. If after all the cleanup methods have been called for all non-NULL values, there are still some non-NULL values with associated cleanup handlers the result is undefined behavior.
+Throws:	boost::thread_resource_error if the necessary resources can not be obtained.
+Notes:	There may be an implementation specific limit to the number of thread specific storage objects that can be created, and this limit may be small.
+Rationale:	The most common need for cleanup will be to call delete on the associated value. If other forms of cleanup are required the overloaded constructor should be called instead.
+thread_specific_ptr(void (*cleanup)(void*) cleanup);
+Effects:	A thread-specific data key is allocated and visible to all threads in the process. Upon creation, the value NULL will be associated with the new key in all active threads. The cleanup method is registered with the key and will be called for a thread with the value associated with the key for that thread when it exits. When a thread exits, if a key has a registered cleanup method and the thread has a non-NULL value associated with that key, the value of the key is set to NULL and then the cleanup method is called with the previously associated value as its sole argument. The order in which registered cleanup methods are called when a thread exits is undefined. If after all the cleanup methods have been called for all non-NULL values, there are still some non-NULL values with associated cleanup handlers the result is undefined behavior.
+Throws:	boost::thread_resource_error if the necessary resources can not be obtained.
+Notes:	There may be an implementation specific limit to the number of thread specific storage objects that can be created, and this limit may be small.
+Rationale:	There is the occasional need to register specialized cleanup methods, or to register no cleanup method at all (done by passing NULL to this constructor.
+~thread_specific_ptr();
+Effects:	Deletes the thread-specific data key allocated by the constructor. The thread-specific data values associated with the key need not be NULL. It is the responsibility of the application to perform any cleanup actions for data associated with the key.
+Notes:	Does not destroy any data that may be stored in any thread's thread specific storage. For this reason you should not destroy a thread_specific_ptr object until you are certain there are no threads running that have made use of its thread specific storage.
+Rationale:	Associated data is not cleaned up because registered cleanup methods need to be run in the thread that allocated the associated data to be guarranteed to work correctly. There's no safe way to inject the call into another thread's execution path, making it impossible to call the cleanup methods safely.
+thread_specific_ptr modifier functions
+T* release();
+Postconditions:	*this holds the null pointer for the current thread.
+Returns:	this->get() prior to the call.
+Rationale:	This method provides a mechanism for the user to relinquish control of the data associated with the thread-specific key.
+void reset(T* p = 0);
+Effects:	If this->get() != p && this->get() != NULL then call the associated cleanup function.
+Postconditions:	*this holds the pointer p for the current thread.
+thread_specific_ptr observer functions
+T* get() const;
+Returns:	The object stored in thread specific storage for the current thread for *this.
+Notes:	Each thread initially returns 0.
+T* operator->() const;
+Returns:	this->get().
+T& operator*()() const;
+Requires:	this->get() != 0
+Returns:	this->get().
+
+\cbend
+
+%%\input{ecosystem}
+%%\input{control_transfer}
+%%\input{first_class}
+%%\input{stack_management}
+%%\input{invalidation}
+%%\input{problem_gp_ub}
+%%\input{solution_gp_ub}
+%%\input{resume_with}
+%%\input{passing_data}
+%%\input{termination}
+%%\input{exceptions}
+%%%%\input{stack}
+%%\input{low_level}
+%%\input{stl}
+%%\input{implementation}
+%%\input{register_window}
+%%\input{performance}
+%%\input{accelerators}
+%%\input{tls}
+%%\input{acknowledgment}
+%%\input{api}
+%%\input{for_examples}
+
+\newpage
+\addcontentsline{toc}{subsection}{references}
+\begin{thebibliography}{99}
+
+    \bibitem{P0876R17}
+        \href{https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p0876r17.pdf}
+        {P0876R17: fibers without scheduler}
+
+    \bibitem{Standard}
+        \href{https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/n4981.pdf}
+        {N4981: Working Draft, Programming Languages -- C++}
+
+\end{thebibliography}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\end{document}
