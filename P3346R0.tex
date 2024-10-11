@@ -246,7 +246,7 @@ resources to instantiate a \tptr.
     \item[---] \cpp{cleanup\_function(this->get())} is well-formed.
 \end{description}
 
-2 \requires
+2 \precond
 \begin{description}
     \item[---] \cpp{cleanup\_function(this->get())} does not throw. 
 \end{description}
@@ -275,7 +275,7 @@ resources to instantiate a \tptr.
 
 \mbrhdr{\cpp{\~thread\_specific\_ptr()}}
 
-1 \requires
+1 \precond
 \begin{description}
     \item[---] All thread specific instances associated with this \tptr
                (except the one associated with the calling thread) must be
@@ -309,7 +309,7 @@ all thread specific instances associated with each \tptr.}
 
 \mbrhdr{T\& operator*() const noexcept}
 
-1 \requires
+1 \precond
 \begin{description}
     \item[---] \cpp{this->get() \!= nullptr}
 \end{description}
