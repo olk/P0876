@@ -1,8 +1,6 @@
 namespace std {
 
-    // [fibercontext], class fiber_context
-    class fiber_context;
-
+    // [thread.ptr], class thread_specific_ptr
     template <class T>
     class thread_specific_ptr;
 

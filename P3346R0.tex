@@ -63,7 +63,7 @@
 \small
 \begin{tabbing}
     Document number: \= P3346R0\\
-    Date:            \> 2024-06-28\\
+    Date:            \> 2024-10-11\\
     Author:          \> Nat Goodspeed (nat@lindenlab.com)\\
     Audience:        \> LEWG, EWG\\
 \end{tabbing}
@@ -126,7 +126,7 @@ the current \replace{thread}{fiber}.
 
 2 \tsnoten{1}{A variable with thread storage duration is initialized as specified
 in \stdclause{basic.start.static}, \stdclause{basic.start.dynamic}, and \stdclause{stmt.dcl}
-and, if constructed, is destroyed on \replace{thread}{fiber} exit \xref{basic.start.term}.}
+and, if constructed, is destroyed on \replace{thread}{fiber} exit \replace{\xref{basic.start.term}}{\xref{fiber.context.overview}}.}
 
 \zs{Modify \stdsection{6.9.3.4}{basic.start.term} paragraph 2 as follows:}
 
@@ -168,13 +168,17 @@ As if by \emph{INVOKE}\cpp{<R>(f, t}$_1$\cpp{, t}$_2$, $\dotsc$\cpp{, t}$_N$\cpp
 where \cpp{f} is the stored task and
 \cpp{t}$_1$\cpp{, t}$_2$, $\dotsc$\cpp{, t}$_N$ are the values in \cpp{args...}. If the task returns normally,
 the return value is stored as the asynchronous result in the shared state of
-\cpp{*this}, otherwise the exception thrown by the task is stored. In either
+\this, otherwise the exception thrown by the task is stored. In either
 case, this is done without making that state ready\xref{futures.state} immediately. Schedules
 the shared state to be made ready when the current thread exits,
 after all objects of thread storage duration associated with the current \replace{thread}
 {thread's default fiber} have been destroyed.
 
-\zs{Append to ???? in P0876R17:}
+\zs{Insert new final subclause in clause 33 \stdclause{thread} as indicated:}
+
+\setcounter{section}{33}
+\setcounter{subsection}{12}
+\setcounter{secnumdepth}{4}
 
 \cbstart
 
@@ -198,64 +202,194 @@ thread, that is nonetheless shared between all fibers on that thread.
 
 %--------------------------------- class def ---------------------------------
 
-thread_specific_ptr construct/copy/destruct
-thread_specific_ptr();
-Requires:	The expression delete get() is well formed.
-Effects:	A thread-specific data key is allocated and visible to all threads in the process. Upon creation, the value NULL will be associated with the new key in all active threads. A cleanup method is registered with the key that will call delete on the value associated with the key for a thread when it exits. When a thread exits, if a key has a registered cleanup method and the thread has a non-NULL value associated with that key, the value of the key is set to NULL and then the cleanup method is called with the previously associated value as its sole argument. The order in which registered cleanup methods are called when a thread exits is undefined. If after all the cleanup methods have been called for all non-NULL values, there are still some non-NULL values with associated cleanup handlers the result is undefined behavior.
-Throws:	boost::thread_resource_error if the necessary resources can not be obtained.
-Notes:	There may be an implementation specific limit to the number of thread specific storage objects that can be created, and this limit may be small.
-Rationale:	The most common need for cleanup will be to call delete on the associated value. If other forms of cleanup are required the overloaded constructor should be called instead.
-thread_specific_ptr(void (*cleanup)(void*) cleanup);
-Effects:	A thread-specific data key is allocated and visible to all threads in the process. Upon creation, the value NULL will be associated with the new key in all active threads. The cleanup method is registered with the key and will be called for a thread with the value associated with the key for that thread when it exits. When a thread exits, if a key has a registered cleanup method and the thread has a non-NULL value associated with that key, the value of the key is set to NULL and then the cleanup method is called with the previously associated value as its sole argument. The order in which registered cleanup methods are called when a thread exits is undefined. If after all the cleanup methods have been called for all non-NULL values, there are still some non-NULL values with associated cleanup handlers the result is undefined behavior.
-Throws:	boost::thread_resource_error if the necessary resources can not be obtained.
-Notes:	There may be an implementation specific limit to the number of thread specific storage objects that can be created, and this limit may be small.
-Rationale:	There is the occasional need to register specialized cleanup methods, or to register no cleanup method at all (done by passing NULL to this constructor.
-~thread_specific_ptr();
-Effects:	Deletes the thread-specific data key allocated by the constructor. The thread-specific data values associated with the key need not be NULL. It is the responsibility of the application to perform any cleanup actions for data associated with the key.
-Notes:	Does not destroy any data that may be stored in any thread's thread specific storage. For this reason you should not destroy a thread_specific_ptr object until you are certain there are no threads running that have made use of its thread specific storage.
-Rationale:	Associated data is not cleaned up because registered cleanup methods need to be run in the thread that allocated the associated data to be guarranteed to work correctly. There's no safe way to inject the call into another thread's execution path, making it impossible to call the cleanup methods safely.
-thread_specific_ptr modifier functions
-T* release();
-Postconditions:	*this holds the null pointer for the current thread.
-Returns:	this->get() prior to the call.
-Rationale:	This method provides a mechanism for the user to relinquish control of the data associated with the thread-specific key.
-void reset(T* p = 0);
-Effects:	If this->get() != p && this->get() != NULL then call the associated cleanup function.
-Postconditions:	*this holds the pointer p for the current thread.
-thread_specific_ptr observer functions
-T* get() const;
-Returns:	The object stored in thread specific storage for the current thread for *this.
-Notes:	Each thread initially returns 0.
-T* operator->() const;
-Returns:	this->get().
-T& operator*()() const;
-Requires:	this->get() != 0
-Returns:	this->get().
+\rSec3[thread.ptr.class]{Class thread\_specific\_ptr}
+
+\cppf{tsp}
+
+\rSec4[thread.ptr.cons]{Constructors, move and assignment}
+
+\mbrhdr{thread\_specific\_ptr()}
+
+1 \mandates
+\begin{description}
+    \item[---] \cpp{delete this->get()} is well-formed.
+\end{description}
+
+2 \effects
+\begin{description}
+    \item[---] Constructs a \cpp{thread\_specific\_ptr} object for storing a
+               pointer to an object of type \cpp{T} specific to each thread.
+               The default \cpp{delete}-based cleanup function will be used to
+               destroy any thread-local objects when \cpp{reset()} is called,
+               or the thread exits.
+\end{description}
+
+3 \remarks
+The initial value associated with an instance of \tptr is \cpp{nullptr} for
+each thread.
+
+4 \except
+\begin{description}
+    \item[---] \cpp{system\_error} if an error occurs.
+\end{description}
+
+5 \errors
+\cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary
+resources to instantiate a \tptr.
+
+\mbrhdr{explicit thread\_specific\_ptr(void (*cleanup\_function)(T*))}
+
+1 \mandates
+\begin{description}
+    \item[---] \cpp{cleanup\_function(this->get())} is well-formed.
+\end{description}
+
+2 \requires
+\begin{description}
+    \item[---] \cpp{cleanup\_function(this->get())} does not throw. 
+\end{description}
+
+3 \effects
+\begin{description}
+    \item[---] Constructs a \tptr object for storing a pointer to an object of
+               type \cpp{T} specific to each thread. The supplied
+               \cpp{cleanup\_function} will be used to destroy any
+               thread-local objects when \cpp{reset()} is called, or the
+               thread exits.
+\end{description}
+
+4 \remarks
+The initial value associated with an instance of \tptr is \cpp{nullptr} for
+each thread.
+
+5 \except
+\begin{description}
+    \item[---] \cpp{system\_error} if an error occurs.
+\end{description}
+
+6 \errors
+\cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary
+resources to instantiate a \tptr.
+
+\mbrhdr{\cpp{\~thread\_specific\_ptr()}}
+
+1 \requires
+\begin{description}
+    \item[---] All thread specific instances associated with this \tptr
+               (except the one associated with the calling thread) must be
+               \cpp{nullptr}.
+\end{description}
+
+2 \effects
+\begin{description}
+    \item[---] Calls \cpp{this->reset()} to clean up the associated value for the
+               calling thread, and destroys \this.
+\end{description}
+
+\tsnote{The requirement avoids the necessity for an implementation to track
+all thread specific instances associated with each \tptr.}
+
+\rSec4[thread.ptr.mem]{Members}
+
+\mbrhdr{T* get() const noexcept}
+
+1 \returns
+\begin{description}
+    \item[---] The pointer associated with the calling thread.
+\end{description}
+
+\mbrhdr{T* operator->() const noexcept}
+
+1 \returns
+\begin{description}
+    \item[---] \cpp{this->get()}
+\end{description}
+
+\mbrhdr{T\& operator*() const noexcept}
+
+1 \requires
+\begin{description}
+    \item[---] \cpp{this->get() \!= nullptr}
+\end{description}
+
+2 \returns
+\begin{description}
+    \item[---] \cpp{*(this->get())}
+\end{description}
+
+\mbrhdr{T* release() noexcept}
+
+1 \effects
+\begin{description}
+    \item[---] Let \cpp{ptr} be the current value of \cpp{this->get()}.
+    \item[---] Stores \cpp{nullptr} as the pointer associated with the
+               calling thread.
+\end{description}
+
+2 \returns
+\begin{description}
+    \item[---] \cpp{ptr}
+\end{description}
+
+3 \postcond
+\begin{description}
+    \item[---] \cpp{this->get() == nullptr}
+\end{description}
+
+\mbrhdr{void reset(T* new\_value=nullptr)}
+
+1 \effects
+\begin{description}
+    \item[---] If \cpp{this->get() \!= new\_value \&\& this->get() \!= nullptr},
+               invokes \cpp{delete this->get()} or\\
+               \cpp{cleanup\_function(this->get())} as appropriate.
+    \item[---] Stores \cpp{new\_value} as the pointer associated with the
+               calling thread.
+\end{description}
+
+2 \postcond
+\begin{description}
+    \item[---] \cpp{this->get() == new\_value}
+\end{description}
+
+3 \except
+\begin{description}
+    \item[---] \cpp{system\_error} if an error occurs.
+\end{description}
+
+4 \errors
+\cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary
+resources to store a new thread specific pointer value.
+
+\mbrhdr{explicit operator bool() const noexcept}
+
+1 \effects
+Equivalent to: \cpp{return (this->get() \!= nullptr);}
+
+\mbrhdr{void swap(thread\_specific\_ptr\& other) noexcept}
+
+1 \effects
+Swaps the pointer associated with the calling thread for \this with the
+pointer associated with the calling thread for \cpp{other}.
+
+\rSec4[thread.ptr.special]{Specialized algorithms}
+\mbrhdr{friend void swap(thread\_specific\_ptr\& lhs, thread\_specific\_ptr\& rhs) noexcept}
+
+1 \effects
+Equivalent to: \cpp{lhs.swap(rhs)}.
 
 \cbend
 
-%%\input{ecosystem}
-%%\input{control_transfer}
-%%\input{first_class}
-%%\input{stack_management}
-%%\input{invalidation}
-%%\input{problem_gp_ub}
-%%\input{solution_gp_ub}
-%%\input{resume_with}
-%%\input{passing_data}
-%%\input{termination}
-%%\input{exceptions}
-%%%%\input{stack}
-%%\input{low_level}
-%%\input{stl}
-%%\input{implementation}
-%%\input{register_window}
-%%\input{performance}
-%%\input{accelerators}
-%%\input{tls}
-%%\input{acknowledgment}
-%%\input{api}
-%%\input{for_examples}
+\abschnitt{Header File}
+
+\zs{Add a new header file to Table 24 in \stdsection{16.4.2.3}{headers}:}
+
+\add{\cpp{<thread\_specific\_ptr>}}
+
+\abschnitt{Feature-test Macro}
+\zs{Add a new feature-test macro to \stdsection{17.3.2}{version.syn} as indicated:}
+
+\add{\cpp{#define \__cpp\_lib\_thread\_specific\_ptr 202XXXL // also in <thread\_specific\_ptr>}}
 
 \newpage
 \addcontentsline{toc}{subsection}{references}
