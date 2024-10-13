@@ -1,5 +1,15 @@
 \abschnitt{Revision History}\label{history}
-This document supersedes P0876R16.
+This document supersedes P0876R17.
+
+\uabschnitt{Changes since P0876R17}
+
+\begin{itemize}
+    \item Distinguish between a \emph{prepared} and a \emph{suspended} fiber.
+    \item Distinguish the two context switches implied by entry to, and return
+          from, \resumewith.
+    \item Remove \cpp{current\_exception\_within\_fiber()}, which became moot
+          in P0876R17.
+\end{itemize}
 
 \uabschnitt{Changes since P0876R16}
 

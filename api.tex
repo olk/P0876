@@ -52,15 +52,18 @@ execution, for example the contents of a processor's registers including its
 instruction pointer, and the invocation sequence \xref{stacktrace.general} of
 functions that have been entered but have not yet returned.}
 
-2 An \emph{implicit fiber} is the default fiber on any thread. All other
-fibers are \emph{explicit fibers.}
-\tsnote{A new fiber can be created using \fiber.}
-
-3 A thread is always running exactly one fiber. Member functions of \fiber
+2 A thread is always running exactly one fiber. Member functions of \fiber
 ([fiber.context.class]) can direct the calling thread to \emph{suspend} the
 current fiber and \emph{resume} a designated other fiber.
 
-4 When a thread first enters a fiber, that thread becomes the
+3 An \emph{implicit fiber} is the default fiber on any thread. All other
+fibers are \emph{explicit fibers.}
+
+4 An explicit fiber is created using \fiber. Instantiating \fiber \emph{prepares} a
+fiber, which can consume resources. A fiber can thus be in one of three
+states: prepared, running or suspended.
+
+5 When a thread first enters a prepared fiber, that thread becomes the
 fiber's \emph{owning thread.} The owning thread never changes.
 \tsnote{A thread is the owning thread of its default fiber.}
 \tsnote{If a thread resumes a fiber owned by another thread, the behaviour is
@@ -113,24 +116,31 @@ returns the number of uncaught exceptions in the current \replace{thread}{fiber 
 
 1 A \fiber object is either \emph{empty} or \emph{non-empty}. A
 default-constructed or moved-from \fiber is empty. A \fiber
-representing a suspended fiber is non-empty.
+representing a prepared or suspended fiber is non-empty.
 
 2 An explicit fiber is prepared by passing an \emph{\entryfn} to \fiber's
-constructor. The fiber conceptually comes into existence at the first call to
-one of the \anyresume member functions, which is when that \entryfn is
-entered.
+constructor. At the first call to one of the \anyresume member functions,
+that \entryfn is entered, and the fiber is running.
 
-3 When a fiber is first entered, a synthesized non-empty \fiber object
-representing the newly-suspended previous fiber is passed as a parameter to
-its \entryfn. Once entered, a fiber can suspend by calling one of the \anyresume
-functions on any accessible non-empty \fiber object. When the
-suspended fiber is resumed, a synthesized \fiber object
-representing the newly-suspended previous fiber is returned.
+3 Every call to one of the \anyresume member functions on an accessible
+non-empty \fiber object transitions between two fibers:
+\begin{itemize}
+    \item suspends the running fiber, making it the previous fiber
+    \item resumes \thisfiber, which was suspended, making it the running fiber.
+\end{itemize}
+In addition, returning a non-empty \fiber from a fiber's \entryfn:
+\begin{itemize}
+    \item terminates the running fiber
+    \item resumes \thefiber{the returned \fiber}.
+\end{itemize}
+
+4 When a prepared fiber is first entered, a synthesized non-empty \fiber
+object representing the previous fiber is passed as a parameter to
+its \entryfn. When a suspended fiber is resumed, a synthesized \fiber object
+representing the previous fiber is returned from the relevant \anyresume
+member function.
 \tsnote{The synthesized \fiber object received in either of those ways might
 represent either an explicit fiber or an implicit fiber.}
-
-4 An explicit fiber terminates by returning a non-empty \fiber object from
-its \entryfn. \Thefiber{that \fiber object} is resumed.
 
 %% \rSec3[fiber.context.toplevel]{Implicit Top-Level Function}
 
@@ -144,11 +154,11 @@ its \entryfn. \Thefiber{that \fiber object} is resumed.
 designated fiber, the synthesized \fiber passed into the resumed fiber is
 empty.
 
-6 If the fiber's \entryfn returns an empty \fiber object, \cpp{std::terminate} is called.
-If the fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
+6 If a fiber's \entryfn returns an empty \fiber object, \cpp{std::terminate} is called.
+If a fiber's \entryfn exits via an exception, \cpp{std::terminate} is called.
 
 7 Regardless of the number of \fiber objects in the program, exactly one of them
-represents each suspended fiber. No \fiber object represents a running fiber.
+represents each prepared or suspended fiber. No \fiber object represents a running fiber.
 
 8 A \fiber object can optionally be constructed by passing an explicit
 \cpp{span<byte>} in which to track the fiber's
@@ -225,8 +235,8 @@ exceeds the \cpp{size()} of that \cpp{span<byte>}, the behaviour is undefined.
                destroyed.}
     \item[---] Initializes \cpp{state} to prepare a fiber that will, when
                first resumed, enter \cpp{entry\_copy}.
-    \item[---] Any necessary resources are created. \tsnote{This includes the
-               new fiber's function call stack.}
+    \item[---] Any necessary resources are created. \tsnote{This includes
+               storage for the new fiber's invocation sequence.}
 \end{description}
 
 4 \postcond
@@ -332,29 +342,31 @@ The operation of \resumewith involves at least two and possibly three fibers.
 Within [fiber.context.mem], for exposition only:
 
 \begin{itemize}
+    \item Calling \resumewith performs a context switch.
     \item The \emph{calling fiber} is the fiber calling \resumewith.
     \item The \emph{target fiber} is \thefiber{\state}.
+    \item \resumewith synthesizes a \fiber object representing the calling
+          fiber. Let \cpp{caller} be that synthesized \fiber object.
+    \item Because \resumewith suspends the calling fiber, returning
+          from \resumewith necessarily requires a subsequent context switch.
     \item On return from \resumewith, the \emph{previous fiber} is the fiber that
           resumed the calling fiber.
           \tsnote{The previous fiber can be other than the target fiber.}
-    \item \resumewith suspends the calling fiber and synthesizes
-          a \fiber object representing the suspended calling fiber. Let
-          \cpp{caller} be that synthesized \fiber object.
     \item Let \cpp{previous} be the synthesized \fiber object representing the
           suspended previous fiber.
 \end{itemize}
 
-At the moment of resumption, the running fiber can be in either of two states, as follows.
+At entry to \resumewith, the target fiber can either be in the prepared state
+(not yet entered) or in the suspended state (waiting to return from \resumewith).
 
 \begin{description}
     \item[---]
-          If the running fiber has already been entered, that implies that
-          at some earlier time, it suspended itself by
-          calling \resumewith[other], where \cpp{other} was some
+          If the running fiber is suspended, that implies that at some earlier
+          time, it called \resumewith[other], where \cpp{other} was some
           non-empty \fiber object. In that case, let
           exposition-only \emph{internal-resume(\cpp{before})},
-          where \cpp{before} is a \fiber object, denote
-          the following sequence of steps:
+          where \cpp{before} is a \fiber object, denote the following sequence
+          of steps:
         \begin{itemize}
             \item Return \cpp{before} from \resumewith[other].
         \end{itemize}   
@@ -435,7 +447,7 @@ Equivalent to:\\
 1 \returns
 \begin{description}
     \item[---] \false if \emptyfn is \true
-    \item[---] \true if \thisfiber has no owning thread
+    \item[---] \true if \thisfiber is in the prepared state (has no owning thread)
     \item[---] \true if \currthread is \ownthread
     \item[---] \false otherwise.
 \end{description}
@@ -454,14 +466,6 @@ Equivalent to: \cpp{return (\! state);}
 
 1 \effects
 Equivalent to: \cpp{return (\! empty());}
-
-%---------------------- current_exception_within_fiber -----------------------
-
-\mbrhdr{static bool current\_exception\_within\_fiber() noexcept}
-
-1 \returns
-\true if the implementation of \exfns reports the current exception(s) only within
-the current fiber, \false if they consider all exceptions within the owning thread.
 
 %----------------------------------- swap ------------------------------------
 \mbrhdr{void swap(fiber\_context\& other) noexcept}
