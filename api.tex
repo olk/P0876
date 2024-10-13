@@ -413,16 +413,16 @@ At entry to \resumewith, the target fiber can either be in the prepared state
 4 \returns
 
 \begin{description}
-    \item[---] If the previous fiber resumed the calling fiber by returning \cpp{caller},
-          an empty \fiber.
+    \item[---] If the previous fiber resumed the calling fiber by returning
+          a \fiber object representing the calling fiber, an empty \fiber.
     \item[---] If the previous fiber resumed the calling fiber by
-          calling \cpp{caller.resume\_with(somefn)}, the \fiber object returned
+          calling \cpp{resume\_with(somefn)}, the \fiber object returned
           by \cpp{invoke\_r<fiber\_context>(somefn, std::move(previous))}.
 \end{description}
 
 5 \except
 
-If the previous fiber resumed the calling fiber by calling \cpp{caller.resume\_with(somefn)}:
+If the previous fiber resumed the calling fiber by calling \cpp{resume\_with(somefn)}:
 \begin{itemize}
     \item Any exception thrown by \cpp{invoke\_r<fiber\_context>(somefn,
           std::move(previous))}.
