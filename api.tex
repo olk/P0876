@@ -237,6 +237,7 @@ exceeds the \cpp{size()} of that \cpp{span<byte>}, the behaviour is undefined.
                first resumed, enter \cpp{entry\_copy}.
     \item[---] Any necessary resources are created. \tsnote{This includes
                storage for the new fiber's invocation sequence.}
+    \item[---] The prepared fiber has no owning thread.
 \end{description}
 
 4 \postcond
@@ -278,6 +279,9 @@ exceeds the \cpp{size()} of that \cpp{span<byte>}, the behaviour is undefined.
                type \cpp{decay\_t<F>} direct-non-list-initialized
                with \cpp{std::forward<F>(entry)}. 
     \item[---] Let \cpp{stack\_copy} be a copy of \cpp{stack}.
+               \tsnote{It might be advantageous to obtain from the host
+               environment a memory block with a read-only guard page to trap
+               stack overflow.}
     \item[---] Let \cpp{deleter\_copy} be an object of
                type \cpp{decay\_t<D>} direct-non-list-initialized
                with \cpp{std::forward<F>(deleter)}. 
@@ -288,9 +292,7 @@ exceeds the \cpp{size()} of that \cpp{span<byte>}, the behaviour is undefined.
     \item[---] Initializes \cpp{state} to prepare a fiber that will, when
                first resumed, enter \cpp{entry\_copy}.
     \item[---] Any necessary resources are created.
-               \tsnote{It might be advantageous to obtain from the host
-               environment a memory block with a read-only guard page to trap
-               stack overflow.}
+    \item[---] The prepared fiber has no owning thread.
 \end{description}
 
 4 \postcond
@@ -400,6 +402,7 @@ At entry to \resumewith, the target fiber can either be in the prepared state
     \item[---] Resets \state so that \emptyfn is \true.
     \item[---] Directs the current thread to suspend the calling fiber and resume
                the target fiber.
+    \item[---] Associates the calling thread as the target fiber's owning thread.
     \item[---] Evaluates \cpp{invoke\_r(std::forward<Fn>(fn), std::move(caller))}.
                Let \cpp{returned} be the \fiber object returned by \cpp{fn}.
                \tsnote{\cpp{returned} can be other than \cpp{caller}.
