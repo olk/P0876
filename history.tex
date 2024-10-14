@@ -1,5 +1,15 @@
 \abschnitt{Revision History}\label{history}
-This document supersedes P0876R16.
+This document supersedes P0876R17.
+
+\uabschnitt{Changes since P0876R17}
+
+\begin{itemize}
+    \item Distinguish between a \emph{prepared} and a \emph{suspended} fiber.
+    \item Distinguish the two context switches implied by entry to, and return
+          from, \resumewith.
+    \item Remove \cpp{current\_exception\_within\_fiber()}, which became moot
+          in P0876R17.
+\end{itemize}
 
 \uabschnitt{Changes since P0876R16}
 
@@ -10,6 +20,24 @@ This document supersedes P0876R16.
           nested bullet lists. Fix a bug in definition of internal-resume.
     \item Revert \resumewith\xspace\returns and \except clauses to R15
           structure, eliminating ``Case C'' and ``Case D''.
+    \item Use scoped exposition-only terms \emph{calling fiber}, \emph{target
+          fiber} and \emph{previous fiber} instead of quoting the phrases.
+          Give previous fiber definition its own bullet.
+    \item Eliminate \emph{internal-resume} parameter \cpp{after}, also
+          definitions of \cpp{after\_entry\_copy}, \cpp{after\_stack\_copy}
+          and \cpp{after\_deleter\_copy}. Describe \emph{internal-resume} in
+          terms of the currently running fiber.
+    \item Explicitly state that \emph{internal-resume} is exposition only, and
+          italicize references.
+    \item Move predicate for first \emph{internal-resume} definition to start
+          of bullet text. Don't state the inverse predicate for the second.
+    \item Remove one level of bullet list nesting from the
+          second \emph{internal-resume} definition. Sequence the bullet list
+          by appending ``, then'' after each item.
+    \item Per EWG in St. Louis, remove implementation defined meaning
+          of \emph{currently handled exception} and \cpp{uncaught\_exceptions}.
+          Now both are fiber-specific.
+    \item Clarify explicit constructor \except clause.
 \end{itemize}
 
 \uabschnitt{Changes since P0876R15}
