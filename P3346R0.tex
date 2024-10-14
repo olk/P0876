@@ -63,7 +63,7 @@
 \small
 \begin{tabbing}
     Document number: \= P3346R0\\
-    Date:            \> 2024-10-11\\
+    Date:            \> 2024-10-14\\
     Author:          \> Nat Goodspeed (nat@lindenlab.com)\\
     Audience:        \> LEWG, EWG\\
 \end{tabbing}
@@ -78,7 +78,7 @@
 
 \abschnitt{abstract}\label{abstract}
 
-P0876R17\cite{P0876R17} does not specify any changes to the semantics of
+P0876R18\cite{P0876R18} does not specify any changes to the semantics of
 \stdterm{thread storage duration}{basic.stc.thread}. The implication is that
 if two fibers are running on the same thread, they will both share the same
 value of a given \tlocal variable. Each fiber will see modifications made by
@@ -90,15 +90,23 @@ Nonetheless, this could be problematic for an existing library that relies on
 calls into that library. From the library's point of view, the value of its
 \tlocal variables might change whimsically.
 
-This is analogous to the problem faced by libraries relying on \cpp{static}
-variables when threads were first introduced, albeit without the UB resulting
-from data races.
-
 It is suggested that every \tlocal variable should have a distinct value for
 each fiber that accesses it. This paper details changes to the
 Standard\cite{Standard} to express that functionality. 
 
-This paper depends on P0876R17.
+When the Standard first introduced \tlocal, library authors were strongly
+encouraged to migrate from \cpp{static} variables to \tlocal. The C++
+community has already paid that price. Now, instead of introducing another new
+keyword requiring another new migration, we should leverage the existing
+keyword to retain the desired behavior of a variable whose value persists
+between successive calls, independently of calls into the same library by
+other execution agents.
+
+To address the less common use case of a variable local to a \thread but
+shared by all fibers within that thread, we also introduce \tptr, a design
+pioneered in the Boost library suite.\cite{Boost}
+
+This paper depends on P0876R18.
 
 \abschnitt{Revision History}\label{history}
 Initial revision.
@@ -112,10 +120,13 @@ Initial revision.
 %%\end{itemize}
 
 %%\newpage
+\abschnitt{acknowledgments}
+
+The author would like to thank Adam Martin.
 
 \abschnitt{Wording}\label{api}
 
-This wording is relative to N4981\cite{Standard} and P0876R17.\cite{P0876R17}
+This wording is relative to N4981\cite{Standard}.
 
 \zs{Modify \stdsection{6.7.5.3}{basic.stc.thread} as follows:}
 
@@ -397,13 +408,17 @@ Equivalent to: \cpp{lhs.swap(rhs)}.
 \addcontentsline{toc}{subsection}{references}
 \begin{thebibliography}{99}
 
-    \bibitem{P0876R17}
-        \href{https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p0876r17.pdf}
-        {P0876R17: fibers without scheduler}
+    \bibitem{P0876R18}
+        \href{https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p0876r18.pdf}
+        {P0876R18: fibers without scheduler}
 
     \bibitem{Standard}
         \href{https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/n4981.pdf}
         {N4981: Working Draft, Programming Languages -- C++}
+
+    \bibitem{Boost}
+        \href{https://www.boost.org/doc/libs/release/doc/html/thread/thread_local_storage.html}
+        {Boost C++ Libraries: Thread Local Storage}
 
 \end{thebibliography}
 
