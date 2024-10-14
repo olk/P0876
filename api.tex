@@ -54,7 +54,8 @@ functions that have been entered but have not yet returned.}
 
 2 A thread is always running exactly one fiber. Member functions of \fiber
 ([fiber.context.class]) can direct the calling thread to \emph{suspend} the
-current fiber and \emph{resume} a designated other fiber.
+running fiber and \emph{resume} a designated other fiber. This transition from
+one fiber to another is a \emph{context switch}.
 
 3 An \emph{implicit fiber} is the default fiber on any thread. All other
 fibers are \emph{explicit fibers.}
@@ -76,7 +77,7 @@ When an exception is thrown, control is transferred to the nearest handler
 with a matching type \xref{except.handle}; ``nearest'' means the handler for
 which the \nt{stmt.block}{compound-statement} or
 \nt{class.base.init}{ctor-initializer} following the \cpp{try} keyword was
-most recently entered by the \replace{thread of control}{current fiber} and
+most recently entered by the \replace{thread of control}{running fiber} and
 not yet exited.
 
 \zs{Modify \stdsection{14.2}{except.throw} paragraph 4 Note 3 as indicated:}
@@ -94,13 +95,14 @@ matching handler continues in a dynamically surrounding try block of the same
 \zs{Modify \stdsection{14.4}{except.handle} paragraph 8 as indicated:}
 
 8 The exception with the most recently activated handler
-\add{in the current fiber ([intro.fibers])} that is still active is called the
+\add{in the running fiber ([intro.fibers])} that is still active is called the
 \emph{currently handled exception}.
 
 \zs{Modify \stdsection{14.6.3}{except.uncaught} paragraph 1 as indicated:}
 
 ... The function \stdterm{\cpp{std::uncaught\_exceptions}}{uncaught.exceptions}
-returns the number of uncaught exceptions in the current \replace{thread}{fiber ([intro.fibers])}.
+returns the number of uncaught exceptions in the
+\replace{current thread}{running fiber ([intro.fibers])}.
 
 \zs{Insert new final subclause in clause 33 \stdclause{thread} as indicated:}
 
@@ -115,18 +117,19 @@ returns the number of uncaught exceptions in the current \replace{thread}{fiber 
 \rSec3[fiber.context.overview]{Overview}
 
 1 A \fiber object is either \emph{empty} or \emph{non-empty}. A
-default-constructed or moved-from \fiber is empty. A \fiber
-representing a prepared or suspended fiber is non-empty.
+default-constructed or moved-from \fiber is empty. Otherwise, a \fiber is
+non-empty, and represents either a prepared or a suspended fiber.
 
 2 An explicit fiber is prepared by passing an \emph{\entryfn} to \fiber's
 constructor. At the first call to one of the \anyresume member functions,
 that \entryfn is entered, and the fiber is running.
 
 3 Every call to one of the \anyresume member functions on an accessible
-non-empty \fiber object transitions between two fibers:
+non-empty \fiber object performs a context switch.
 \begin{itemize}
-    \item suspends the running fiber, making it the previous fiber
-    \item resumes \thisfiber, which was suspended, making it the running fiber.
+    \item suspends the running fiber, making it the \emph{previous fiber}
+    \item resumes \thisfiber, which was either prepared or suspended, making
+          it the running fiber.
 \end{itemize}
 In addition, returning a non-empty \fiber from a fiber's \entryfn:
 \begin{itemize}
@@ -230,11 +233,12 @@ exceeds the \cpp{size()} of that \cpp{span<byte>}, the behaviour is undefined.
     \item[---] Let \cpp{entry\_copy} be an object of
                type \cpp{decay\_t<F>} direct-non-list-initialized
                with \cpp{std::forward<F>(entry)}. 
-               \tsnote{\cpp{entry\_copy} is not a member of \fiber because it
-               is destroyed on fiber termination, not when a \fiber object is
-               destroyed.}
     \item[---] Initializes \cpp{state} to prepare a fiber that will, when
                first resumed, enter \cpp{entry\_copy}.
+               \tsnote{\cpp{entry\_copy} is not a member of \fiber because it
+               is destroyed on fiber termination, not when a \fiber object is
+               destroyed. Storage for \cpp{entry\_copy} is associated
+               with \cpp{state}.}
     \item[---] Any necessary resources are created. \tsnote{This includes
                storage for the new fiber's invocation sequence.}
     \item[---] The prepared fiber has no owning thread.
@@ -285,12 +289,13 @@ exceeds the \cpp{size()} of that \cpp{span<byte>}, the behaviour is undefined.
     \item[---] Let \cpp{deleter\_copy} be an object of
                type \cpp{decay\_t<D>} direct-non-list-initialized
                with \cpp{std::forward<F>(deleter)}. 
-               \tsnote{\cpp{entry\_copy}, \cpp{stack\_copy} and
-                \cpp{deleter\_copy} are not members of \fiber because they 
-               are destroyed on fiber termination, not when a \fiber object is
-               destroyed.}
     \item[---] Initializes \cpp{state} to prepare a fiber that will, when
                first resumed, enter \cpp{entry\_copy}.
+               \tsnote{\cpp{entry\_copy}, \cpp{stack\_copy} and
+               \cpp{deleter\_copy} are not members of \fiber because they 
+               are destroyed on fiber termination, not when a \fiber object is
+               destroyed. Storage for \cpp{entry\_copy}, \cpp{stack\_copy} and
+               \cpp{deleter\_copy} is associated with \cpp{state}.}
     \item[---] Any necessary resources are created.
     \item[---] The prepared fiber has no owning thread.
 \end{description}
@@ -351,7 +356,7 @@ Within [fiber.context.mem], for exposition only:
           fiber. Let \cpp{caller} be that synthesized \fiber object.
     \item Because \resumewith suspends the calling fiber, returning
           from \resumewith necessarily requires a subsequent context switch.
-    \item On return from \resumewith, the \emph{previous fiber} is the fiber that
+    \item On return from \resumewith, the previous fiber is the fiber that
           resumed the calling fiber.
           \tsnote{The previous fiber can be other than the target fiber.}
     \item Let \cpp{previous} be the synthesized \fiber object representing the
@@ -384,7 +389,7 @@ At entry to \resumewith, the target fiber can either be in the prepared state
                     \item execute \cpp{invoke(deleter\_copy, stack\_copy)}, then
                     \item destroy \cpp{deleter\_copy}, then
                 \end{itemize}
-            \item exit the current fiber, then
+            \item exit the running fiber, then
             \item reclaim implementation-provided resources, then
             \item direct the current thread to resume \thefiber{\cpp{successor}}, then
             \item execute \emph{internal-resume(\cpp{fiber\_context()})}.
@@ -488,14 +493,14 @@ Equivalent to: \cpp{lhs.swap(rhs)}.
 %% \mbrhdr{[[ noreturn ]] void unwind\_fiber(fiber\_context\&\& other)}
 %% 
 %% 1 \effects
-%% terminate the current running fiber.
+%% terminate the running fiber.
 %% 
 %% 2 \remarks
 %% \begin{description}
 %%     \item[---] The underlying Unwinding facility (for instance the unwind facility
 %%                described in \emph{System V ABI for AMD64}) unwinds the stack
 %%                to the implicit top-level stack frame and terminates the
-%%                current fiber as described above.
+%%                running fiber as described above.
 %%     \item[---] Unwinding the fiber's stack causes its stack variables to be
 %%                destroyed.
 %%     \item[---] During this specific stack unwinding, 
@@ -529,12 +534,12 @@ Equivalent to: \cpp{lhs.swap(rhs)}.
 \zs{Modify \stdsection{19.6.1}{stacktrace.general} as indicated:}
 
 1 Subclause \stdclause{stacktrace} describes components that C++ programs may use to
-store the stacktrace of the current \delete{thread of}\\
-\replace{execution}{fiber ([intro.fibers])}
+store the stacktrace of the \delete{current thread of}\\
+\replace{execution}{running fiber ([intro.fibers])}
 and query information about the stored stacktrace at runtime.
 
 2 The \emph{invocation sequence} of the current evaluation $x_0$
-in the current \replace{thread of execution}{fiber} is a sequence
+in the \replace{current thread of execution}{running fiber} is a sequence
 ($x_0$,...,$x_n$) of evaluations such that, for $i \geq 0$,
 $x_i$ is within the function invocation $x_{i+1}$ \xref{intro.execution}.
 
