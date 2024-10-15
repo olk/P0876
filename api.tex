@@ -349,15 +349,15 @@ The operation of \resumewith involves at least two and possibly three fibers.
 Within [fiber.context.mem], for exposition only:
 
 \begin{itemize}
-    \item Calling \resumewith performs a context switch.
+    \item Entering \resumewith performs a context switch.
     \item The \emph{calling fiber} is the fiber calling \resumewith.
     \item The \emph{target fiber} is \thefiber{\state}.
     \item \resumewith synthesizes a \fiber object representing the calling
           fiber. Let \cpp{caller} be that synthesized \fiber object.
-    \item Because \resumewith suspends the calling fiber, returning
-          from \resumewith necessarily requires a subsequent context switch.
-    \item On return from \resumewith, the previous fiber is the fiber that
-          resumed the calling fiber.
+    \item Because \resumewith suspends the calling fiber, return
+          from \resumewith necessarily requires some other fiber to perform a
+          subsequent context switch back to the original calling fiber.
+          When \resumewith returns, that other fiber is the previous fiber.
           \tsnote{The previous fiber can be other than the target fiber.}
     \item Let \cpp{previous} be the synthesized \fiber object representing the
           suspended previous fiber.
