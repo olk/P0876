@@ -63,7 +63,7 @@
 \small
 \begin{tabbing}
     Document number: \= P3346R0\\
-    Date:            \> 2024-10-14\\
+    Date:            \> 2024-10-15\\
     Author:          \> Nat Goodspeed (nat@lindenlab.com)\\
     Audience:        \> LEWG, EWG\\
 \end{tabbing}
@@ -76,7 +76,7 @@
 
 %//////////////////////////////////////////////////////////////////////////////
 
-\abschnitt{abstract}\label{abstract}
+\abschnitt{Abstract}\label{abstract}
 
 P0876R18\cite{P0876R18} does not specify any changes to the semantics of
 \stdterm{thread storage duration}{basic.stc.thread}. The implication is that
@@ -88,7 +88,7 @@ moment a specific thread is running exactly one fiber.
 Nonetheless, this could be problematic for an existing library that relies on
 \tlocal variables if multiple fibers on the same thread take turns making
 calls into that library. From the library's point of view, the value of its
-\tlocal variables might change whimsically.
+\tlocal variables might change unexpectedly.
 
 It is suggested that every \tlocal variable should have a distinct value for
 each fiber that accesses it. This paper details changes to the
@@ -120,9 +120,9 @@ Initial revision.
 %%\end{itemize}
 
 %%\newpage
-\abschnitt{acknowledgments}
+\abschnitt{Acknowledgments}
 
-The author would like to thank Adam Martin.
+The author would like to thank ADAM Martin.
 
 \abschnitt{Wording}\label{api}
 
@@ -322,7 +322,7 @@ all thread specific instances associated with each \tptr.}
 
 1 \precond
 \begin{description}
-    \item[---] \cpp{this->get() \!= nullptr}
+    \item[---] \cpp{bool(*this) == true}
 \end{description}
 
 2 \returns
@@ -330,7 +330,7 @@ all thread specific instances associated with each \tptr.}
     \item[---] \cpp{*(this->get())}
 \end{description}
 
-\mbrhdr{T* release() noexcept}
+\mbrhdr{[[nodiscard]] T* release() noexcept}
 
 1 \effects
 \begin{description}
@@ -346,14 +346,24 @@ all thread specific instances associated with each \tptr.}
 
 3 \postcond
 \begin{description}
-    \item[---] \cpp{this->get() == nullptr}
+    \item[---] \cpp{bool(*this) == false}
 \end{description}
 
-\mbrhdr{void reset(T* new\_value=nullptr)}
+\mbrhdr{void reset() noexcept}
+
+1 \effects
+Equivalent to: \cpp{reset(nullptr);}
+
+2 \postcond
+\begin{description}
+    \item[---] \cpp{bool(*this) == false}
+\end{description}
+
+\mbrhdr{void reset(T* new\_value)}
 
 1 \effects
 \begin{description}
-    \item[---] If \cpp{this->get() \!= new\_value \&\& this->get() \!= nullptr},
+    \item[---] If \cpp{this->get() \!= new\_value \&\& bool(*this)},
                invokes \cpp{delete this->get()} or\\
                \cpp{cleanup\_function(this->get())} as appropriate.
     \item[---] Stores \cpp{new\_value} as the pointer associated with the
@@ -405,7 +415,7 @@ Equivalent to: \cpp{lhs.swap(rhs)}.
 \add{\cpp{#define \__cpp\_lib\_thread\_specific\_ptr 202XXXL // also in <thread\_specific\_ptr>}}
 
 \newpage
-\addcontentsline{toc}{subsection}{references}
+\addcontentsline{toc}{subsection}{References}
 \begin{thebibliography}{99}
 
     \bibitem{P0876R18}
