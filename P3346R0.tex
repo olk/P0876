@@ -63,7 +63,7 @@
 \small
 \begin{tabbing}
     Document number: \= P3346R0\\
-    Date:            \> 2024-10-15\\
+    Date:            \> 2024-10-16\\
     Author:          \> Nat Goodspeed (nat@lindenlab.com)\\
     Audience:        \> LEWG, EWG\\
 \end{tabbing}
@@ -208,11 +208,6 @@ thread, but distinct for each referencing thread.
 used to access a distinct object with dynamic storage duration for each
 thread, that is nonetheless shared between all fibers on that thread.
 
-3 Conceptually a \tptr\cpp{<T, Deleter>} instance stores a distinct
-\cpp{unique\_ptr<T, Deleter>} instance for each consuming thread.
-However, \cpp{Deleter} must be copyable so that \cpp{reset(T*)} can associate
-a new copy of the stored deleter with the new pointer value.
-
 %--------------------------------- synopsis ----------------------------------
 \rSec3[thread.ptr.synopsis]{Header <thread\_specific\_ptr> synopsis}
 
@@ -232,30 +227,29 @@ a new copy of the stored deleter with the new pointer value.
 1 \constraints
 \cpp{is\_pointer\_v<Deleter> == false} and \cpp{is\_default\_constructible\_v<Deleter> == true}
 
-2 \precond
-\cpp{Deleter} meets the \emph{Cpp17DefaultConstructible} and
-\emph{Cpp17CopyConstructible} requirements and such construction does not exit
-via an exception.
-\cpp{Deleter} meets the \emph{Cpp17CopyAssignable} requirements.
+2 \mandates
+\cpp{is\_nothrow\_invocable\_v<Deleter, T*> == true}
 
-3 \effects
+3 \precond
+\cpp{Deleter} meets the \emph{Cpp17DefaultConstructible} requirements and such
+construction does not exit via an exception.
+
+4 \effects
 \begin{description}
     \item[---] Constructs a \cpp{thread\_specific\_ptr} object for storing a
                pointer to an object of type \cpp{T} specific to each thread.
-               Value-initializes the stored deleter.
+               Value-initializes \cpp{del}.
 \end{description}
 
-4 \postcond
+5 \postcond
 \cpp{bool(*this) == false}
-\tsnote{Conceptually the instance of \cpp{this->p} for each consuming thread
-is initialized with \cpp{nullptr} and a copy of the stored deleter.}
 
-5 \except
+6 \except
 \begin{description}
     \item[---] \cpp{system\_error} if an error occurs.
 \end{description}
 
-6 \errors
+7 \errors
 \cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary
 resources to instantiate a \tptr.
 
@@ -265,61 +259,63 @@ resources to instantiate a \tptr.
 1 \constraints
 \cpp{is\_constructible\_v<Deleter, decltype(deleter)> == true}
 
-2 \precond
+2 \mandates
+\cpp{is\_nothrow\_invocable\_v<Deleter, T*> == true}
+
+3 \precond
 \cpp{Deleter} meets the \emph{Cpp17CopyConstructible} requirements and such
 construction does not exit via an exception.
-\cpp{Deleter} meets the \emph{Cpp17CopyAssignable} requirements.
 
-3 \effects
+4 \effects
 \begin{description}
     \item[---] Constructs a \cpp{thread\_specific\_ptr} object for storing a
                pointer to an object of type \cpp{T} specific to each thread.
-               Initializes the stored deleter from
+               Initializes \cpp{del} from
                \cpp{std::forward<decltype(deleter)>(deleter)}.
 \end{description}
 
-4 \postcond
+5 \postcond
 \cpp{bool(*this) == false}
-\tsnote{Conceptually the instance of \cpp{this->p} for each consuming thread
-is initialized with \cpp{nullptr} and a copy of the stored deleter.}
 
-5 \except
+6 \except
 \begin{description}
     \item[---] \cpp{system\_error} if an error occurs.
 \end{description}
 
-6 \errors
+7 \errors
 \cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary
 resources to instantiate a \tptr.
 
-%--------------------------------- move ctor ---------------------------------
-\mbrhdr{thread\_specific\_ptr(thread\_specific\_ptr\&\& other)}
+%----------------------------- move deleter ctor -----------------------------
+\mbrhdr{explicit thread\_specific\_ptr(Deleter\&\& deleter)}
 
 1 \constraints
 \cpp{is\_move\_constructible\_v<Deleter> == true}
 
-2 \precond
+2 \mandates
+\cpp{is\_nothrow\_invocable\_v<Deleter, T*> == true}
+
+3 \precond
 \cpp{Deleter} meets the \emph{Cpp17MoveConstructible} requirements and such
 construction does not exit via an exception.
 
-3 \effects
+4 \effects
 \begin{description}
     \item[---] Constructs a \cpp{thread\_specific\_ptr} object for storing a
                pointer to an object of type \cpp{T} specific to each thread.
-               The stored deleter is move constructed from \cpp{other}'s deleter.
+               Initializes \cpp{del} from
+               \cpp{std::forward<decltype(deleter)>(deleter)}.
 \end{description}
 
-4 \postcond
+5 \postcond
 \cpp{bool(*this) == false}
-\tsnote{Conceptually the instance of \cpp{this->p} for each consuming thread
-is initialized with \cpp{nullptr} and a copy of the stored deleter.}
 
-5 \except
+6 \except
 \begin{description}
     \item[---] \cpp{system\_error} if an error occurs.
 \end{description}
 
-6 \errors
+7 \errors
 \cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary
 resources to instantiate a \tptr.
 
@@ -339,25 +335,10 @@ resources to instantiate a \tptr.
                calling thread, and destroys \this.
 \end{description}
 
-\tsnote{The requirement avoids the necessity for an implementation to track
+\tsnote{The Precondition avoids the necessity for an implementation to track
 all thread specific instances associated with each \tptr.}
 
 \rSec4[thread.ptr.mem]{Members}
-
-%------------------------------ move assignment ------------------------------
-\mbrhdr{thread\_specific\_ptr\& operator=(thread\_specific\_ptr\&\& other)}
-
-1 \constraints
-\cpp{is\_move\_assignable\_v<Deleter> == true}
-
-2 \precond
-\cpp{Deleter} meets the \emph{Cpp17MoveAssignable} requirements and such
-assignment does not exit via an exception.
-
-3 \effects
-\begin{description}
-    \item[---] Equivalent to: \cpp{p = std::move(other.p);}
-\end{description}
 
 %----------------------------------- get() -----------------------------------
 \mbrhdr{T* get() const noexcept}
@@ -389,11 +370,24 @@ assignment does not exit via an exception.
 \end{description}
 
 %--------------------------------- release() ---------------------------------
-\mbrhdr{[[nodiscard]] unique\_ptr<T, Deleter> release() noexcept}
+\mbrhdr{[[nodiscard]] T* release() noexcept}
 
 1 \effects
-For the instance of \cpp{this->p} for the current thread, equivalent to:
-\cpp{return std::move(p);}
+\begin{description}
+    \item[---] Let \cpp{ptr} be the current value of \cpp{this->get()}.
+    \item[---] Stores \cpp{nullptr} as the pointer associated with the
+               calling thread.
+\end{description}
+
+2 \returns
+\begin{description}
+    \item[---] \cpp{ptr}
+\end{description}
+
+3 \postcond
+\begin{description}
+    \item[---] \cpp{bool(*this) == false}
+\end{description}
 
 %------------------------------ nullary reset() ------------------------------
 \mbrhdr{void reset() noexcept}
@@ -410,15 +404,24 @@ Equivalent to: \cpp{reset(nullptr);}
 \mbrhdr{void reset(T* new\_value)}
 
 1 \effects
-For the instance of \cpp{this->p} for the current thread, equivalent to:
-\cpp{p.reset(new\_value);}
+\begin{description}
+    \item[---] If \cpp{this->get() \!= new\_value \&\& bool(*this)},
+               invokes \cpp{this->del(this->get())}.
+    \item[---] Stores \cpp{new\_value} as the pointer associated with the
+               calling thread.
+\end{description}
 
-2 \except
+2 \postcond
+\begin{description}
+    \item[---] \cpp{this->get() == new\_value}
+\end{description}
+
+3 \except
 \begin{description}
     \item[---] \cpp{system\_error} if an error occurs.
 \end{description}
 
-3 \errors
+4 \errors
 \cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary
 resources to store a new thread specific pointer value.
 
@@ -427,20 +430,6 @@ resources to store a new thread specific pointer value.
 
 1 \effects
 Equivalent to: \cpp{return (this->get() \!= nullptr);}
-
-%------------------------------- member swap() -------------------------------
-\mbrhdr{void swap(thread\_specific\_ptr\& other) noexcept}
-
-1 \effects
-Swaps the pointer associated with the calling thread for \this with the
-pointer associated with the calling thread for \cpp{other}.
-
-%------------------------------- friend swap() -------------------------------
-\rSec4[thread.ptr.special]{Specialized algorithms}
-\mbrhdr{friend void swap(thread\_specific\_ptr\& lhs, thread\_specific\_ptr\& rhs) noexcept}
-
-1 \effects
-Equivalent to: \cpp{lhs.swap(rhs)}.
 
 \cbend
 
