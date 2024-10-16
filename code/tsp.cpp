@@ -6,7 +6,6 @@ public:
     // [thread.ptr.cons], constructors, move and assignment
     thread_specific_ptr();
     explicit thread_specific_ptr(const Deleter& deleter);
-    explicit thread_specific_ptr(Deleter&& deleter);
 
     ~thread_specific_ptr();
 

@@ -286,39 +286,6 @@ construction does not exit via an exception.
 \cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary
 resources to instantiate a \tptr.
 
-%----------------------------- move deleter ctor -----------------------------
-\mbrhdr{explicit thread\_specific\_ptr(Deleter\&\& deleter)}
-
-1 \constraints
-\cpp{is\_move\_constructible\_v<Deleter> == true}
-
-2 \mandates
-\cpp{is\_nothrow\_invocable\_v<Deleter, T*> == true}
-
-3 \precond
-\cpp{Deleter} meets the \emph{Cpp17MoveConstructible} requirements and such
-construction does not exit via an exception.
-
-4 \effects
-\begin{description}
-    \item[---] Constructs a \cpp{thread\_specific\_ptr} object for storing a
-               pointer to an object of type \cpp{T} specific to each thread.
-               Initializes \cpp{del} from
-               \cpp{std::forward<decltype(deleter)>(deleter)}.
-\end{description}
-
-5 \postcond
-\cpp{bool(*this) == false}
-
-6 \except
-\begin{description}
-    \item[---] \cpp{system\_error} if an error occurs.
-\end{description}
-
-7 \errors
-\cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary
-resources to instantiate a \tptr.
-
 %----------------------------------- dtor ------------------------------------
 \mbrhdr{\cpp{\~thread\_specific\_ptr()}}
 
@@ -406,7 +373,10 @@ Equivalent to: \cpp{reset(nullptr);}
 1 \effects
 \begin{description}
     \item[---] If \cpp{this->get() \!= new\_value \&\& bool(*this)},
-               invokes \cpp{this->del(this->get())}.
+               let \cpp{tempdel} be a temporary copy of \cpp{del}.\\
+               Invokes \cpp{tempdel(this->get())}.
+               \tsnote{Calling a copy of \cpp{del} avoids potential data races
+               from concurrent executions of \cpp{del}.}
     \item[---] Stores \cpp{new\_value} as the pointer associated with the
                calling thread.
 \end{description}
