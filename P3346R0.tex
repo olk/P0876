@@ -1,0 +1,439 @@
+%//////////////////////////////////////////////////////////////////////////////
+
+\documentclass[fontsize=10pt,paper=A4,pagesize,DIV=15]{scrartcl}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[american]{babel}        % required for ISO dates
+\usepackage[iso,american]{isodate}  % ISO format of dates
+\usepackage[final]{listings}        % code listings
+\usepackage{booktabs}               % fancy tables
+\usepackage[color]{changebar}       % changebars for large inserted passages
+\usepackage{longtable}              % auto breaking tables
+\usepackage{ltcaption}              % fix captions for long tables
+\usepackage{relsize}                % provide relative font size changes
+%\usepackage{underscore}             % remove special status of '_' in ordinary text
+%\usepackage{verbatim}               % improved verbatim environment
+\usepackage{parskip}                % handle non-indented paragraphs "properly"
+\usepackage{array}                  % new column definitions for tables
+\usepackage[normalem]{ulem}         % underline commands
+\usepackage{xcolor}                 % driver-independent color extensions
+\usepackage{amsmath}                % mathematical symbols
+\usepackage{mathrsfs}               % mathscr font
+\usepackage{xspace}                 % inserts a space to replace one "eaten" by TeX
+\usepackage[final]{microtype}       % micro-typographic extensions introduced by pdfTeX
+\usepackage{xstring}                % manipulating strings
+\usepackage{fixme}                  % collaborative annotations
+\usepackage{multicol}               % intermix single and multiple columns
+\usepackage{perpage}                % counter reset at every page boundary
+\usepackage{palatino}               % Adobe Palatino font
+\usepackage{overcite}               % citations
+\usepackage{boxedminipage}          % framed mini-pages
+\usepackage{fancyhdr}               % control of page headers and footers
+\usepackage{soul}                   % hyphenatable spacingout), underlining, striking out, et.
+\usepackage{svg}                    % SVG pictures
+\usepackage{tikz}                   % creating PS and PDF graphics
+\usetikzlibrary{arrows,automata}
+
+\cbcolor{green}
+
+\usepackage[pdftex,
+            pdftitle    = {thread\_local means fiber-specific},
+            pdfsubject  = {},
+            pdfauthor   = {Nat Goodspeed},
+            pdfkeywords = {C++,fiber_context,thread_local},
+            bookmarks=true,
+            bookmarksnumbered=true,
+            pdfpagelabels=true,
+            pdfpagemode=UseOutlines,
+            pdfstartview=FitH,
+            linktocpage=true,
+            colorlinks=true,
+            linkcolor=blue,
+            plainpages=false
+           ]{hyperref}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\input{commands}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\begin{document}
+\small
+\begin{tabbing}
+    Document number: \= P3346R0\\
+    Date:            \> 2024-10-16\\
+    Author:          \> Nat Goodspeed (nat@lindenlab.com)\\
+    Audience:        \> LEWG, EWG\\
+\end{tabbing}
+
+\section*{thread\_local means fiber-specific}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\tableofcontents
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\abschnitt{Abstract}\label{abstract}
+
+P0876R18\cite{P0876R18} does not specify any changes to the semantics of
+\stdterm{thread storage duration}{basic.stc.thread}. The implication is that
+if two fibers are running on the same thread, they will both share the same
+value of a given \tlocal variable. Each fiber will see modifications made by
+the other fiber. They will not \stdterm{race}{intro.races}, since at every
+moment a specific thread is running exactly one fiber.
+
+Nonetheless, this could be problematic for an existing library that relies on
+\tlocal variables if multiple fibers on the same thread take turns making
+calls into that library. From the library's point of view, the value of its
+\tlocal variables might change unexpectedly.
+
+It is suggested that every \tlocal variable should have a distinct value for
+each fiber that accesses it. This paper details changes to the
+Standard\cite{Standard} to express that functionality. 
+
+When the Standard first introduced \tlocal, library authors were strongly
+encouraged to migrate from \cpp{static} variables to \tlocal. The C++
+community has already paid that price. Now, instead of introducing another new
+keyword requiring another new migration, we should leverage the existing
+keyword to retain the desired behavior of a variable whose value persists
+between successive calls, independently of calls into the same library by
+other execution agents.
+
+To address the less common use case of a variable local to a \thread but
+shared by all fibers within that thread, we also introduce \tptr, a design
+pioneered in the Boost library suite.\cite{Boost}
+
+This paper depends on P0876R18.
+
+\abschnitt{Revision History}\label{history}
+Initial revision.
+
+%%This document supersedes P3346R0.
+%%
+%%\uabschnitt{Changes since P3346R0}
+%%
+%%\begin{itemize}
+%%    \item Update to reference N4981.
+%%\end{itemize}
+
+%%\newpage
+\abschnitt{Acknowledgments}
+
+The author would like to thank ADAM Martin.
+
+\abschnitt{Wording}\label{api}
+
+This wording is relative to N4981\cite{Standard}.
+
+\zs{Modify \stdsection{6.7.5.3}{basic.stc.thread} as follows:}
+
+1 All variables declared with the \cpp{thread\_local} keyword have
+\emph{thread storage duration}.
+The storage for these entities lasts for the duration of
+the \replace{thread}{fiber} in which they are created. There is a distinct object or reference
+per \replace{thread}{fiber}, and use of the declared name refers to the entity associated with
+the current \replace{thread}{fiber}.
+
+2 \tsnoten{1}{A variable with thread storage duration is initialized as specified
+in \stdclause{basic.start.static}, \stdclause{basic.start.dynamic}, and \stdclause{stmt.dcl}
+and, if constructed, is destroyed on \replace{thread}{fiber} exit \replace{\xref{basic.start.term}}{\xref{fiber.context.overview}}.}
+
+\zs{Modify \stdsection{6.9.3.4}{basic.start.term} paragraph 2 as follows:}
+
+2 Constructed objects with thread storage duration within a given \replace{thread}{fiber}
+are destroyed as a result of returning from the initial function of that \replace{thread}{fiber} and as a
+result of that \replace{thread}{fiber} calling \cpp{std::exit}.
+The destruction of all constructed objects with thread storage
+duration within that \replace{thread}{fiber} strongly happens before destroying
+any object with static storage duration.
+
+\zs{Modify \stdsection{11.4.9.3}{class.static.data} paragraph 1 as follows:}
+
+1 A static data member is not part of the subobjects of a class. If a
+static data member is declared \cpp{thread\_local} there is one copy of
+the member per \replace{thread}{fiber}. If a static data member is not declared
+\cpp{thread\_local} there is one copy of the data member that is shared by all
+the objects of the class.
+
+\zs{Modify \stdsection{17.5}{support.start.term} paragraph 9.1 as follows:}
+
+(9.1) --- First, objects with thread storage duration and associated with the current
+\replace{thread}{thread's default fiber}
+are destroyed. Next, objects with static storage duration are destroyed
+and functions registered by calling
+\cpp{atexit}
+are called.\textsuperscript{191}
+
+See \stdclause{basic.start.term} for the order of destructions and calls.
+(Objects with automatic storage duration are not destroyed as a result of calling
+\cpp{exit()}.)\textsuperscript{192}
+
+If a registered function invoked by \cpp{exit} exits via an exception,
+the function \cpp{std::terminate} is invoked\xref{except.terminate}.
+
+\zs{Modify \stdsection{33.10.10.2}{futures.task.members} paragraph 23 as follows:}
+
+23 \effects
+As if by \emph{INVOKE}\cpp{<R>(f, t}$_1$\cpp{, t}$_2$, $\dotsc$\cpp{, t}$_N$\cpp{)}\xref{func.require},
+where \cpp{f} is the stored task and
+\cpp{t}$_1$\cpp{, t}$_2$, $\dotsc$\cpp{, t}$_N$ are the values in \cpp{args...}. If the task returns normally,
+the return value is stored as the asynchronous result in the shared state of
+\this, otherwise the exception thrown by the task is stored. In either
+case, this is done without making that state ready\xref{futures.state} immediately. Schedules
+the shared state to be made ready when the current thread exits,
+after all objects of thread storage duration associated with the current \replace{thread}
+{thread's default fiber} have been destroyed.
+
+\zs{Insert new final subclause in clause 33 \stdclause{thread} as indicated:}
+
+\setcounter{section}{33}
+\setcounter{subsection}{12}
+\setcounter{secnumdepth}{4}
+
+\cbstart
+
+\rSec2[thread.ptr]{thread\_specific\_ptr}
+
+\rSec3[thread.ptr.overview]{Overview}
+
+1 Objects with thread storage duration now have a distinct instance for each
+fiber within a thread, and are destroyed when the fiber terminates. It is
+sometimes desirable to access storage that is shared between all fibers on a
+thread, but distinct for each referencing thread.
+
+2 The \tptr class manages pointers, one per referencing thread. This can be
+used to access a distinct object with dynamic storage duration for each
+thread, that is nonetheless shared between all fibers on that thread.
+
+%--------------------------------- synopsis ----------------------------------
+\rSec3[thread.ptr.synopsis]{Header <thread\_specific\_ptr> synopsis}
+
+\cppf{synopsis.tls}
+
+%--------------------------------- class def ---------------------------------
+
+\rSec3[thread.ptr.class]{Class thread\_specific\_ptr}
+
+\cppf{tsp}
+
+\rSec4[thread.ptr.cons]{Constructors, move and assignment}
+
+%------------------------------- default ctor --------------------------------
+\mbrhdr{thread\_specific\_ptr()}
+
+1 \constraints
+\cpp{is\_pointer\_v<Deleter> == false} and \cpp{is\_default\_constructible\_v<Deleter> == true}
+
+2 \mandates
+\cpp{is\_nothrow\_invocable\_v<Deleter, T*> == true}
+
+3 \precond
+\cpp{Deleter} meets the \emph{Cpp17DefaultConstructible} requirements and such
+construction does not exit via an exception.
+
+4 \effects
+\begin{description}
+    \item[---] Constructs a \cpp{thread\_specific\_ptr} object for storing a
+               pointer to an object of type \cpp{T} specific to each thread.
+               Value-initializes \cpp{del}.
+\end{description}
+
+5 \postcond
+\cpp{bool(*this) == false}
+
+6 \except
+\begin{description}
+    \item[---] \cpp{system\_error} if an error occurs.
+\end{description}
+
+7 \errors
+\cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary
+resources to instantiate a \tptr.
+
+%----------------------------- copy deleter ctor -----------------------------
+\mbrhdr{explicit thread\_specific\_ptr(const Deleter\& deleter)}
+
+1 \constraints
+\cpp{is\_constructible\_v<Deleter, decltype(deleter)> == true}
+
+2 \mandates
+\cpp{is\_nothrow\_invocable\_v<Deleter, T*> == true}
+
+3 \precond
+\cpp{Deleter} meets the \emph{Cpp17CopyConstructible} requirements and such
+construction does not exit via an exception.
+
+4 \effects
+\begin{description}
+    \item[---] Constructs a \cpp{thread\_specific\_ptr} object for storing a
+               pointer to an object of type \cpp{T} specific to each thread.
+               Initializes \cpp{del} from
+               \cpp{std::forward<decltype(deleter)>(deleter)}.
+\end{description}
+
+5 \postcond
+\cpp{bool(*this) == false}
+
+6 \except
+\begin{description}
+    \item[---] \cpp{system\_error} if an error occurs.
+\end{description}
+
+7 \errors
+\cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary
+resources to instantiate a \tptr.
+
+%----------------------------------- dtor ------------------------------------
+\mbrhdr{\cpp{\~thread\_specific\_ptr()}}
+
+1 \precond
+\begin{description}
+    \item[---] All thread specific instances associated with this \tptr
+               (except the one associated with the calling thread) must be
+               \cpp{nullptr}.
+\end{description}
+
+2 \effects
+\begin{description}
+    \item[---] Calls \cpp{this->reset()} to clean up the associated value for the
+               calling thread, and destroys \this.
+\end{description}
+
+\tsnote{The Precondition avoids the necessity for an implementation to track
+all thread specific instances associated with each \tptr.}
+
+\rSec4[thread.ptr.mem]{Members}
+
+%----------------------------------- get() -----------------------------------
+\mbrhdr{T* get() const noexcept}
+
+1 \returns
+\begin{description}
+    \item[---] The pointer associated with the calling thread.
+\end{description}
+
+%------------------------------- operator->() --------------------------------
+\mbrhdr{T* operator->() const noexcept}
+
+1 \returns
+\begin{description}
+    \item[---] \cpp{this->get()}
+\end{description}
+
+%-------------------------------- operator*() --------------------------------
+\mbrhdr{T\& operator*() const noexcept}
+
+1 \precond
+\begin{description}
+    \item[---] \cpp{bool(*this) == true}
+\end{description}
+
+2 \returns
+\begin{description}
+    \item[---] \cpp{*(this->get())}
+\end{description}
+
+%--------------------------------- release() ---------------------------------
+\mbrhdr{[[nodiscard]] T* release() noexcept}
+
+1 \effects
+\begin{description}
+    \item[---] Let \cpp{ptr} be the current value of \cpp{this->get()}.
+    \item[---] Stores \cpp{nullptr} as the pointer associated with the
+               calling thread.
+\end{description}
+
+2 \returns
+\begin{description}
+    \item[---] \cpp{ptr}
+\end{description}
+
+3 \postcond
+\begin{description}
+    \item[---] \cpp{bool(*this) == false}
+\end{description}
+
+%------------------------------ nullary reset() ------------------------------
+\mbrhdr{void reset() noexcept}
+
+1 \effects
+Equivalent to: \cpp{reset(nullptr);}
+
+2 \postcond
+\begin{description}
+    \item[---] \cpp{bool(*this) == false}
+\end{description}
+
+%------------------------------- unary reset() -------------------------------
+\mbrhdr{void reset(T* new\_value)}
+
+1 \effects
+\begin{description}
+    \item[---] If \cpp{this->get() \!= new\_value \&\& bool(*this)},
+               let \cpp{tempdel} be a temporary copy of \cpp{del}.\\
+               Invokes \cpp{tempdel(this->get())}.
+               \tsnote{Calling a copy of \cpp{del} avoids potential data races
+               from concurrent executions of \cpp{del}.}
+    \item[---] Stores \cpp{new\_value} as the pointer associated with the
+               calling thread.
+\end{description}
+
+2 \postcond
+\begin{description}
+    \item[---] \cpp{this->get() == new\_value}
+\end{description}
+
+3 \except
+\begin{description}
+    \item[---] \cpp{system\_error} if an error occurs.
+\end{description}
+
+4 \errors
+\cpp{resource\_unavailable\_try\_again} -- the system lacked the necessary
+resources to store a new thread specific pointer value.
+
+%------------------------------ operator bool() ------------------------------
+\mbrhdr{explicit operator bool() const noexcept}
+
+1 \effects
+Equivalent to: \cpp{return (this->get() \!= nullptr);}
+
+\cbend
+
+%---------------------------------- header -----------------------------------
+\abschnitt{Header File}
+
+\zs{Add a new header file to Table 24 in \stdsection{16.4.2.3}{headers}:}
+
+\add{\cpp{<thread\_specific\_ptr>}}
+
+%---------------------------- feature test macro -----------------------------
+\abschnitt{Feature-test Macro}
+\zs{Add a new feature-test macro to \stdsection{17.3.2}{version.syn} as indicated:}
+
+\add{\cpp{#define \__cpp\_lib\_thread\_specific\_ptr 202XXXL // also in <thread\_specific\_ptr>}}
+
+\newpage
+\addcontentsline{toc}{subsection}{References}
+\begin{thebibliography}{99}
+
+    \bibitem{P0876R18}
+        \href{https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p0876r18.pdf}
+        {P0876R18: fibers without scheduler}
+
+    \bibitem{Standard}
+        \href{https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/n4981.pdf}
+        {N4981: Working Draft, Programming Languages -- C++}
+
+    \bibitem{Boost}
+        \href{https://www.boost.org/doc/libs/release/doc/html/thread/thread_local_storage.html}
+        {Boost C++ Libraries: Thread Local Storage}
+
+\end{thebibliography}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\end{document}
