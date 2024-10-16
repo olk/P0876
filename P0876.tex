@@ -1,0 +1,109 @@
+%//////////////////////////////////////////////////////////////////////////////
+
+\documentclass[fontsize=10pt,paper=A4,pagesize,DIV=15]{scrartcl}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[american]{babel}        % required for ISO dates
+\usepackage[iso,american]{isodate}  % ISO format of dates
+\usepackage[final]{listings}        % code listings
+\usepackage{booktabs}               % fancy tables
+\usepackage[color]{changebar}       % changebars for large inserted passages
+\usepackage{longtable}              % auto breaking tables
+\usepackage{ltcaption}              % fix captions for long tables
+\usepackage{relsize}                % provide relative font size changes
+%\usepackage{underscore}             % remove special status of '_' in ordinary text
+%\usepackage{verbatim}               % improved verbatim environment
+\usepackage{parskip}                % handle non-indented paragraphs "properly"
+\usepackage{array}                  % new column definitions for tables
+\usepackage[normalem]{ulem}         % underline commands
+\usepackage{xcolor}                 % driver-independent color extensions
+\usepackage{amsmath}                % mathematical symbols
+\usepackage{mathrsfs}               % mathscr font
+\usepackage{xspace}                 % inserts a space to replace one "eaten" by TeX
+\usepackage[final]{microtype}       % micro-typographic extensions introduced by pdfTeX
+\usepackage{xstring}                % manipulating strings
+\usepackage{fixme}                  % collaborative annotations
+\usepackage{multicol}               % intermix single and multiple columns
+\usepackage{perpage}                % counter reset at every page boundary
+\usepackage{palatino}               % Adobe Palatino font
+\usepackage{overcite}               % citations
+\usepackage{boxedminipage}          % framed mini-pages
+\usepackage{fancyhdr}               % control of page headers and footers
+\usepackage{soul}                   % hyphenatable spacingout), underlining, striking out, et.
+\usepackage{svg}                    % SVG pictures
+\usepackage{tikz}                   % creating PS and PDF graphics
+\usetikzlibrary{arrows,automata}
+
+\cbcolor{green}
+
+\usepackage[pdftex,
+            pdftitle    = {fibers without scheduler},
+            pdfsubject  = {},
+            pdfauthor   = {Oliver Kowalke},
+            pdfkeywords = {C++,callcc,call/cc,context,continuation,coroutine,execution,fiber,fiber_context,switch,P0099,P0534,P0876},
+            bookmarks=true,
+            bookmarksnumbered=true,
+            pdfpagelabels=true,
+            pdfpagemode=UseOutlines,
+            pdfstartview=FitH,
+            linktocpage=true,
+            colorlinks=true,
+            linkcolor=blue,
+            plainpages=false
+           ]{hyperref}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\input{commands}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\begin{document}
+\small
+\begin{tabbing}
+    Document number: \= D0876R17\\
+    Date:            \> 2024-06-24\\
+    Author:          \> Oliver Kowalke (oliver.kowalke@gmail.com)\\
+                     \> Nat Goodspeed (nat@lindenlab.com)\\
+    Audience:        \> LWG, CWG, EWG\\
+\end{tabbing}
+
+\section*{\emph{fiber\_context} - fibers without scheduler}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\tableofcontents
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\input{abstract}
+\input{history}
+\newpage
+\input{ecosystem}
+\input{control_transfer}
+\input{first_class}
+\input{stack_management}
+\input{invalidation}
+\input{problem_gp_ub}
+\input{solution_gp_ub}
+\input{resume_with}
+\input{passing_data}
+\input{termination}
+\input{exceptions}
+%%\input{stack}
+\input{low_level}
+\input{stl}
+\input{implementation}
+\input{register_window}
+\input{performance}
+\input{accelerators}
+\input{tls}
+\input{acknowledgment}
+\input{api}
+\input{for_examples}
+\input{references}
+
+%//////////////////////////////////////////////////////////////////////////////
+
+\end{document}
