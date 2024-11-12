@@ -85,7 +85,8 @@ Also used in some ByteDance services.
 
 \uabschnitt{Alibaba's \libeasy}\cite{libeasy} supports a large number of
 servers, including storage, database, etc. Not officially open-sourced, but
-carried out by some open source projects, such as Oceanbase, tair, etc.
+has been published as part of some open source projects, such as Oceanbase,
+tair, etc.
 
 \uabschnitt{Baidu's \bthread}\cite{bthread} has 1 million+ deployed instances
 (not counting clients) and thousands of kinds of services.
@@ -94,7 +95,17 @@ carried out by some open source projects, such as Oceanbase, tair, etc.
 is widely used in backend service of WeChat, which is the largest IM service
 in China, with billions of users. 
 
-\uabschnitt{\libgo}\cite{libgo} is said to be developed by Meizu.
+\uabschnitt{\libgo}\cite{libgo} is developed by Meizu, one of the top mobile
+phone vendors in China. Libgo is used in Kiev, Meizu's distributed service
+framework for its applications. Libgo does support parallel scheduling
+for multi-core CPUs.
+
+\uabschnitt{\statethreads}\cite{state-threads} was first developed by
+Netscape, then maintained by SGI and Yahoo!. It is now used in a realtime
+media streaming server called \href{https://github.com/ossrs/srs}{SRS}, and
+maintained by SRS's developers. \emph{state-threads} was used in the
+\href{https://dl.acm.org/doi/10.1145/3302424.3303967}
+{distributed block store for Meituan}, another top Internet company in China.
 
 \zs{As shown in this section a low-level API can act as building block for a
 rich set of high-level frameworks designed for specific application domains
