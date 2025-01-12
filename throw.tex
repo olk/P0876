@@ -1,0 +1,33 @@
+\newpage
+\abschnitt{Appendix B: throw-expression with no operand}\label{throw}
+
+Both \stdclause{expr.throw} paragraph 3 and \cpp{current\_exception()}
+(\stdclause{propagation} paragraph 8) reference the ``currently handled
+exception'' (\stdclause{except.handle} paragraph 8). Thus, the
+construct \cpp{throw;} is by definition equivalent to\\
+\cpp{std::rethrow\_exception(std::current\_exception());}
+(\stdclause{propagation} paragraph 9).
+
+The existing definition of currently handled exception:
+
+``The exception with the most recently activated handler that is still active
+is called the \emph{currently handled exception.}''
+
+does not clearly constrain the scope to the current thread. This constraint
+must be inferred from \stdclause{except.throw} paragraph 2:
+
+``When an exception is thrown, control is transferred to the nearest handler
+with a matching type \xref{except.handle}; ``nearest'' means the handler for
+which the \nt{stmt.block}{compound-statement} or
+\nt{class.base.init}{ctor-initializer} following the \cpp{try} keyword was
+most recently entered by the thread of control and not yet exited.''
+
+In any case, if ``currently handled exception'' means the exception with the
+most recently activated handler within any fiber on the current thread, we can get
+\href{https://github.com/secondlife/3p-boost/blob/nat/exstate/tests/nullary_throw.cpp}{the following result}.
+
+\cppfl{nullary_throw}
+
+Worse still, the exceptions in question aren't necessarily related to each
+other, and line 36 is more likely to read \cpp{catch (const Bad& caught)} --
+in which case the \cpp{throw;} on line 34 would \emph{not} be caught.
