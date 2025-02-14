@@ -132,7 +132,18 @@ fibers is that a function need not know whether some function it calls (or
 some indirect callee thereof) will resume another fiber. It's not practical
 simply to forbid coders from switching fibers within a catch block.
 
-It's worth pointing out that with
+In St. Louis in June 2024, EWG requested\cite{stlouisnotes} implementation
+experience with fiber-specific exception state.
+
+In Wroclaw in November 2024,\cite{wroclawnotes} we presented
 \href{https://github.com/secondlife/3p-boost/blob/nat/exstate/patches/libs/context/0001-switch-exception-state.patch}{a small patch}
-to the Boost.Context reference implementation, all three programs behave
-correctly when built with libstdc++ on Windows and Linux.
+to the Boost.Context reference implementation. With that patch, all three
+exception state test programs behave correctly when built with libstdc++ on
+Windows and Linux. Microsoft questioned whether fiber-specific exception state
+is implementable in MSVC, and EWG agreed to take up this matter in Hagenberg.
+
+On February 14, 2025, Gor Nishanov stated\cite{onwindows} that a Windows
+Fibers implementation of \fiber would be possible, while expressing concern
+about potential performance.
+
+
