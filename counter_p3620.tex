@@ -1,0 +1,61 @@
+\abschnitt{P3620R0: Concerns with the proposed addition of fibers to C++26}
+
+At a high level, P3620R0\cite{P3620R0} appears to argue that unless fibers are
+appropriate for all use cases, they must not be available for any use case.
+This ignores the industry experience cited in \nameref{low_level}.
+
+Not every C++ feature is applicable to every environment. \cpp{breakpoint()}
+is not generally found in production code. A library that writes to
+\cpp{std::cerr} will cause problems for an application running in a windowed
+environment that has no stderr file handle. A library that throws exceptions
+is a poor choice for an application that forbids exceptions. A library that
+creates \cpp{std::thread}s will cause trouble for an application that's not
+expecting them.
+
+\uabschnitt{Fibers are not lightweight threads}
+
+P3620R0 states that operating system vendors have largely abandoned attempts
+to support fibers as N:M threading, because operating system threads have more
+state than it's feasible to manage with fibers.
+
+\fiber does not claim to support lightweight threads. \fiber is a tool for
+organizing the flow of control within an operating system thread. It does not
+need to manage signals, signal masks or other facilities beyond the C++
+abstract machine.
+
+\uabschnitt{TLS}
+
+P3620R0 notes that \tlocal storage is shared between all the fibers on a
+thread. P3346R0\cite{P3346R0} proposed to modify \tlocal to mean
+fiber-specific. This was rejected by SG1 in Wrocław.\cite{wroclawp3346}
+
+This semantic can nonetheless be addressed by a higher-level library. For
+instance, Boost.Fiber\cite{bfiber} provides
+\href{https://www.boost.org/doc/libs/release/libs/fiber/doc/html/fiber/fls.html}
+{\cpp{fiber\_specific\_ptr}}.
+
+P3620R0 further claims that C++20 coroutines do not have this problem.
+Actually, they do. If, on entry, a coroutine links an object into a linked
+list anchored with a \cpp{static} or \tlocal pointer, then unlinks it on final
+return, reaching that coroutine from different interleaved invocation
+sequences will corrupt that linked list. This issue did not block adoption
+of C++20 coroutines.
+
+It may be worth noting that coroutines provide no entity analogous to a fiber.
+It would not be straightforward to support chain-of-coroutines-local storage.
+
+\uabschnitt{Deadlocks}
+
+P3620R0 points out that switching fibers within a thread while holding a lock
+may lead to accidental deadlock.
+
+This semantic can be addressed by a higher-level library. For instance,
+Boost.Fiber\cite{bfiber} provides fiber-aware synchronization primitives such as
+\href{https://www.boost.org/doc/libs/release/libs/fiber/doc/html/fiber/synchronization/mutex_types.html}
+{\cpp{boost::fibers::mutex}}.
+
+C++20 coroutines have the same problem. This issue did not block adoption of
+C++20 coroutines.
+
+It would not be straightforward to support chain-of-coroutines-aware
+synchronization primitives.
