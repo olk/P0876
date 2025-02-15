@@ -19,3 +19,7 @@ term \emph{fiber} for a higher-level facility built on top of this one.
 
 Informally within this proposal, the term \emph{fiber} is used to denote the
 flow of control launched and represented by the first-class object \fiber.
+
+It's telling that when Hana Dusikova was working on implementations of P3367R3
+constexpr coroutines\cite{P3367R3}, the ``easiest way to model a coroutine,''
+the ``obvious first choice,'' was to use fibers in the constexpr evaluator.
