@@ -34,21 +34,26 @@ esac
 
 # There should be only one master .tex file, but in case we turn up more than
 # one, reverse-sort names, skipping the first character, and take the first.
-oldtex="$(ls [PD]${PNUM}R*.tex | sort -k1.2r | head -n 1)"
-oldrev="${oldtex%.tex}"
+##oldtex="$(ls [PD]${PNUM}R*.tex | sort -k1.2r | head -n 1)"
+# We've gone to a single canonical master .tex file model.
+oldtex="P${PNUM}.tex"
+##oldrev="${oldtex%.tex}"
+# That means we must extract oldrev from that file.
+# e.g. '    Document number: \= P0876R18\\'
+oldrev="$(sed -n -E "s/^ *Document number: .= (P${PNUM}R.*)\\\\\\\\/\1/p" "$oldtex")"
 
 # Find the URL for the published oldrev
 oldurl="$(curl --silent --location --head --output /dev/null --write-out '%{url_effective}' -- https://wg21.link/$oldrev)"
 
 # Find the rev previous to oldrev
-prevrev="$(sed -n -E "s/^.*supersedes ([PD]0876R.*)\..*/\1/p" history.tex)"
+prevrev="$(sed -n -E "s/^.*supersedes ([PD]${PNUM}R.*)\..*/\1/p" history.tex)"
 
 echo "Updating $oldrev -> $newrev"
 echo "$oldrev URL: $oldurl"
 echo "Previous to $oldrev was $prevrev"
 
-git mv "$oldtex" "$newrev.tex"
-sed -i~ "s/$oldrev/$newrev/" "$newrev.tex"
+##git mv "$oldtex" "$newrev.tex"
+sed -i~ "s/$oldrev/$newrev/" "$oldtex"
 sed -i~ "s/$prevrev\\\\cite{$prevrev}/$oldrev\\\\cite{$oldrev}/" abstract.tex
 
 # For 'This document supersedes $prevrev', just update to $oldrev.

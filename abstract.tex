@@ -8,7 +8,7 @@ constructs such as stackful coroutines as well as cooperative multitasking
 
 This revision addresses concerns, questions and suggestions from the past meetings.
 The proposed API supersedes the former proposals N3985\cite{N3985},
-P0099R1\cite{P0099R1}, P0534R3\cite{P0534R3} and P0876R17\cite{P0876R17}.
+P0099R1\cite{P0099R1}, P0534R3\cite{P0534R3} and P0876R19\cite{P0876R19}.
 
 Because of name clashes with \emph{coroutine} from C++20,
 \emph{execution context} from executor proposals and \emph{continuation} used
@@ -19,3 +19,7 @@ term \emph{fiber} for a higher-level facility built on top of this one.
 
 Informally within this proposal, the term \emph{fiber} is used to denote the
 flow of control launched and represented by the first-class object \fiber.
+
+It's telling that when Hana Dusikova was working on implementations of P3367R3
+constexpr coroutines\cite{P3367R3}, the ``easiest way to model a coroutine,''
+the ``obvious first choice,'' was to use fibers in the constexpr evaluator.

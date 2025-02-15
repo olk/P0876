@@ -1,0 +1,13 @@
+\newpage
+\abschnitt{Appendix A: potential premature destruction of exception object}\label{exlife}
+
+In \stdclause{except.throw} paragraph 4, the destruction of an exception
+object is specified to potentially occur when an active handler for the
+exception exits, not when a handler exits while the exception is still the
+currently handled exception. It is possible to observe, with the Boost
+implementation in an Itanium C++ ABI environment, cases where an exception is
+destroyed at a different point than specified (and, in particular, when a
+handler for the exception is still active in a fiber). Consider
+\href{https://github.com/secondlife/3p-boost/blob/nat/exstate/tests/early_exc_destroy.cpp}{the following program}.
+
+\cppf{early_exc_destroy}

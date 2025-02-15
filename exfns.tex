@@ -1,0 +1,27 @@
+\newpage
+\abschnitt{Appendix C: \exfns}\label{exfns}
+
+\href{https://github.com/secondlife/3p-boost/blob/nat/exstate/tests/fccurrexc.cpp}{The following program}
+illustrates the output of \exfns in cases involving fiber context
+switches within a destructor invoked by exception handling, and within a catch
+block.
+
+\cppf{fccurrexc}
+
+With fiber-specific exception state, \uncexs never exceeds 1, and \curex
+displays:
+
+\cpp{fiber() catch block after: std::current\_exception() = fiber() exception}
+
+and:
+
+\cpp{main() catch block after: std::current\_exception() = main() exception}
+
+Without fiber-specific exception state, \uncexs displays up to 2 (one
+exception in \main, one in \cpp{fiber()}), and \curex displays:
+
+\cpp{fiber() catch block after: std::current\_exception() = main() exception}
+
+and:
+
+\cpp{main() catch block after: std::current\_exception() = fiber() exception}
