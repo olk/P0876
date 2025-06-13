@@ -450,7 +450,7 @@ Equivalent to:\\
 \cpp{return resume\_with(identity());}
 
 %-------------------------------- can_resume ---------------------------------
-\mbrhdr{bool can\_resume() noexcept}
+\mbrhdr{bool can\_resume() const noexcept}
 
 1 \returns
 \begin{description}
@@ -459,9 +459,6 @@ Equivalent to:\\
     \item[---] \true if \currthread is \ownthread
     \item[---] \false otherwise.
 \end{description}
-
-\red{\EnterBlock{Editorial note} \canresume is intentionally not
-marked \cpp{const}. \ExitBlock{editorial note}}
 
 %----------------------------------- empty -----------------------------------
 \mbrhdr{bool empty() const noexcept}

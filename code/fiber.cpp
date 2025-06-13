@@ -21,7 +21,7 @@ public:
     template<class Fn>
     fiber_context resume_with(Fn&& fn) &&;
 
-    bool can_resume() noexcept;
+    bool can_resume() const noexcept;
 
     explicit operator bool() const noexcept;
     bool empty() const noexcept;
