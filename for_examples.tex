@@ -1,11 +1,11 @@
 \newpage
 \abschnitt{Appendix D: support code for examples}\label{autocancel}
 
-Destroying a non-empty \fiber instance invokes Undefined Behaviour
+Destroying a non-empty \fiber object invokes Undefined Behaviour
 (see \nameref{termination}). To simplify code examples in this paper, we
 introduce an \cpp{autocancel} wrapper class that launches a fiber and tracks
-the sequence of \fiber instances representing that fiber. When
-an \cpp{autocancel} instance is destroyed, it sets a stop flag and loops until
+the sequence of \fiber objects representing that fiber. When
+an \cpp{autocancel} object is destroyed, it sets a stop flag and loops until
 the fiber voluntarily terminates.
 
 \cppf{autocancel}

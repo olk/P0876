@@ -3,7 +3,7 @@
 %% There are a few different ways to terminate a given fiber without
 %% terminating the whole process, or engaging undefined behaviour.
 %% 
-%% When a \fiber instance is constructed with an \entryfn, its new stack is
+%% When a \fiber object is constructed with an \entryfn, its new stack is
 %% initialized with the frame of an implicit top-level function that marks the
 %% end of the stack. \unwindfib unwinds the stack back to
 %% that top-level function, which resumes the \fiber passed to \unwindfib.
@@ -19,10 +19,10 @@
 %%           does. Since\\\unwindfib accepts a \fiber, and since \resumewith
 %%           synthesizes a\\\fiber representing its caller and passes it to the
 %%           subject function, this terminates the fiber referenced by the
-%%           original \fiber instance and then resumes the caller.
+%%           original \fiber object and then resumes the caller.
 %%     \item Engage \dtor: switch to some other fiber, which will
-%%           receive a \fiber instance representing the current fiber. Make that
-%%           other fiber destroy the received \fiber instance.
+%%           receive a \fiber object representing the current fiber. Make that
+%%           other fiber destroy the received \fiber object.
 %% \end{itemize}
 %% 
 %% The above are all equivalent: stack variables are properly destroyed, since
@@ -33,19 +33,19 @@ Every \fiber you launch must
 terminate gracefully by returning from its \entryfn.
 %% You may not
 %% call \unwindfib. You may not call \dtor, explicitly or implicitly, on a
-%% non-empty \fiber instance. With these restrictions, it is possible to use
+%% non-empty \fiber object. With these restrictions, it is possible to use
 %% the \fiber facility without exception support.
 
 When an explicitly-launched fiber's \entryfn returns a non-empty \fiber
-instance, the running fiber is terminated. Control switches to the fiber
-indicated by the returned \fiber instance. The \entryfn may return (switch to)
-any reachable non-empty \fiber instance -- it need not be the instance originally
-passed in, or an instance returned from the \resume family of methods.
+object, the running fiber is terminated. Control switches to the fiber
+represented by the returned \fiber object. The \entryfn may return (switch to)
+any reachable non-empty \fiber object -- it need not be the object originally
+passed in, or an object returned from the \resume family of methods.
 
-\emph{Calling} \resume means: ``Please switch to the indicated fiber; I
+\emph{Calling} \resume means: ``Please switch to the specified fiber; I
 am suspending; please resume me later.''
 
-\emph{Returning} a particular \fiber means: ``Please switch to the indicated
+\emph{Returning} a particular \fiber means: ``Please switch to the specified
 fiber; and by the way, I am done.''
 
 Cancellation of another fiber is not explicitly supported
@@ -61,10 +61,10 @@ might not immediately return.
 One tactic would be to request termination, then loop over \anyresume calls until
 the returned \fiber is \emptyfn. However, that information is ambiguous.
 
-Suppose we have a \fiber instance \cpp{f1} representing suspended fiber F,
+Suppose we have a \fiber object \cpp{f1} representing suspended fiber F,
 with an application-specific termination request mechanism. The running fiber
 M requests F to terminate, then calls \cpp{f1.resume()}, which in due course
-returns another \fiber instance \cpp{f2}.
+returns another \fiber object \cpp{f2}.
 
 \cpp{f2} has various possible values.
 
@@ -92,7 +92,7 @@ possible cancellation implementation, subject to the limitations described
 above.
 
 %% The \emph{last} fiber on a particular thread has no non-empty \fiber to
-%% return. For this reason, returning an empty \fiber instance (\opbool
+%% return. For this reason, returning an empty \fiber object (\opbool
 %% returns \false) terminates the calling thread. This is true whether or
 %% not the thread's default fiber (see \nameref{fiber-context.general}) has
 %% terminated.
@@ -195,9 +195,9 @@ above.
 %% it is worth pointing out that destroying a non-empty \fiber on a thread other
 %% than the thread on which it was last resumed will run those object destructors
 %% %% and \catchall clauses
-%% on the thread destroying the \fiber instance.
+%% on the thread destroying the \fiber object.
 %% 
-%% As a consequence, destroying a \fiber instance representing a thread's default
+%% As a consequence, destroying a \fiber object representing a thread's default
 %% fiber (see \nameref{fiber-context.general})
 %% from any other thread engages Undefined Behaviour.\footnote{One unobvious case
 %% would be if a fiber running on non-\main thread \cpp{T} stores a \fiber
@@ -228,9 +228,9 @@ above.
 %% as long as desired.
 %% 
 %% Ultimately, however, it must be possible to exit a fiber in such as way as to
-%% terminate the calling thread. Returning an empty \fiber instance from
+%% terminate the calling thread. Returning an empty \fiber object from
 %% a fiber's \entryfn terminates the running thread. Consequently, passing an
-%% empty \fiber instance to \unwindfib also terminates the calling thread.
+%% empty \fiber object to \unwindfib also terminates the calling thread.
 %% 
 %% The \fiber facility does not defend against the case in which a thread's
 %% default fiber suspends (rather than terminating), but the explicit fiber it
@@ -238,5 +238,5 @@ above.
 %% above. A higher-level library built on \fiber can provide a scheduler.
 %% The \fiber facility intentionally does not.
 %% 
-%% The conceptual top-level function above \main, given an empty \fiber instance to resume,
+%% The conceptual top-level function above \main, given an empty \fiber object to resume,
 %% terminates the whole process instead of that one thread.

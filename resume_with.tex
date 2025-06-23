@@ -12,7 +12,7 @@ called \cpp{fn()}.
 
 Like an \entryfn passed to \fiber, \cpp{fn()} must accept
 \cpp{std::fiber\_context&&} and return\\
-\fiber. The \fiber instance returned by \cpp{fn()} will, in turn, be returned
+\fiber. The \fiber object returned by \cpp{fn()} will, in turn, be returned
 to \cpp{f}'s lambda by the \resume at line 3.
 
 In the example below, suppose that code running on the program's main fiber
@@ -38,7 +38,7 @@ matters when control leaves it in either of two ways:
         a matching \cpp{catch} clause.\footnote{As stated
         in \nameref{exceptions}, if there is no matching \cpp{catch}
         clause in that fiber, \cpp{std::terminate()} is called.}
-  \item If the function returns, the returned \fiber instance is returned by
+  \item If the function returns, the returned \fiber object is returned by
         the suspended \anyresume call.
 \end{enumerate}
 
@@ -47,9 +47,9 @@ matters when control leaves it in either of two ways:
 The \cpp{f.resume\_with(<lambda>)} call at line 18 passes control to the second
 lambda on the fiber of the first lambda.
 
-As usual, \resumewith synthesizes a \fiber instance representing the calling
+As usual, \resumewith synthesizes a \fiber object representing the calling
 fiber, passed into the lambda as \cpp{m}. This particular lambda returns \cpp{m}
-unchanged at line 21; thus that \cpp{m} instance is returned by the \resume call
+unchanged at line 21; thus that object \cpp{m} is returned by the \resume call
 at line 8.
 
 Finally, the first lambda returns at line 10 the \cpp{m} variable updated at
@@ -59,10 +59,10 @@ One case worth pointing out is when you call \anyresumewith on a
 \fiber that has not yet been resumed for the first time:
 \cppfl{initial_resume_with}
 
-In this situation, \cpp{injected()} is called with a \fiber instance
+In this situation, \cpp{injected()} is called with a \fiber object
 representing the caller of \resumewith. When \cpp{injected()} eventually
-returns that (or some other) \fiber instance, the returned\\
-\fiber instance is passed into \cpp{topfunc()} as its \cpp{prev} parameter.
+returns that (or some other) \fiber object, the returned\\
+\fiber object is passed into \cpp{topfunc()} as its \cpp{prev} parameter.
 
 \zs{Member function \anyresumewith allows you to inject a
 function into a suspended fiber.}

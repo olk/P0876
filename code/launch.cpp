@@ -1,5 +1,5 @@
 // unwind_exception is an exception used internally by launch() to unwind the
-// stack of a suspended fiber when the referencing fiber_context instance is
+// stack of a suspended fiber when the referencing fiber_context object is
 // destroyed.
 class unwind_exception: public std::runtime_error {
 public:
@@ -39,7 +39,7 @@ auto launch(Fn&& entry_function) {
             }
         },
         // cancellation-function passed to fiber_context constructor
-        // throws unwind_exception, binding passed fiber_context instance.
+        // throws unwind_exception, binding passed fiber_context object.
         [](std::fiber_context&& previous)->std::fiber_context {
             throw unwind_exception{std::move(previous)};
             return {};
