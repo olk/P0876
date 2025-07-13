@@ -1,0 +1,62 @@
+\abschnitt{Recent WG21 History}\label{wg21_history}
+
+In St. Louis in June 2024,
+\href{https://docs.google.com/document/d/1ebdFai3h2Y4g5NayNf_pG6Gl2qidYdF6G-smMWNw-Go/edit?tab=t.0#heading=h.9aqgmrf0hvh1}{LWG tentatively approved}
+P0876 Library wording.
+
+In Tokyo in March 2024, CWG finished initial P0876 Core wording review, with
+\href{https://wiki.edg.com/bin/view/Wg21tokyo2024/CoreWorkingGroup#D0876R16_fiber_context}{one requested change}:
+that P0876 mandate per-fiber exception state. That required EWG approval.
+
+In St. Louis in June 2024,
+\href{https://wiki.edg.com/bin/view/Wg21stlouis2024/NotesEWGP0876}{EWG approved} the change:
+
+\begin{table}[ht]
+\begin{tabular}{|r|r|r|r|r|} % right-just columns (5 columns)
+\hline %inserts horizontal line
+SF & F & N & A & SA \\ [0.5ex] % inserts table heading
+\hline % inserts single horizontal line
+6 & 8 & 3 & 0 & 0 \\ % [1ex] % [1ex] adds vertical space
+\hline %inserts single line
+\end{tabular}
+\end{table}
+
+However, EWG did not forward P0876 back to CWG, requesting implementation
+experience with the proposed change.
+
+In Wrocław in November 2024, Nat Goodspeed presented implementation experience
+with libstdc++.
+\href{https://wiki.edg.com/bin/view/Wg21wroclaw2024/NotesEWGP0876}{Microsoft requested}
+time to consult the backend team. EWG agreed to defer to Hagenberg.
+
+In Hagenberg in February 2025, late in the week,
+\href{https://lists.isocpp.org/ext/2025/02/25138.php}{Microsoft conceded} that
+per-fiber exception state is implementable with the MSVC runtime (while voicing
+performance concerns). Unfortunately this response arrived so late that EWG
+ran out of time without considering P0876.
+
+In Sofia in June 2025,
+\href{https://docs.google.com/document/d/1wItX212LurEjkJK53XxnxumciqTRzxTSTJ48GwFihpE/edit?tab=t.0#heading=h.zc6lxwkrnobj}{EWG forwarded P0876}
+back to CWG and LWG for inclusion in C++26:
+
+\begin{table}[ht]
+\begin{tabular}{|r|r|r|r|r|} % right-just columns (5 columns)
+\hline %inserts horizontal line
+SF & F & N & A & SA \\ [0.5ex] % inserts table heading
+\hline % inserts single horizontal line
+10 & 14 & 4 & 5 & 1 \\ % [1ex] % [1ex] adds vertical space
+\hline %inserts single line
+\end{tabular}
+\end{table}
+
+But both CWG and LWG ran out of time in Sofia without considering P0876,
+thereby postponing it to C++29.
+
+Concerning a <feature> that fails to make the deadline for C++<NN>,
+\href{https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p1000r6.pdf}{P1000R6}
+says:
+``Just wait a couple more meetings and C++<NN+3> will be open for business and <feature> can be
+the first thing voted into the C++<NN+3> working draft.''
+
+This is the promise of the train model. It matters to all of us that the train
+model works as promised.
