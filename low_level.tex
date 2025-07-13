@@ -9,8 +9,8 @@ following frameworks are based on the low-level fiber switching API of
 \cpp{coroutine<>::push_type} and\\
 \cpp{coroutine<>::pull_type}, providing a
 unidirectional transfer of data. These stackful coroutines are only used in
-pairs. When \cpp{coroutine<>::push_type} is explicitly
-instantiated, \cpp{coroutine<>::pull_type} is synthesized and passed as
+pairs. When an object of type \cpp{coroutine<>::push_type} is explicitly
+constructed, \cpp{coroutine<>::pull_type} is synthesized and passed as
 parameter into the coroutine function. In the
 example below, \cpp{coroutine<>::push_type} (variable \cpp{writer}) provides the
 resume operation, while \cpp{coroutine<>::pull_type} (variable \cpp{in})

@@ -153,14 +153,14 @@ presenting fiber-aware synchronization primitives.)
 It's true that if:
 
 \begin{itemize}
-    \item a particular function relies on a \cpp{thread\_local} variable
-    \item the function calls a function that resumes a different fiber
-    \item the other fiber makes a different call to that same function, or to
-          another function that modifies the same \cpp{thread\_local} variable
+    \item on fiber X, function F relies on a \cpp{thread\_local} variable V
+    \item function F calls function G that resumes fiber Y
+    \item fiber Y calls function F, or another function that modifies variable V
+    \item fiber Y resumes fiber X
+    \item on fiber X, function G returns to function F
 \end{itemize}
 
-then on resumption of the original fiber, the function will observe the new
-value for the \cpp{thread\_local} variable.
+then function F on fiber X will observe fiber Y's value for variable V.
 
 This is analogous to use of a \cpp{static} variable by multiple threads in the
 same program -- though not as bad, since it doesn't produce race-related
@@ -176,6 +176,14 @@ cross-thread resumption is forbidden.
 
 (This is the only optimization that has yet been surfaced by implementers as a
 potentially problematic interaction with fibers.)
+
+P3346R0\cite{P3346R0} proposed to modify \tlocal to mean fiber-specific. This
+was rejected by SG1 in Wrocław in 2024\cite{wroclawp3346}.
+
+That said, in an environment in which \tlocal referenced fiber-specific
+storage, TLS pointers cached in function stack frames would remain valid even
+if the original fiber were later resumed on some other thread, thus removing
+the restriction against cross-thread resumption.
 
 \uabschnitt{tooling} One particularly valuable consequence of adding \fiber to
 the Standard will be to add fiber awareness to debuggers, performance

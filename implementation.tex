@@ -100,7 +100,7 @@ fiber. Using the stack as storage makes this mechanism very easy to
 implement.\footnote{The implementation of \bcontext\cite{bcontext} utilizes this
 technique.}
 Inside \resume the code pushes the relevant CPU registers onto the stack, and
-from the resulting stack address creates a new \fiber. This instance is then
+from the resulting stack address constructs a new \fiber. This object is then
 passed (or returned) into the resumed fiber (see \nameref{synthesizing}).
 
 \zs{Using the active fiber's stack as storage for the CPU state is efficient because no

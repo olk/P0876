@@ -5,6 +5,11 @@ This document supersedes P0876R20.
 
 \begin{itemize}
     \item Apply P3472R1: Make \fiber\cpp{::}\canresume \cpp{const}.
+    \item Remove ``Instantiating'' from proposed wording. Remove remaining
+          instances of ``instance'' in front matter.
+    \item Clarify that bad behaviour in Appendices A and B is observed only in
+          implementations predating proposed changes to \stdclause{except}.
+    \item Add ``Recent WG21 History'' section.
 \end{itemize}
 
 \uabschnitt{Changes since P0876R19}
@@ -167,7 +172,7 @@ This document supersedes P0876R20.
     than ``thread of execution.''
     \item Changed ``thread'' definition to be the execution agent that runs fibers.
     \item Clarified that if a fiber terminates by returning an empty \fiber
-          instance, \cpp{std::terminate} is called.
+          object, \cpp{std::terminate} is called.
     \item Added \cpp{constexpr fiber\_context::current\_exception\_within\_fiber}.
     \item Removed definition of ``function call stack.''
     \item Removed change to definition of expression evaluation conflict.
@@ -290,7 +295,7 @@ presents a problem: how does the code that suspends a fiber find its
 associated \cpp{stop\_source} shared state?
 
 A consumer wishing to pass a \cpp{std::stop\_token} to a new fiber can itself
-instantiate \cpp{std::stop\_source}, obtain from it a \cpp{stop\_token} and
+construct a \cpp{std::stop\_source}, obtain from it a \cpp{stop\_token} and
 bind that \cpp{stop\_token} in a lambda passed to the \fiber
 constructor. Accordingly, the \fiber API need not explicitly support that.
 
@@ -360,14 +365,14 @@ a particular fiber earlier in the lifespan of the fiber, a struct serves.
 
 A more compelling reason to avoid constructing an explicit fiber with
 a \cancelfn is that no implicit fiber has any such \cancelfn\xspace -- and the
-consuming application cannot tell, a priori, whether a given \fiber instance
+consuming application cannot tell, a priori, whether a given \fiber object
 represents an explicit or an implicit fiber. If \this represents an
 implicit fiber, what should the proposed \cpp{cancel()} member function do?
 
 Passing a specific \cancelfn to \anyresumewith avoids that problem.
 
 P0876R8 follows SG1 recommendation in making it Undefined Behaviour to destroy
-(or assign to) a non-empty \fiber instance.
+(or assign to) a non-empty \fiber object.
 
 \unwindfib was reintroduced with implementation-defined behaviour to allow fiber
 cleanup leveraging implementation internals. Its use was entirely optional (and
@@ -433,7 +438,7 @@ Problems resolved by discarding \unwindex:
     \item Similarly, it was possible to catch \unwindex but not rethrow it.
     \item If we attempted to address the problem above by introducing a
           \unwindex operation to extract the bound \fiber, it became possible
-          to rethrow the exception with an empty (moved-from) \fiber instance.
+          to rethrow the exception with an empty (moved-from) \fiber object.
     \item Throwing a C++ exception during C++ exception unwinding terminates
           the program. It was possible for an exception implementation based
           on \cpp{thread\_local} to become confused by exceptions on different

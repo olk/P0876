@@ -25,7 +25,7 @@ private:
 // implicitly requests stop on that fiber. It uses the tactic seen in the
 // example 'filament' class to continually update the fiber_context
 // representing the fiber of interest. (See "returning synthesized
-// std::fiber_context instance from resume()")
+// std::fiber_context object from resume()")
 class autocancel{
 private:
     std::fiber_context f_;
@@ -63,7 +63,7 @@ public:
         return stop_flag_;
     }
 
-    // for initial entry from a plain fiber rather than an autocancel instance
+    // for initial entry from a plain fiber rather than an autocancel object
     std::fiber_context resume(){
         return std::move(f_).resume();
     }

@@ -60,7 +60,7 @@ one fiber to another is a \emph{context switch}.
 3 An \emph{implicit fiber} is the default fiber on any thread. All other
 fibers are \emph{explicit fibers.}
 
-4 An explicit fiber is created using \fiber. Instantiating \fiber \emph{prepares} a
+4 An explicit fiber is created using \fiber. Constructing a \fiber object \emph{prepares} a
 fiber, which can consume resources. A fiber can thus be in one of three
 states: prepared, running or suspended.
 

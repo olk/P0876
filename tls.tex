@@ -2,7 +2,7 @@
 
 Any thread in a program may be shared by multiple fibers.
 
-A newly-instantiated fiber is not yet associated with any thread. However,
+A newly-constructed fiber is not yet associated with any thread. However,
 once a fiber has been resumed the first time by some thread, it must
 thereafter be resumed only by that same thread.
 

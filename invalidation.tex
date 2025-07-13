@@ -9,24 +9,24 @@ cause undefined behaviour because the stack might already be unwound (objects
 allocated on the stack were destroyed or the memory used as stack was already
 deallocated).
 
-As a consequence each call of \resume will empty the \fiber instance.
+As a consequence each call of \resume will empty the \fiber object.
 
 Whether or not a \fiber is empty can be tested with member function \opbool.
 
 To make this more explicit, functions \allresume are rvalue-reference qualified.
 %If a fiber calls \cpp{f.resume()} then the  fiber is suspended and \cpp{f} is
 %invalidated. When the fiber is resumed later, it returns from \cpp{f.resume()}
-%and instance \cpp{f} references the calling fiber (the fiber that has resumed
+%and object \cpp{f} references the calling fiber (the fiber that has resumed
 %the current fiber).
 
 The essential points:
 \begin{itemize}
     \item regardless of the number of \fiber declarations, exactly one \fiber
-          instance represents each suspended fiber
-    \item no \fiber instance represents the currently-running fiber
+          object represents each suspended fiber
+    \item no \fiber object represents the currently-running fiber
 \end{itemize}
 
-Section \nameref{solution_gpub} describes how an instance of\\
+Section \nameref{solution_gpub} describes how an object of type\\
 \fiber is synthesized from the active fiber that suspends.
 
 \zs{
