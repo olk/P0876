@@ -1,0 +1,33 @@
+\abschnitt{P4003R0, P4007R0: Coroutines and network I/O}
+
+%\uabschnitt{}
+
+P4003R0\cite{P4003R0} points out the performance cost of using the default
+coroutine frame allocator for asynchronous network I/O. A very important
+characteristic of network I/O, or asynchronous I/O in general, is that the
+lifespan of an I/O operation cannot be bounded by its calling coroutine.
+Therefore the compiler cannot apply HALO optimization to elide the coroutine
+frame for any coroutine in the call chain: the frame for every caller must be
+allocated dynamically.
+
+P4003R0 suggests a special recycling frame allocator which must be propagated
+through the call chain. To avoid signature pollution, the allocator is
+retained in the coroutine frame's environment and delivered to child
+coroutines via a \cpp{thread\_local} write-through cache during
+\cpp{operator new}.
+
+Asynchronous I/O using fiber suspension, rather than C++20 coroutine
+suspension, bypasses this allocator question. The memory pool for function
+frame allocation is continuously referenced by the processor stack pointer
+register. A new frame is allocated by decrementing that register, released by
+incrementing it. Without HALO, it would be difficult for C++20 coroutine frame
+allocation to use fewer instructions.
+
+P4007R0\cite{P4007R0} further points out that coroutines waiting on
+Sender/Receiver asynchronous operations can only leverage a special coroutine
+frame allocator by explicitly passing that allocator through every coroutine
+parameter list in the call chain.
+
+Again, using fiber suspension rather than C++20 coroutine suspension would
+delegate the whole problem of function frame allocation to the normal C++
+runtime.
