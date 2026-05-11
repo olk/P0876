@@ -52,6 +52,28 @@ echo "Updating $oldrev -> $newrev"
 echo "$oldrev URL: $oldurl"
 echo "Previous to $oldrev was $prevrev"
 
+# To upload the newest rev as (e.g.) P0876R23.pdf rather than P0876.pdf, we
+# usually keep a hard link with the Rxx suffix to the plain generated
+# P0876.pdf. Interestingly, the texi2pdf command run by pdfy leaves the hard
+# link intact. (If that were not the case, we'd use a symlink instead, and
+# change this test accordingly.) Since at this point we think we know both the
+# old hard link name and the new, if we're right, update the hard link.
+basepdf="P${PNUM}.pdf"
+if [[ "$oldrev.pdf" -ef "$basepdf" ]]
+then
+    # $oldrev.pdf is a hard link to $basepdf, update it
+    mv -v "$oldrev.pdf" "$newrev.pdf"
+##elif [[ -L "$oldrev.pdf" && "$(readlink "$oldrev.pdf")" == "$basepdf" ]]
+##then
+##    (UNTESTED)
+##    # $oldrev.pdf is a symlink to $basepdf, update it
+##    mv -v "$oldrev.pdf" "newrev.pdf"
+else
+    # $oldrev.pdf doesn't exist, or is a file that isn't a link, or is a link
+    # to something else: just create $newrev.pdf
+    ln -v "$basepdf" "$newrev.pdf"
+fi
+
 ##git mv "$oldtex" "$newrev.tex"
 sed -i~ "s/$oldrev/$newrev/" "$oldtex"
 sed -i~ "s/$prevrev\\\\cite{$prevrev}/$oldrev\\\\cite{$oldrev}/" abstract.tex
