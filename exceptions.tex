@@ -3,6 +3,8 @@
 %% In general,
 If an uncaught exception escapes from a fiber's \entryfn,
 \cpp{std::terminate} is called.
+Whether the stack is unwound before \cpp{std::terminate} is
+implementation-defined \xref{except.handle\#8}.
 %% There is one exception: the \foreignex used to
 %% unwind fiber stacks. The \fiber facility internally uses this \foreignex to
 %% clean up the stack of a suspended fiber being destroyed. Because this
