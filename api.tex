@@ -109,6 +109,18 @@ returns the number of uncaught exceptions in the
 1 \emph{Returns:} The number of uncaught exceptions \xref{except.throw} in the
 \replace{current thread}{running fiber ([intro.fibers])}.
 
+\zs{Modify \stdsection{17.14.3}{csetjmp.syn} paragraph 2 as indicated:}
+
+The function signature \cpp{longjmp(jmp\_buf jbuf, int val)} has more
+restricted behavior in this document. A \cpp{setjmp/longjmp} call pair has
+undefined behavior if replacing the \cpp{setjmp} and \cpp{longjmp}
+by \cpp{catch} and \cpp{throw} would invoke any non-trivial destructors for
+any objects with automatic storage duration.
+\add{A call to \cpp{longjmp} specifying a \cpp{jmp\_buf}}
+\add{initialized by a \cpp{setjmp} call executed on a different fiber has undefined behavior.}
+A call to \cpp{setjmp} or \cpp{longjmp} has undefined behavior if invoked in a
+suspension context of a coroutine \xref{expr.await}.
+
 \zs{Insert new final subclause in clause 32 \stdclause{thread} as indicated:}
 
 \setcounter{section}{32}

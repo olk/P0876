@@ -67,7 +67,7 @@ then
 ##then
 ##    (UNTESTED)
 ##    # $oldrev.pdf is a symlink to $basepdf, update it
-##    mv -v "$oldrev.pdf" "newrev.pdf"
+##    mv -v "$oldrev.pdf" "$newrev.pdf"
 else
     # $oldrev.pdf doesn't exist, or is a file that isn't a link, or is a link
     # to something else: just create $newrev.pdf

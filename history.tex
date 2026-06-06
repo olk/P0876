@@ -1,5 +1,13 @@
 \abschnitt{Revision History}\label{history}
-This document supersedes P0876R22.
+This document supersedes P0876R23.
+
+\uabschnitt{Changes since P0876R23}
+
+\begin{itemize}
+    \item Modify \stdclause{csetjmp.syn} to forbid \cpp{longjmp} across fibers.
+    \item Clarify that, in addition to calling \cpp{std::terminate}, an
+          uncaught exception from a fiber may or may not unwind the stack.
+\end{itemize}
 
 \uabschnitt{Changes since P0876R22}
 
