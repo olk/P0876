@@ -18,6 +18,22 @@ thread.}}
                implementation-defined.
 \end{description}
 
+\zs{Modify \stdsection{6.10.1}{intro.execution} paragraph 12 as indicated:}
+
+12 For each
+\begin{description}
+    \item[---] function invocation,
+    \item[---] evaluation of an \emph{await-expression} \xref{expr.await}, or
+    \item[---] evaluation of a \emph{throw-expression} \xref{expr.throw}
+\end{description}
+\emph{F}, each evaluation that does not occur within \emph{F} but is evaluated on the same
+\replace{thread}{fiber} and as part of the same signal handler (if any) is either sequenced
+before all evaluations that occur within \emph{F} or sequenced after all
+evaluations that occur within \emph{F};\textsuperscript{31} if \emph{F} invokes or resumes
+a coroutine \xref{expr.await}, only evaluations subsequent to the previous
+suspension (if any) and prior to the next suspension (if any) are considered
+to occur within \emph{F}.
+
 \zs{Modify \stdsection{6.10.2.1}{intro.multithread.general} paragraph 1 as indicated:}
 
 A \emph{thread of execution} (also known as a \emph{thread}) is
@@ -52,7 +68,8 @@ execution, for example the contents of a processor's registers including its
 instruction pointer, and the invocation sequence \xref{stacktrace.general} of
 functions that have been entered but have not yet returned.}
 
-2 A thread is always running exactly one fiber. Member functions of \fiber
+2 A thread is always executing exactly one fiber, called its \emph{running
+fiber}. Member functions of \fiber\\
 ([fiber.context.class]) can direct the calling thread to \emph{suspend} the
 running fiber and \emph{resume} a designated other fiber. This transition from
 one fiber to another is a \emph{context switch}.
@@ -60,11 +77,11 @@ one fiber to another is a \emph{context switch}.
 3 An \emph{implicit fiber} is the default fiber on any thread. All other
 fibers are \emph{explicit fibers.}
 
-4 An explicit fiber is created using \fiber. Constructing a \fiber object \emph{prepares} a
+4 An explicit fiber is created using \stdfiber. Constructing a \fiber object \emph{prepares} a
 fiber, which can consume resources. A fiber can thus be in one of three
 states: prepared, running or suspended.
 
-5 When a thread first enters a prepared fiber, that thread becomes the
+5 When a thread first resumes a prepared fiber, that thread becomes the
 fiber's \emph{owning thread.} The owning thread never changes.
 \tsnote{A thread is the owning thread of its default fiber.}
 \tsnote{If a thread resumes a fiber owned by another thread, the behaviour is
@@ -120,6 +137,16 @@ any objects with automatic storage duration.
 \add{initialized by a \cpp{setjmp} call executed on a different fiber has undefined behavior.}
 A call to \cpp{setjmp} or \cpp{longjmp} has undefined behavior if invoked in a
 suspension context of a coroutine \xref{expr.await}.
+
+\zs{Modify \stdsection{26.3.1}{algorithms.parallel.defns} paragraph 5 as
+indicated:}
+
+5 A standard library function is \emph{vectorization-unsafe} if it is specified to
+synchronize with another function invocation, or another function invocation
+is specified to synchronize with it, and if it is not a memory allocation or
+deallocation function or lock-free atomic modify-write operation \xref{atomics.order}.
+\add{\stdfiber\cpp{::}\resumewith ([fiber.context.mem])}\\
+\add{is vectorization-unsafe.}
 
 \zs{Insert new final subclause in clause 32 \stdclause{thread} as indicated:}
 
