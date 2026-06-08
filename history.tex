@@ -5,8 +5,13 @@ This document supersedes P0876R23.
 
 \begin{itemize}
     \item Modify \stdclause{csetjmp.syn} to forbid \cpp{longjmp} across fibers.
-    \item Clarify that, in addition to calling \cpp{std::terminate}, an
+    \item Clarify in front matter that, in addition to calling \cpp{std::terminate}, an
           uncaught exception from a fiber may or may not unwind the stack.
+    \item Modify \stdclause{intro.execution\#12} to scope sequenced-before and
+          sequenced-after rules within fiber.
+    \item Add explicit definition of \emph{running fiber}.
+    \item Qualify first reference to \stdfiber in Wording.
+    \item State that \resumewith is vectorization-unsafe.
 \end{itemize}
 
 \uabschnitt{Changes since P0876R22}
