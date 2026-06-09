@@ -440,6 +440,10 @@ At entry to \resumewith, the target fiber can either be in the prepared state
         \end{itemize}
 \end{description}
 
+\resumewith is vectorization-unsafe \xref{algorithms.parallel.defns\#5}.
+
+\resumewith may be recursively reentered \xref{reentrancy}.
+
 1 \mandates
 \cpp{is\_invocable\_r\_v<fiber\_context, decay\_t<Fn>, fiber\_context&&>} is \true.
 
