@@ -92,17 +92,17 @@
 \newcommand{\stdsection}[2]{§#1\xspace\stdclause{#2}}
 \newcommand{\true}{\cpp{true}}
 \newcommand{\false}{\cpp{false}}
-\newcommand{\dtor}{\cpp{\~fiber\_context()}}
-\newcommand{\main}{\cpp{main()}}
+\newcommand{\dtor}{\cpp{\~fiber\_context}}
+\newcommand{\main}{\cpp{main}}
 \newcommand{\justmain}{\cpp{main}}
 \newcommand{\stdfiber}{\cpp{std::}\fiber}
 \newcommand{\fiber}{\cpp{fiber\_context}}
-\newcommand{\op}[1][]{\dotref[#1]\cpp{operator()()}}
-\newcommand{\opbool}[1][]{\dotref[#1]\cpp{operator bool()}}
-\newcommand{\resume}[1][]{\dotref[#1]\cpp{resume()}}
-\newcommand{\resumewith}[1][]{\dotref[#1]\cpp{resume\_with()}}
-\newcommand{\xtresume}[1][]{\dotref[#1]\cpp{resume\_from\_any\_thread()}}
-\newcommand{\xtresumewith}[1][]{\dotref[#1]\cpp{resume\_from\_any\_thread\_with()}}
+\newcommand{\op}[1][]{\dotref[#1]\cpp{operator()}}
+\newcommand{\opbool}[1][]{\dotref[#1]\cpp{operator bool}}
+\newcommand{\resume}[1][]{\dotref[#1]\cpp{resume}}
+\newcommand{\resumewith}[1][]{\dotref[#1]\cpp{resume\_with}}
+\newcommand{\xtresume}[1][]{\dotref[#1]\cpp{resume\_from\_any\_thread}}
+\newcommand{\xtresumewith}[1][]{\dotref[#1]\cpp{resume\_from\_any\_thread\_with}}
 \newcommand{\someresume}[1][]{\resume[#1]} %% {\resume[#1] or \xtresume[#1]}
 \newcommand{\anyresumewith}[1][]{\resumewith[#1]} %% {\resumewith[#1] or \xtresumewith[#1]}
 \newcommand{\allresumewith}[1][]{\resumewith[#1]} %% {\resumewith[#1] and \xtresumewith[#1]}
@@ -110,17 +110,17 @@
 \newcommand{\xtresumesome}[1][]{\xtresume[#1] or \xtresumewith[#1]}
 \newcommand{\anyresume}[1][]{\resume[#1] or \resumewith[#1]} %% {\resume[#1], \resumewith[#1], \xtresume[#1] or \xtresumewith[#1]}
 \newcommand{\allresume}[1][]{\resume[#1] and \resumewith[#1]} %% {\resume[#1], \resumewith[#1], \xtresume[#1] and \xtresumewith[#1]}
-\newcommand{\cancel}[1][]{\dotref[#1]\cpp{cancel()}}
-\newcommand{\xtcancel}[1][]{\dotref[#1]\cpp{cancel\_from\_any\_thread()}}
+\newcommand{\cancel}[1][]{\dotref[#1]\cpp{cancel}}
+\newcommand{\xtcancel}[1][]{\dotref[#1]\cpp{cancel\_from\_any\_thread}}
 \newcommand{\anycancel}[1][]{\cancel[#1]}
-\newcommand{\emptyfn}[1][]{\dotref[#1]\cpp{empty()}}
+\newcommand{\emptyfn}[1][]{\dotref[#1]\cpp{empty}}
 %% referenced in history.tex
 \newcommand{\source}{\cpp{stop\_source}}
-\newcommand{\getsource}{\cpp{get\_stop\_source()}}
-\newcommand{\gettoken}{\cpp{get\_stop\_token()}}
-\newcommand{\reqstop}{\cpp{request\_stop()}}
-\newcommand{\canresume}[1][]{\dotref[#1]\cpp{can\_resume()}}
-\newcommand{\canxtresume}[1][]{\dotref[#1]\cpp{can\_resume\_from\_this\_thread()}}
+\newcommand{\getsource}{\cpp{get\_stop\_source}}
+\newcommand{\gettoken}{\cpp{get\_stop\_token}}
+\newcommand{\reqstop}{\cpp{request\_stop}}
+\newcommand{\canresume}[1][]{\dotref[#1]\cpp{can\_resume}}
+\newcommand{\canxtresume}[1][]{\dotref[#1]\cpp{can\_resume\_from\_this\_thread}}
 \newcommand{\canresumesome}[1][]{\canresume[#1]}
 \newcommand{\thread}{\cpp{std::thread}}
 \newcommand{\jthread}{\cpp{std::jthread}}
@@ -134,13 +134,13 @@
 \newcommand{\thefiber}[1]{the fiber represented by #1}
 \newcommand{\this}{\cpp{*this}}
 \newcommand{\unwindex}{\cpp{std::unwind\_exception}}
-\newcommand{\unwindfib}{\cpp{std::unwind\_fiber()}}
-\newcommand{\uwforced}{\cpp{\_Unwind\_ForcedUnwind()}}
-\newcommand{\curex}{\cpp{std::current\_exception()}}
-\newcommand{\uncexs}{\cpp{std::uncaught\_exceptions()}}
+\newcommand{\unwindfib}{\cpp{std::unwind\_fiber}}
+\newcommand{\uwforced}{\cpp{\_Unwind\_ForcedUnwind}}
+\newcommand{\curex}{\cpp{std::current\_exception}}
+\newcommand{\uncexs}{\cpp{std::uncaught\_exceptions}}
 \newcommand{\exfns}{\uncexs and \curex}
 \newcommand{\catchall}{\cpp{catch (...)}}
-\newcommand{\swapcontext}{\cpp{swapcontext()}}
+\newcommand{\swapcontext}{\cpp{swapcontext}}
 \newcommand{\seeautocancel}{(See \nameref{autocancel} for the definition of \cpp{autocancel}.)}
 
 \newcommand{\sym}{\emph{symmetric}\xspace}
