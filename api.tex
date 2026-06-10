@@ -34,6 +34,19 @@ a coroutine \xref{expr.await}, only evaluations subsequent to the previous
 suspension (if any) and prior to the next suspension (if any) are considered
 to occur within \emph{F}.
 
+\zs{Insert before \stdsection{6.10.1}{intro.execution} paragraph 13 and
+renumber existing paragraphs 13-16:}
+
+\cbstart
+13 When the running fiber resumes a prepared fiber (by returning
+from its entry function or by calling \qualmethod{\resumewith}), all
+evaluations prior to the context switch are sequenced before any evaluations
+subsequent to the context switch in the resumed fiber's entry function. When
+the running fiber resumes a suspended fiber, all evaluations prior to the
+context switch are sequenced before any evaluations subsequent to the context
+switch in the resumed fiber's call to \resumewith.
+\cbend
+
 \zs{Modify \stdsection{6.10.2.1}{intro.multithread.general} paragraph 1 as indicated:}
 
 A \emph{thread of execution} (also known as a \emph{thread}) is
@@ -117,7 +130,7 @@ matching handler continues in a dynamically surrounding try block of the same
 
 \zs{Modify \stdsection{14.2}{except.throw} paragraph 7 Note 5 as indicated:}
 
-The function \stdterm{\cpp{std::uncaught\_exceptions}}{uncaught.exceptions}
+The function \stdterm{\uncexs}{uncaught.exceptions}
 returns the number of uncaught exceptions in the
 \replace{current thread}{running fiber ([intro.fibers])}.
 

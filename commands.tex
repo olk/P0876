@@ -95,8 +95,10 @@
 \newcommand{\dtor}{\cpp{\~fiber\_context}}
 \newcommand{\main}{\cpp{main}}
 \newcommand{\justmain}{\cpp{main}}
-\newcommand{\stdfiber}{\cpp{std::}\fiber}
+\newcommand{\std}{\cpp{std::}}
+\newcommand{\stdfiber}{\std\fiber}
 \newcommand{\fiber}{\cpp{fiber\_context}}
+\newcommand{\qualmethod}[1]{\stdfiber\cpp{::}#1}
 \newcommand{\op}[1][]{\dotref[#1]\cpp{operator()}}
 \newcommand{\opbool}[1][]{\dotref[#1]\cpp{operator bool}}
 \newcommand{\resume}[1][]{\dotref[#1]\cpp{resume}}
