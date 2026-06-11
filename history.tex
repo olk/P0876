@@ -12,17 +12,19 @@ This document supersedes P0876R23.
     \item Insert a new \stdclause{intro.execution} paragraph 13 to sequence
           operations before and after a fiber context switch.
     \item Add explicit definition of \emph{running fiber}.
+    \item ``context switch'' => ``fiber context switch''
     \item Qualify first reference to \stdfiber in Wording.
     \item Remove empty parens from references to function names.
     \item Invoke, rather than enter, a function.
     \item Evaluate \cpp{invoke(...)}, rather than execute.
     \item Update \mandates to avoid \cpp{is\_invocable\_r\_v<fiber\_context, ...>}.
+    \item Update \mandates \cpp{invoke\_result\_t<...>}\add{\cpp{&&}} denotes \fiber\add{\cpp{&&}}.
     \item Tweaks to \resumewith:
     \begin{itemize}
         \item State that \resumewith is vectorization-unsafe.
         \item Require that \resumewith be reentrant.
         \item ``return from \resumewith'' => ``returning from \resumewith''
-        \item Introduce \emph{internal-context-switch}: make some other fiber
+        \item Introduce \emph{fiber-activation}: make some other fiber
               current without yet jumping into it. Use to clarify setup
               for \emph{internal-resume}.
         \item Avoid \cpp{other.resume\_with()}.
@@ -30,8 +32,12 @@ This document supersedes P0876R23.
         \item Replace \cpp{invoke\_r<fiber\_context>(...)} with \cpp{invoke(...)}.
         \item Replace string of ``, then...'' with ``...the following sequence of steps in order.''
         \item Define composite \emph{internal-resume} with an internal decision.
+        \item ``\cpp{returned} can be other than \cpp{caller}. \cpp{returned}...'' =>
+              ``\cpp{returned} can be other than \cpp{caller}; \cpp{returned}...''
+        \item Add ``Suspends the running fiber'' to \effects.
     \end{itemize}
-    \item Replace ``Effects: equivalent to return ...'' with ``Returns: ...''.
+    \item For \emptyfn and \cpp{operator bool}, replace ``Effects: equivalent
+          to return ...'' with ``Returns: ...''. Remove outer parentheses.
     \item Describe \cpp{swap} in English rather than in C++.
 \end{itemize}
 
