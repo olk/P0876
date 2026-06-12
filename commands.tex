@@ -82,6 +82,10 @@
 \newcommand{\green}[1]{\colorbox{green}{#1}}
 \newcommand{\delete}[1]{\red{#1}}
 %% \insert is already defined, with a different meaning
+%% this makes green text on white background, and supports multiple lines:
+%% \newcommand{\add}[1]{{\color{green}#1}}
+%% this makes black text on green background, but forces all contents to a
+%% single line:
 \newcommand{\add}[1]{\green{#1}}
 \newcommand{\replace}[2]{\delete{#1}\add{#2}}
 \newcommand{\eel}[2]{\href{https://eel.is/c++draft/#1}{#2}}
@@ -89,6 +93,7 @@
 \newcommand{\stdclause}[1]{\eel{#1}{[#1]}}                          
 \newcommand{\xref}[1]{(\stdclause{#1})}
 \newcommand{\stdterm}[2]{#1\xspace\xref{#2}}
+\newcommand{\stdname}[2]{\stdterm{\cpp{#1}}{#2}}
 \newcommand{\stdsection}[2]{§#1\xspace\stdclause{#2}}
 \newcommand{\true}{\cpp{true}}
 \newcommand{\false}{\cpp{false}}
@@ -147,7 +152,7 @@
 
 \newcommand{\sym}{\emph{symmetric}\xspace}
 \newcommand{\asym}{\emph{asymmetric}\xspace}
-\newcommand{\entryfn}{entry-function\xspace}
+\newcommand{\entryfn}{entry function\xspace}
 \newcommand{\cancelfn}{cancellation-function\xspace}
 \newcommand{\dbframe}{\emph{.debug\_frame\xspace}}
 \newcommand{\ehframe}{\emph{.eh\_frame}\xspace}

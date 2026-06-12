@@ -37,15 +37,8 @@ to occur within \emph{F}.
 \zs{Insert before \stdsection{6.10.1}{intro.execution} paragraph 13 and
 renumber existing paragraphs 13-16:}
 
-\cbstart
-¶ When the running fiber resumes a prepared fiber (by returning
-from its entry function or by calling \qualmethod{\resumewith}), all
-evaluations prior to the fiber context switch are sequenced before any evaluations
-subsequent to the fiber context switch in the resumed fiber's entry function. When
-the running fiber resumes a suspended fiber, all evaluations prior to the fiber
-context switch are sequenced before any evaluations subsequent to the fiber context
-switch in the resumed fiber's call to \resumewith.
-\cbend
+\add{¶ Given a fiber context switch from fiber A to fiber B, the fiber context switch in A is sequenced before the fiber context}\\
+\add{switch in B.}
 
 \zs{Modify \stdsection{6.10.2.1}{intro.multithread.general} paragraph 1 as indicated:}
 
@@ -61,6 +54,16 @@ execution steps}.
 
 \add{When a thread is created, it runs a default fiber ([intro.fibers]).}
 
+%% [basic.start.main]: Executing a program starts a main thread of execution
+%% (6.10.2, 32.4) in which the main function is invoked.
+%% [thread.thread.class] does not talk about creating a thread!
+%% [thread.thread.class.general] p1: The class thread provides a mechanism to
+%% create a new thread of execution, ...
+%% [thread.thread.constr] p5: Effects: The new thread of execution executes
+%% invoke(...)...
+%% Any return value from this invocation is ignored.
+%% Same for [thread.jthread.class.general] p1, [thread.jthread.constr] p5.
+
 \zs{Insert before \stdsection{6.10.3}{basic.start} and renumber existing 6.10.3 to 6.10.4:}
 
 \setcounter{section}{6}
@@ -69,12 +72,12 @@ execution steps}.
 \setcounter{secnumdepth}{4}
 \cbstart
 
-\rSec3[intro.fibers]{Fibers and Threads}
+\rSec3[intro.fibers]{Fibers and threads}
 
 1 A \emph{fiber} is a single flow of control within a program, including the
-initial invocation of a specific top-level function, and recursively including
-every function invocation subsequently executed by the fiber. The execution
-steps of a fiber are performed by a thread.
+initial invocation of a specific \emph{\entryfn}, and recursively
+including every function invocation subsequently executed by the fiber. The
+execution steps of a fiber are performed by a thread.
 
 \tsnote{``Flow of control'' here refers to state necessary to program
 execution, for example the contents of a processor's registers including its
@@ -82,23 +85,34 @@ instruction pointer, and the invocation sequence \xref{stacktrace.general} of
 functions that have been entered but have not yet returned.}
 
 2 A thread is always executing exactly one fiber, called its \emph{running
-fiber}. Member functions of \fiber\\
-([fiber.context.class]) can direct the calling thread to \emph{suspend} the
-running fiber and \emph{resume} a designated other fiber. This transition from
-one fiber to another is a \emph{fiber context switch}.
+fiber}. Every thread starts by running a \emph{default fiber}.
 
-3 An \emph{implicit fiber} is the default fiber on any thread. All other
-fibers are \emph{explicit fibers.}
+3 The invocable passed to the \cpp{thread} or \cpp{jthread}
+constructor \xref{thread.threads} is the \entryfn of the created thread.
+The \entryfn of a thread is the \entryfn of its default fiber.
 
-4 An explicit fiber is created using \stdfiber. Constructing a \fiber object \emph{prepares} a
+4 Constructing an object of type \stdfiber ([fiber.context]) with an \entryfn
+creates an \emph{explicit fiber}. When the \entryfn passed to the constructor
+of \fiber returns, the fiber terminates. The \entryfn for an explicit
+fiber must return a non-empty \fiber object to designate the \emph{successor
+fiber} for the current thread. The \entryfn for a thread need not return
+a \fiber object because the entire thread is terminating.
+
+5 Member functions of \fiber ([fiber.context.class]) can direct the calling
+thread to \emph{suspend} the running fiber and \emph{resume} a designated
+other fiber. Similarly, returning from the \entryfn for a fiber resumes
+the designated successor fiber. This transition from one fiber to another is
+a \emph{fiber context switch}.
+
+6 Constructing an object of type \fiber with an \entryfn \emph{prepares} a
 fiber, which can consume resources. A fiber can thus be in one of three
 states: prepared, running or suspended.
 
-5 When a thread first resumes a prepared fiber, that thread becomes the
+7 When a thread first resumes a prepared fiber, that thread becomes the
 fiber's \emph{owning thread.} The owning thread never changes.
 \tsnote{A thread is the owning thread of its default fiber.}
 \tsnote{If a thread resumes a fiber owned by another thread, the behaviour is
-undefined.}
+undefined ([fiber.context.mem]).}
 \cbend
 
 \zs{Modify \stdsection{14.2}{except.throw} paragraph 2 as indicated:}
@@ -116,6 +130,12 @@ not yet exited.
 \replace{threads}{fibers} unless caught, stored, and rethrown using
 appropriate library functions; see \stdclause{propagation} and \stdclause{futures}.}
 
+\zs{Modify \stdsection{14.2}{except.throw} paragraph 7 Note 5 as indicated:}
+
+The function \stdterm{\uncexs}{uncaught.exceptions}
+returns the number of uncaught exceptions in the
+\replace{current thread}{running fiber ([intro.fibers])}.
+
 \zs{Modify \stdsection{14.4}{except.handle} paragraph 6 as indicated:}
 
 If no match is found among the handlers for a try block, the search for a
@@ -128,11 +148,25 @@ matching handler continues in a dynamically surrounding try block of the same
 \add{in the running fiber ([intro.fibers])} that is still active is called the
 \emph{currently handled exception}.
 
-\zs{Modify \stdsection{14.2}{except.throw} paragraph 7 Note 5 as indicated:}
+\zs{Modify the last bullet 1.19 of \stdsection{14.6.2}{except.terminate} as
+indicated:}
 
-The function \stdterm{\uncexs}{uncaught.exceptions}
-returns the number of uncaught exceptions in the
-\replace{current thread}{running fiber ([intro.fibers])}.
+\begin{description}
+    \item[---] when an exception is thrown from a
+               coroutine \stdname{std::execution::task}{exec.task} which doesn’t support
+               a \cpp{std::execution::set\_error\_t(std::exception\_ptr)}
+               completion\replace{.}{, or}
+\end{description}
+
+\zs{Append after bullet 1.19 of \stdsection{14.6.2}{except.terminate}:}
+
+\begin{description}
+    \item[---] when an explicit fiber's \entryfn returns an empty \fiber
+               object ([fiber.context]), or
+    \item[---] when an explicit fiber's \entryfn terminates via an exception, or
+    \item[---] when a non-empty \fiber object is destroyed, or
+    \item[---] when a non-empty \fiber object is the target of an assignment.
+\end{description}
 
 \zs{Modify \stdsection{17.9.6}{uncaught.exceptions} paragraph 1 as indicated:}
 
@@ -177,7 +211,7 @@ deallocation function or lock-free atomic modify-write operation \xref{atomics.o
 default-constructed or moved-from \fiber is empty. Otherwise, a \fiber is
 non-empty, and represents either a prepared or a suspended fiber.
 
-2 An explicit fiber is prepared by passing an \emph{\entryfn} to \fiber's
+2 An explicit fiber is prepared by passing an \entryfn to \fiber's
 constructor. At the first call to one of the \anyresume member functions,
 that \entryfn is invoked, and the fiber is running.
 
@@ -200,9 +234,9 @@ its \entryfn. When a suspended fiber is resumed, a synthesized \fiber object
 representing the previous fiber is returned from the relevant \anyresume
 member function.
 \tsnote{The synthesized \fiber object received in either of those ways might
-represent either an explicit fiber or an implicit fiber.}
+represent either an explicit fiber or a default fiber.}
 
-%% \rSec3[fiber.context.toplevel]{Implicit Top-Level Function}
+%% \rSec3[fiber.context.toplevel]{Implicit top-level function}
 
 %% On every explicit fiber, the behaviour is equivalent to calling the \entryfn
 %% passed to \fiber's constructor from an implicit top-level function.
@@ -235,14 +269,14 @@ exceeds the \cpp{size} of that \cpp{span<byte>}, the behaviour is undefined.
 %% conceptual implicit top-level function is responsible for deallocating the
 %% explicit fiber's stack memory on return from the \entryfn.
 %% 
-%% Similarly, on every implicit fiber, the behaviour is equivalent to passing control through an
+%% Similarly, on every default fiber, the behaviour is equivalent to passing control through an
 %% implicit top-level function above \justmain and above the \entryfn for
 %% each \thread.
 %% The conceptual stack frame for this implicit top-level function delimits
 %% stack unwinding for each of these stacks. If the fiber stack is unwound,
 %% control is conceptually returned to this implicit top-level function.
 %% The conceptual top-level
-%% function for an implicit fiber does not deallocate the fiber's stack memory,
+%% function for a default fiber does not deallocate the fiber's stack memory,
 %% since the host environment will do that.
 
 %% \begin{itemize}
@@ -281,8 +315,8 @@ exceeds the \cpp{size} of that \cpp{span<byte>}, the behaviour is undefined.
 2 \mandates
 \begin{description}
     \item[---] \cpp{is\_constructible\_v<decay\_t<F>, F>} is \true.
-    \item[---] \cpp{is\_invocable\_v<decay\_t<F>, fiber\_context&&>} is \true\\
-               and \cpp{invoke\_result\_t<decay\_t<F>, fiber\_context&&>&&} denotes \fiber\cpp{&&}.
+    \item[---] \cpp{is\_invocable\_v<decay\_t<F>, fiber\_context\&\&>} is \true\\
+               and \cpp{invoke\_result\_t<decay\_t<F>, fiber\_context\&\&>\&\&} denotes \fiber\cpp{\&\&}.
 \end{description}
 
 3 \effects
@@ -323,8 +357,8 @@ exceeds the \cpp{size} of that \cpp{span<byte>}, the behaviour is undefined.
 \begin{description}
     \item[---] \cpp{is\_constructible\_v<decay\_t<F>, F>} is \true.
     \item[---] \cpp{is\_constructible\_v<decay\_t<D>, D>} is \true.
-    \item[---] \cpp{is\_invocable\_v<decay\_t<F>, fiber\_context&&>} is \true\\
-               and \cpp{invoke\_result\_t<decay\_t<F>, fiber\_context&&>&&} denotes \fiber\cpp{&&}.
+    \item[---] \cpp{is\_invocable\_v<decay\_t<F>, fiber\_context\&\&>} is \true\\
+               and \cpp{invoke\_result\_t<decay\_t<F>, fiber\_context\&\&>\&\&} denotes \fiber\cpp{\&\&}.
     \item[---] \cpp{is\_invocable\_v<decay\_t<D>, span<byte>>} is \true.
 \end{description}
 
@@ -333,6 +367,8 @@ exceeds the \cpp{size} of that \cpp{span<byte>}, the behaviour is undefined.
     \item[---] \cpp{decay\_t<D>} meets the \emph{Cpp17MoveConstructible} requirements.
     \item[---] \cpp{invoke(deleter, stack)} does not throw an exception.
 \end{description}
+
+%% cross-ref P2019, which adds thread attribute to set size of thread/jthread.
 
 3 \effects
 \begin{description}
@@ -463,8 +499,8 @@ of the target fiber.}
 \end{description}
 
 1 \mandates
-\cpp{is\_invocable\_v<decay\_t<Fn>, fiber\_context&&>} is \true
-and \cpp{invoke\_result\_t<decay\_t<Fn>, fiber\_context&&>&&} denotes \fiber\cpp{&&}.
+\cpp{is\_invocable\_v<decay\_t<Fn>, fiber\_context\&\&>} is \true
+and \cpp{invoke\_result\_t<decay\_t<Fn>, fiber\_context\&\&>\&\&} denotes \fiber\cpp{\&\&}.
 
 2 \precond
 \cpp{can\_resume()} is \true.
