@@ -153,8 +153,17 @@
 \newcommand{\ehframe}{\emph{.eh\_frame}\xspace}
 \newcommand{\foreignex}{\emph{foreign exception}\xspace}
 
-\newcommand{\abschnitt}[1]{\addcontentsline{toc}{subsection}{#1}\subsection*{#1}}
-\newcommand{\uabschnitt}[1]{\paragraph*{#1}}
+\makeatletter
+\long\def\abschnitt#1{%
+  \def\@currentlabelname{#1}%
+  \addcontentsline{toc}{subsection}{#1}%
+  \subsection*{#1}%
+}
+\long\def\uabschnitt#1{%
+  \def\@currentlabelname{#1}%
+  \paragraph*{#1}%
+}
+\makeatother
 
 \newcommand{\tsabschnitt}[1]{\subsection[]{#1}}
 \newcommand{\tsuabschnitt}[1]{\subsubsection[]{#1}}
