@@ -4,14 +4,50 @@ This document supersedes P0876R23.
 \uabschnitt{Changes since P0876R23}
 
 \begin{itemize}
+    \item Remove Recent WG21 History.
     \item Modify \stdclause{csetjmp.syn} to forbid \cpp{longjmp} across fibers.
     \item Clarify in front matter that, in addition to calling \cpp{std::terminate}, an
           uncaught exception from a fiber may or may not unwind the stack.
     \item Modify \stdclause{intro.execution\#12} to scope sequenced-before and
           sequenced-after rules within fiber.
+    \item Insert a new \stdclause{intro.execution} paragraph 13 to sequence
+          operations before and after a fiber context switch.
     \item Add explicit definition of \emph{running fiber}.
+    \item ``context switch'' => ``fiber context switch''
     \item Qualify first reference to \stdfiber in Wording.
-    \item State that \resumewith is vectorization-unsafe.
+    \item Remove empty parens from references to function names.
+    \item Invoke, rather than enter, a function.
+    \item Evaluate, rather than execute, \cpp{invoke(...)}.
+    \item Update \mandates to avoid \cpp{is\_invocable\_r\_v<fiber\_context, ...>}.
+    \item Update \mandates \cpp{invoke\_result\_t<...>}\add{\cpp{\&\&}} denotes \fiber\add{\cpp{\&\&}}.
+    \item Tweaks to \resumewith:
+    \begin{itemize}
+        \item State that \resumewith is vectorization-unsafe.
+        \item Require that \resumewith be reentrant.
+        \item ``return from \resumewith'' => ``returning from \resumewith''
+        \item Introduce \emph{fiber-activation}: make some other fiber
+              current without yet jumping into it. Use to clarify setup
+              for \emph{internal-resume}.
+        \item Avoid \cpp{other.resume\_with()}.
+        \item Delete ``exposition-only'' when defining \emph{internal-resume}.
+        \item Replace \cpp{invoke\_r<fiber\_context>(...)} with \cpp{invoke(...)}.
+        \item Replace string of ``, then...'' with ``...the following sequence of steps in order.''
+        \item Define composite \emph{internal-resume} with an internal decision.
+        \item ``\cpp{returned} can be other than \cpp{caller}. \cpp{returned}...'' =>
+              ``\cpp{returned} can be other than \cpp{caller}; \cpp{returned}...''
+        \item Add ``Suspends the running fiber'' to \effects.
+    \end{itemize}
+    \item For \emptyfn and \cpp{operator bool}, replace ``Effects: equivalent
+          to return ...'' with ``Returns: ...''. Remove outer parentheses.
+    \item Describe \cpp{swap} in English rather than in C++.
+    \item Expand [intro.fibers] to talk about thread's default fiber. Ditch
+              ``implicit fiber.''
+    \item Add xref to clarify UB from resuming a fiber on non-owning thread.
+    \item Distinguish thread entry function and fiber entry function,
+              and their returns.
+    \item Include return from terminating fiber in def of fiber context
+              switch.
+    \item Add to the list of bullets for when \cpp{terminate} is called.
 \end{itemize}
 
 \uabschnitt{Changes since P0876R22}
